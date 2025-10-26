@@ -12,21 +12,23 @@ export default function Home() {
       style={{ backgroundColor: "var(--background)", color: "var(--secondary-text)" }}
     >
       <main
-        className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 sm:items-start"
+        className="flex min-h-screen w-full max-w-3xl flex-col items-start justify-between py-8 px-4 sm:py-32 sm:px-16"
         style={{ backgroundColor: "var(--background)" }}
       >
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <LottieAnimation
-            src="/animations/animationBooks.lottie"
-            width={200}
-            height={200}
-            ariaLabel="Animerad bokklubbslogotyp"
-            isDecorative={false}
-          />
+        <div className="flex w-full flex-col items-start gap-6 text-left">
+          <div className="flex w-full justify-center sm:justify-start">
+            <LottieAnimation
+              src="/animations/animationBooks.lottie"
+              width={200}
+              height={200}
+              ariaLabel="Animerad bokklubbslogotyp"
+              isDecorative={false}
+            />
+          </div>
 
           {/* Heading */}
           <h1
-            className="max-w-xs text-3xl leading-10 tracking-wide"
+            className="max-w-xs px-4 text-3xl leading-10 tracking-wide sm:px-0"
             style={{
               fontFamily: "var(--font-newyorker)",
               color: "var(--primary-text)",
@@ -37,7 +39,7 @@ export default function Home() {
 
           {/* Paragraph */}
           <p
-            className="max-w-md text-lg leading-8"
+            className="max-w-md px-4 text-lg leading-8 sm:px-0"
             style={{
               fontFamily: "var(--font-body)",
               color: "var(--secondary-text)",
