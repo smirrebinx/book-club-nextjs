@@ -83,7 +83,7 @@ export default function Navbar() {
           <div className="flex-shrink-0">
             <Link
               href="/"
-              className="text-xl font-bold focus:outline-2 focus:outline-offset-4"
+              className="text-lg font-bold transition-colors duration-200 hover:opacity-80 focus:outline-2 focus:outline-offset-4 sm:text-xl"
               style={{
                 fontFamily: "var(--font-newyorker)",
                 color: "var(--primary-text)",
@@ -95,8 +95,8 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:flex-1 md:items-center md:justify-between md:ml-10">
-            <div className="flex items-center space-x-1">
+          <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-between lg:ml-10">
+            <div className="flex items-center space-x-2">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
@@ -104,16 +104,31 @@ export default function Navbar() {
                     key={link.href}
                     href={link.href}
                     aria-current={isActive ? "page" : undefined}
-                    className={`rounded-md px-3 py-2 text-sm transition-colors focus:outline-2 focus:outline-offset-2 ${
+                    className={`group relative rounded-md px-4 py-2 text-sm transition-all duration-200 hover:bg-opacity-50 focus:outline-2 focus:outline-offset-2 ${
                       isActive ? "font-bold" : "font-medium"
                     }`}
                     style={{
                       fontFamily: "var(--font-body)",
                       color: "var(--secondary-text)",
                       outlineColor: "var(--secondary-border)",
+                      backgroundColor: "transparent",
                     }}
                   >
                     {link.label}
+                    {/* Active indicator underline */}
+                    {isActive && (
+                      <span
+                        className="absolute bottom-0 left-0 right-0 h-0.5"
+                        style={{ backgroundColor: "var(--secondary-border)" }}
+                        aria-hidden="true"
+                      />
+                    )}
+                    {/* Hover underline */}
+                    <span
+                      className="absolute bottom-0 left-0 right-0 h-0.5 scale-x-0 transition-transform duration-200 group-hover:scale-x-100"
+                      style={{ backgroundColor: "var(--primary-border)" }}
+                      aria-hidden="true"
+                    />
                   </Link>
                 );
               })}
@@ -122,16 +137,18 @@ export default function Navbar() {
             {/* User Avatar - Desktop */}
             <Link
               href="/login"
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors focus:outline-2 focus:outline-offset-2"
+              className="group flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200 hover:shadow-md focus:outline-2 focus:outline-offset-2"
               style={{
                 fontFamily: "var(--font-body)",
                 color: "var(--secondary-text)",
+                borderColor: "var(--primary-border)",
+                backgroundColor: "transparent",
                 outlineColor: "var(--secondary-border)",
               }}
               aria-label="Logga in på ditt konto"
             >
               <div
-                className="flex h-8 w-8 items-center justify-center rounded-full"
+                className="flex h-8 w-8 items-center justify-center rounded-full transition-transform duration-200 group-hover:scale-110"
                 style={{ backgroundColor: "var(--primary-bg)" }}
                 aria-hidden="true"
               >
@@ -155,11 +172,11 @@ export default function Navbar() {
           </div>
 
           {/* Mobile: User Avatar and Menu Button */}
-          <div className="flex items-center gap-3 md:hidden">
+          <div className="flex items-center gap-3 lg:hidden">
             {/* User Avatar - Mobile */}
             <Link
               href="/login"
-              className="flex h-8 w-8 items-center justify-center rounded-full transition-colors focus:outline-2 focus:outline-offset-2"
+              className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-2 focus:outline-offset-2"
               style={{
                 backgroundColor: "var(--primary-bg)",
                 outlineColor: "var(--secondary-border)",
@@ -191,7 +208,7 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-controls="mobile-menu"
               aria-expanded={isMobileMenuOpen}
-              className="inline-flex items-center justify-center rounded-md border p-2 transition-colors focus:outline-2 focus:outline-offset-2"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-md border transition-all duration-200 hover:shadow-md active:scale-95 focus:outline-2 focus:outline-offset-2"
               style={{
                 color: "var(--primary-text)",
                 borderColor: "var(--primary-border)",
@@ -240,13 +257,30 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* Mobile menu backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-40 transition-opacity duration-300 lg:hidden"
+          style={{
+            backgroundColor: "rgba(128, 128, 128, 0.15)",
+          }}
+          onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Mobile menu */}
       <div
         ref={mobileMenuRef}
         id="mobile-menu"
-        className="md:hidden"
+        className={`lg:hidden transition-all duration-300 ease-in-out ${
+          isMobileMenuOpen
+            ? "max-h-screen opacity-100"
+            : "max-h-0 opacity-0 overflow-hidden"
+        }`}
         style={{
-          display: isMobileMenuOpen ? "block" : "none",
+          position: "relative",
+          zIndex: 50,
         }}
       >
         <div
