@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Google Fonts import for body text */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap');
+
 /* Font Face Declarations */
 @font-face {
   font-family: 'NewYorker';
@@ -15,8 +18,9 @@
   --foreground: #171717;
   --primary-bg: #94b1aa;
   --secondary-bg: #568b7f;
-  --primary-text: #000000;
-  --secondary-text: #000000;
+  --primary-text: #1A1A1A; /* Onyx for strong headings */
+  --secondary-text: #2E2E2E; /* Dark Charcoal for comfortable reading */
+  --color-muted: #4A4A4A;
   --primary-border: #94b1aa;
   --secondary-border: #568b7f;
   --primary-label: #94b1aa;
@@ -25,25 +29,32 @@
   --secondary-placeholder: #568b7f;
 
   --font-newyorker: 'NewYorker', Georgia, serif;
+  --font-body: 'Cormorant Garamond', Georgia, serif;
   --font-sans: system-ui, -apple-system, sans-serif;
   --font-mono: 'Courier New', monospace;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 /* Base Styles */
 body {
   background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-newyorker);
+  font-family: var(--font-body);
 }
 
 /* Heading Styles */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-newyorker);
+  color:var(--primary-text);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+/* Paragraph Styles*/
+p, li, span {
+  font-family: var(--font-body);
+  color: var(--secondary-text);
+  line-height: 1.7;
+}
+
+small, .muted {
+  color: var(--color-muted);
 }
