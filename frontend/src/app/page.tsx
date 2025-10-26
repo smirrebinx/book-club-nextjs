@@ -39,7 +39,7 @@ export default function Home() {
           >
             Välkommen till Barnfria bokklubben! Här kan du se vilka böcker vi läst,
             lägga till förslag på böcker samt rösta på nästa bok att läsa. Här finns
-            även information om var och när nästa bokträff är och vilken bok vi ska
+            även information om var och när nästa bokträff kommer vara samt vilken bok vi ska
             läsa till träffen.
           </p>
         </div>
