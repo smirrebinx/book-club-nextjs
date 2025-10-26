@@ -16,7 +16,13 @@ export default function Home() {
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <LottieAnimation width={200} height={200} />
+          <LottieAnimation
+            src="/animations/animationBooks.lottie"
+            width={200}
+            height={200}
+            ariaLabel="Animerad bokklubbslogotyp"
+            isDecorative={false}
+          />
 
           {/* Heading */}
           <h1
@@ -37,10 +43,7 @@ export default function Home() {
               color: "var(--secondary-text)",
             }}
           >
-            Välkommen till Barnfria bokklubben! Här kan du se vilka böcker vi läst,
-            lägga till förslag på böcker samt rösta på nästa bok att läsa. Här finns
-            även information om var och när nästa bokträff kommer vara samt vilken bok vi ska
-            läsa till träffen.
+            Välkommen till Barnfria bokklubben! Här kan du se vilka böcker vi har läst, lägga till egna boktips och rösta på nästa bok att läsa. Du hittar också information om tid och plats för nästa bokträff samt vilken bok vi ska läsa till träffen.
           </p>
         </div>
       </main>
