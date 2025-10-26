@@ -15,7 +15,7 @@ export default function Logo() {
         }}
       >
         Barnfria bokklubben
-        {/* Book icon */}
+        {/* Book icon - Stacked Books */}
         <svg
           className="h-5 w-5 sm:h-6 sm:w-6"
           viewBox="0 0 24 24"
@@ -23,29 +23,67 @@ export default function Logo() {
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
         >
-          {/* Book cover */}
+          {/* Bottom book (largest) */}
+          <rect
+            x="3"
+            y="15"
+            width="14"
+            height="6"
+            rx="0.5"
+            fill="var(--primary-bg)"
+            fillOpacity="0.4"
+            stroke="var(--primary-bg)"
+            strokeWidth="1.5"
+          />
+          {/* Bottom book spine */}
           <path
-            d="M4 19.5C4 18.837 4.26339 18.2011 4.73223 17.7322C5.20107 17.2634 5.83696 17 6.5 17H20"
+            d="M3 15L3 21"
             stroke="var(--secondary-border)"
             strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
           />
-          <path
-            d="M6.5 2H20V22H6.5C5.83696 22 5.20107 21.7366 4.73223 21.2678C4.26339 20.7989 4 20.163 4 19.5V4.5C4 3.83696 4.26339 3.20107 4.73223 2.73223C5.20107 2.26339 5.83696 2 6.5 2Z"
-            stroke="var(--primary-bg)"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            fill="var(--primary-bg)"
-            fillOpacity="0.15"
-          />
-          {/* Book pages */}
-          <path
-            d="M8 7H16M8 11H16"
+
+          {/* Middle book (medium, slightly offset) */}
+          <rect
+            x="5"
+            y="9"
+            width="13"
+            height="5"
+            rx="0.5"
+            fill="var(--secondary-border)"
+            fillOpacity="0.5"
             stroke="var(--secondary-border)"
             strokeWidth="1.5"
+          />
+          {/* Middle book detail line */}
+          <line
+            x1="7"
+            y1="11"
+            x2="14"
+            y2="11"
+            stroke="var(--primary-bg)"
+            strokeWidth="1"
+            strokeOpacity="0.6"
+          />
+
+          {/* Top book (smallest, angled) */}
+          <path
+            d="M7 4L19 6L18 10L6 8L7 4Z"
+            fill="var(--primary-bg)"
+            fillOpacity="0.6"
+            stroke="var(--primary-bg)"
+            strokeWidth="1.5"
             strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          {/* Top book detail */}
+          <line
+            x1="9"
+            y1="6.5"
+            x2="15"
+            y2="7.5"
+            stroke="var(--secondary-border)"
+            strokeWidth="1"
+            strokeOpacity="0.5"
           />
         </svg>
       </Link>
