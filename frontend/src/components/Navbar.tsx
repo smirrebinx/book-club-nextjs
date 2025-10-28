@@ -11,10 +11,10 @@ import MobileNav from "@/components/navbar/MobileNav";
 
 const navLinks = [
   { href: "/", label: "Hem" },
-  { href: "/next-meeting", label: "Nästa bokträff" },
-  { href: "/books-read", label: "Lästa böcker" },
-  { href: "/book-suggestions", label: "Bokförslag" },
-  { href: "/vote", label: "Rösta" },
+  { href: "/NextMeeting", label: "Nästa bokträff" },
+  { href: "/BooksRead", label: "Lästa böcker" },
+  { href: "/BookSuggestions", label: "Bokförslag" },
+  { href: "/Vote", label: "Rösta" },
 ];
 
 export default function Navbar() {
