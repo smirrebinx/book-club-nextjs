@@ -1,5 +1,7 @@
 import LottieAnimation from "@/components/LottieAnimation";
+import NextMeetingCard from "@/components/NextMeetingCard";
 import { APP_NAME } from "@/constants";
+import { nextMeetingData } from "@/data/nextMeeting";
 
 export const metadata = {
   title: APP_NAME,
@@ -12,10 +14,10 @@ export default function Home() {
       style={{ backgroundColor: "var(--background)", color: "var(--secondary-text)" }}
     >
       <main
-        className="flex min-h-screen w-full max-w-3xl flex-col items-start justify-between py-8 px-4 sm:py-32 sm:px-16"
+        className="flex min-h-screen w-full max-w-3xl flex-col items-start justify-between pt-2 pb-4 px-4 sm:pt-4 sm:pb-32 sm:px-16"
         style={{ backgroundColor: "var(--background)" }}
       >
-        <div className="flex w-full flex-col items-start gap-6 text-left">
+        <div className="flex w-full flex-col items-start gap-1 text-left">
           <div className="flex w-full justify-center sm:justify-start">
             <LottieAnimation
               src="/animations/animationBooks.lottie"
@@ -45,8 +47,13 @@ export default function Home() {
               color: "var(--secondary-text)",
             }}
           >
-            Välkommen till Barnfria bokklubben! Här kan du se vilka böcker vi har läst, lägga till egna boktips och rösta på nästa bok att läsa. Du hittar också information om tid och plats för nästa bokträff samt vilken bok vi ska läsa till träffen.
+            Välkommen till Barnfria bokklubben! Här kan du se vilka böcker vi har läst, lägga till egna boktips och rösta på nästa bok att läsa.
           </p>
+
+          {/* Next Meeting Card */}
+          <div className="w-full px-4 sm:px-0">
+            <NextMeetingCard meetingData={nextMeetingData} />
+          </div>
         </div>
       </main>
     </div>
