@@ -1,3 +1,4 @@
+import LottieAnimation from "@/components/LottieAnimation";
 import { APP_NAME } from "@/constants";
 import { nextMeetingData } from "@/data/nextMeeting";
 
@@ -19,16 +20,27 @@ export default function NextMeeting() {
         className="flex w-full max-w-3xl flex-col items-start gap-8 px-4 py-8 sm:px-16 sm:py-32"
         style={{ backgroundColor: "var(--background)" }}
       >
-        {/* Heading */}
-        <h1
-          className="px-4 text-3xl leading-10 tracking-wide sm:px-0"
-          style={{
-            fontFamily: "var(--font-newyorker)",
-            color: "var(--primary-text)",
-          }}
-        >
-          Nästa bokträff
-        </h1>
+        <div className="flex w-full flex-col items-start gap-6 text-left">
+          <div className="flex w-full justify-center sm:justify-start">
+            <LottieAnimation
+              src="/animations/Calendar.lottie"
+              width={200}
+              height={200}
+              ariaLabel="Animerad kalender"
+              isDecorative={false}
+            />
+          </div>
+
+          {/* Heading */}
+          <h1
+            className="px-4 text-3xl leading-10 tracking-wide sm:px-0"
+            style={{
+              fontFamily: "var(--font-newyorker)",
+              color: "var(--primary-text)",
+            }}
+          >
+            Nästa bokträff
+          </h1>
 
         {/* Meeting Details */}
         <div
@@ -94,6 +106,7 @@ export default function NextMeeting() {
               {nextMeetingData.additionalInfo}
             </p>
           </section>
+        </div>
         </div>
       </main>
     </div>
