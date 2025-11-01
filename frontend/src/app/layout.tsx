@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Merriweather, Playfair_Display } from "next/font/google";
 
 import Navbar from "@/components/Navbar";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
@@ -17,6 +17,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const merriweather = Merriweather({
+  variable: "--font-body",
+  subsets: ["latin"],
+  weight: ["300", "400", "700", "900"],
+});
+
+const playfairDisplay = Playfair_Display({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
 export const metadata: Metadata = {
   title: "Barnfria bokklubben",
   description: "Barnfria bokklubben. Här kan du se vilka böcker vi har läst, lägga till egna boktips och rösta på nästa bok att läsa. Information om kommande bokträffar.",
@@ -30,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="sv">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${merriweather.variable} ${playfairDisplay.variable} antialiased`}
         suppressHydrationWarning
       >
         <SessionProviderWrapper>
