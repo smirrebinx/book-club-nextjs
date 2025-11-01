@@ -10,12 +10,15 @@
     "seed": "tsx src/scripts/seedMeetings.ts"
   },
   "dependencies": {
+    "@auth/mongodb-adapter": "^3.11.1",
     "@lottiefiles/dotlottie-react": "^0.17.5",
     "@tailwindcss/postcss": "^4.1.16",
     "autoprefixer": "^10.4.21",
     "mongodb": "^6.20.0",
     "mongoose": "^8.19.2",
     "next": "^15.0.0",
+    "next-auth": "^5.0.0-beta.30",
+    "nodemailer": "^7.0.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.1.16"
@@ -24,6 +27,7 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.38.0",
     "@types/node": "^20",
+    "@types/nodemailer": "^7.0.3",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
