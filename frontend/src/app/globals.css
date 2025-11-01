@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* Google Fonts import for body text */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&display=swap');
-
 /* Font Face Declarations */
 @font-face {
   font-family: 'NewYorker';
@@ -29,7 +26,7 @@
   --secondary-placeholder: #568b7f;
 
   --font-newyorker: 'NewYorker', Georgia, serif;
-  --font-body: 'Cormorant Garamond', Georgia, serif;
+  /* --font-heading and --font-body are defined by Next.js font loader in layout.tsx */
   --font-sans: system-ui, -apple-system, sans-serif;
   --font-mono: 'Courier New', monospace;
 }
@@ -38,23 +35,32 @@
 body {
   background: var(--background);
   font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 500;
 }
 
 /* Heading Styles */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-newyorker);
-  color:var(--primary-text);
+  font-family: var(--font-heading);
+  color: var(--primary-text);
   letter-spacing: 0.02em;
   line-height: 1.2;
 }
 
 /* Paragraph Styles*/
-p, li, span {
+p, li, span:not(button span, a span) {
   font-family: var(--font-body);
   color: var(--secondary-text);
   line-height: 1.7;
+  font-weight: 500;
 }
 
 small, .muted {
   color: var(--color-muted);
+}
+
+/* Cursor Pointer for Interactive Elements */
+button, a, [role="button"] {
+  cursor: pointer;
 }
