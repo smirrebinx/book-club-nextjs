@@ -10,11 +10,11 @@ export const metadata = {
 export default function Home() {
   return (
     <div
-      className="flex min-h-screen items-center justify-center"
+      className="flex min-h-screen items-start justify-center"
       style={{ backgroundColor: "var(--background)", color: "var(--secondary-text)" }}
     >
       <main
-        className="flex min-h-screen w-full max-w-3xl flex-col items-start justify-between pt-2 pb-4 px-4 sm:pt-4 sm:pb-32 sm:px-16"
+        className="flex w-full max-w-3xl flex-col items-start pt-4 pb-8 px-4 sm:pt-8 sm:pb-16 sm:px-16"
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="flex w-full flex-col items-start gap-1 text-left">
