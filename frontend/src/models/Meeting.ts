@@ -1,5 +1,7 @@
-import mongoose, { Schema, Model } from 'mongoose';
-import { BookInfo, MeetingData } from '@/types/meeting';
+import mongoose, { Schema } from 'mongoose';
+
+import type { BookInfo, MeetingData } from '@/types/meeting';
+import type { Model } from 'mongoose';
 
 const BookInfoSchema = new Schema<BookInfo>({
   id: { type: String, required: true },

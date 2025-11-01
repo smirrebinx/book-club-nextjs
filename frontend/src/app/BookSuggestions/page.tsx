@@ -1,4 +1,5 @@
 import Image from "next/image";
+
 import { APP_NAME } from "@/constants";
 
 export const metadata = {

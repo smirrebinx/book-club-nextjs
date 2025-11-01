@@ -1,6 +1,7 @@
 import LottieAnimation from "@/components/LottieAnimation";
 import { APP_NAME } from "@/constants";
-import { MeetingData } from "@/types/meeting";
+
+import type { MeetingData } from "@/types/meeting";
 
 export const metadata = {
   title: `Nästa bokträff - ${APP_NAME}`,

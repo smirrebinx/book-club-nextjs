@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+
 import connectDB from '@/lib/mongodb';
 import Meeting from '@/models/Meeting';
-import { MeetingData } from '@/types/meeting';
+
+import type { MeetingData } from '@/types/meeting';
+import type { NextRequest } from 'next/server';
 
 interface RouteParams {
   params: Promise<{

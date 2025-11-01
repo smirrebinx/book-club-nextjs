@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+
 import connectDB from '@/lib/mongodb';
 import Meeting from '@/models/Meeting';
 
@@ -6,9 +7,6 @@ import Meeting from '@/models/Meeting';
 export async function GET() {
   try {
     await connectDB();
-
-    // Get current date and time
-    const now = new Date();
 
     // For now, we'll just get the most recently created meeting
     // In the future, you might want to add proper date parsing and comparison

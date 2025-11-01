@@ -1,6 +1,9 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 import path from 'path';
+
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+
+
 import { nextMeetingData } from '../data/nextMeeting';
 
 // Load environment variables from .env.local
@@ -46,7 +49,7 @@ const Meeting = mongoose.models.Meeting || mongoose.model('Meeting', MeetingSche
 async function seedMeetings() {
   try {
     console.log('Connecting to MongoDB...');
-    await mongoose.connect(MONGODB_URI);
+    await mongoose.connect(MONGODB_URI as string);
     console.log('Connected to MongoDB successfully!');
 
     // Clear existing meetings
@@ -70,4 +73,4 @@ async function seedMeetings() {
   }
 }
 
-seedMeetings();
+void seedMeetings();

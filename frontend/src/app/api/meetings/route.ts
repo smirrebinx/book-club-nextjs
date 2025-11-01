@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+
 import connectDB from '@/lib/mongodb';
 import Meeting from '@/models/Meeting';
-import { MeetingData } from '@/types/meeting';
+
+import type { MeetingData } from '@/types/meeting';
+import type { NextRequest } from 'next/server';
 
 // GET /api/meetings - Get all meetings
 export async function GET() {
@@ -52,11 +55,11 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating meeting:', error);
 
     // Handle duplicate key error
-    if (error.code === 11000) {
+    if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
       return NextResponse.json(
         {
           success: false,

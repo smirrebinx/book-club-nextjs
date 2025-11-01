@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
 import DesktopNav from "@/components/navbar/DesktopNav";
@@ -19,6 +20,7 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -84,37 +86,49 @@ export default function Navbar() {
         <div className="flex h-16 items-center justify-between">
           <Logo />
 
-          <DesktopNav navLinks={navLinks} pathname={pathname} />
+          <DesktopNav navLinks={navLinks} pathname={pathname} session={session} />
 
           {/* Mobile: User Avatar and Menu Button */}
           <div className="flex items-center gap-3 lg:hidden">
             {/* User Avatar - Mobile */}
-            <Link
-              href="/login"
-              className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-2 focus:outline-offset-2"
-              style={{
-                backgroundColor: "var(--primary-bg)",
-                outlineColor: "var(--secondary-border)",
-              }}
-              aria-label="Logga in på ditt konto"
-              title="Logga in på ditt konto"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-                stroke="currentColor"
-                style={{ color: "var(--primary-text)" }}
-                aria-hidden="true"
+            {session?.user ? (
+              <button
+                onClick={() => void signOut({ callbackUrl: "/auth/signin" })}
+                className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-2 focus:outline-offset-2"
+                style={{
+                  backgroundColor: "var(--secondary-bg)",
+                  outlineColor: "var(--secondary-border)",
+                }}
+                aria-label="Logga ut"
+                title="Logga ut"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                />
-              </svg>
-            </Link>
+                {session.user.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    width={44}
+                    height={44}
+                    className="h-full w-full rounded-full"
+                  />
+                ) : (
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                    style={{ color: "var(--background)" }}
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                    />
+                  </svg>
+                )}
+              </button>
+            ) : null}
 
             <MobileMenuButton
               isMobileMenuOpen={isMobileMenuOpen}
