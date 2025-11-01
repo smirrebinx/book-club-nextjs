@@ -1,19 +1,4 @@
-export interface BookInfo {
-  id: string;
-  title: string;
-  author: string;
-  coverImage?: string; // Optional: URL to book cover image
-  isbn?: string; // Optional: For future integrations
-}
-
-export interface MeetingData {
-  id: string; // Unique identifier for the meeting
-  date: string;
-  time: string;
-  location: string;
-  book: BookInfo;
-  additionalInfo: string;
-}
+import type { MeetingData } from "@/types/meeting";
 
 export const nextMeetingData: MeetingData = {
   id: "meeting-2025-11-11",
