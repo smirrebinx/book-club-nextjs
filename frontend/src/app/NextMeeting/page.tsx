@@ -1,13 +1,50 @@
 import LottieAnimation from "@/components/LottieAnimation";
 import { APP_NAME } from "@/constants";
-import { nextMeetingData } from "@/data/nextMeeting";
+import { MeetingData } from "@/types/meeting";
 
 export const metadata = {
   title: `Nästa bokträff - ${APP_NAME}`,
   description: "Information om nästa bokträff: datum, tid, plats och vilken bok vi ska läsa.",
 };
 
-export default function NextMeeting() {
+async function getNextMeeting(): Promise<MeetingData | null> {
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/meetings/next`, {
+      cache: 'no-store', // Always fetch fresh data
+    });
+
+    if (!res.ok) {
+      console.error('Failed to fetch next meeting');
+      return null;
+    }
+
+    const data = await res.json();
+    return data.success ? data.data : null;
+  } catch (error) {
+    console.error('Error fetching next meeting:', error);
+    return null;
+  }
+}
+
+export default async function NextMeeting() {
+  const meetingData = await getNextMeeting();
+
+  if (!meetingData) {
+    return (
+      <div
+        className="flex min-h-screen items-center justify-center"
+        style={{
+          backgroundColor: "var(--background)",
+          color: "var(--secondary-text)",
+        }}
+      >
+        <main className="flex w-full max-w-3xl flex-col items-center gap-8 px-4 py-8">
+          <p className="text-lg">Ingen bokträff hittades. Kontrollera att databasen är konfigurerad korrekt.</p>
+        </main>
+      </div>
+    );
+  }
   return (
     <div
       className="flex min-h-screen items-center justify-center"
@@ -59,7 +96,7 @@ export default function NextMeeting() {
               Datum och tid
             </h2>
             <p className="text-lg leading-7">
-              {nextMeetingData.date}, klockan {nextMeetingData.time}
+              {meetingData.date}, klockan {meetingData.time}
             </p>
           </section>
 
@@ -72,7 +109,7 @@ export default function NextMeeting() {
               Plats
             </h2>
             <p className="text-lg leading-7">
-              {nextMeetingData.location}
+              {meetingData.location}
             </p>
           </section>
 
@@ -86,10 +123,10 @@ export default function NextMeeting() {
             </h2>
             <div className="flex flex-col gap-1">
               <p className="text-lg leading-7">
-                <span className="font-semibold">Titel:</span> {nextMeetingData.book.title}
+                <span className="font-semibold">Titel:</span> {meetingData.book.title}
               </p>
               <p className="text-lg leading-7">
-                <span className="font-semibold">Författare:</span> {nextMeetingData.book.author}
+                <span className="font-semibold">Författare:</span> {meetingData.book.author}
               </p>
             </div>
           </section>
@@ -103,7 +140,7 @@ export default function NextMeeting() {
               Övrigt
             </h2>
             <p className="text-lg leading-7">
-              {nextMeetingData.additionalInfo}
+              {meetingData.additionalInfo}
             </p>
           </section>
         </div>
