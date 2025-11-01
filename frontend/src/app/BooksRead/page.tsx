@@ -9,14 +9,14 @@ export const metadata = {
 export default function BooksRead() {
   return (
     <div
-      className="flex min-h-screen items-center justify-center"
+      className="flex min-h-screen items-start justify-center"
       style={{
         backgroundColor: "var(--background)",
         color: "var(--secondary-text)",
       }}
     >
       <main
-        className="flex w-full max-w-3xl flex-col items-start gap-8 px-4 py-8 sm:px-16 sm:py-32"
+        className="flex w-full max-w-3xl flex-col items-start gap-8 px-4 py-4 sm:px-16 sm:py-8"
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="flex w-full flex-col items-start gap-6 text-left">
@@ -34,7 +34,7 @@ export default function BooksRead() {
           <h1
             className="px-4 text-3xl leading-10 tracking-wide sm:px-0"
             style={{
-              fontFamily: "var(--font-newyorker)",
+              fontFamily: "var(--font-heading)",
               color: "var(--primary-text)",
             }}
           >

@@ -1,5 +1,8 @@
 import type { MeetingData } from "@/types/meeting";
 
+// Re-export the type so other files can import it from here
+export type { MeetingData };
+
 export const nextMeetingData: MeetingData = {
   id: "meeting-2025-11-11",
   date: "Tisdag 11 november 2025",

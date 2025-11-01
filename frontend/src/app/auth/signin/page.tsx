@@ -7,11 +7,11 @@ import LottieAnimation from "@/components/LottieAnimation";
 import { APP_NAME } from "@/constants";
 
 export default function SignIn() {
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [email, _setEmail] = useState("");
+  const [_isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
-  const handleEmailSignIn = async (e: React.FormEvent) => {
+  const _handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -31,7 +31,7 @@ export default function SignIn() {
 
   return (
     <div
-      className="flex min-h-screen items-center justify-center"
+      className="flex min-h-screen items-start justify-center pt-16"
       style={{
         backgroundColor: "var(--background)",
       }}
@@ -39,10 +39,10 @@ export default function SignIn() {
       <main className="flex w-full max-w-md flex-col items-center gap-8 px-4 py-8">
         <div className="flex w-full flex-col items-center gap-6 text-center">
           <LottieAnimation
-            src="/animations/Calendar.lottie"
-            width={150}
-            height={150}
-            ariaLabel="Bokklubbs logotyp"
+            src="/animations/animationBooks.lottie"
+            width={200}
+            height={200}
+            ariaLabel="Animerad bokklubbslogotyp"
             isDecorative={false}
           />
 
@@ -73,7 +73,7 @@ export default function SignIn() {
                   color: "var(--secondary-text)",
                 }}
               >
-                Kolla din e-post! Vi har skickat en inloggningslänk till {email}
+                Titta i din e-post. Vi har skickat en inloggningslänk till {email}
               </p>
             </div>
           ) : (
@@ -111,6 +111,7 @@ export default function SignIn() {
                 <span className="font-semibold">Fortsätt med Google</span>
               </button>
 
+{/* Commented out until Magic Link is configured
               <div className="flex items-center gap-4" role="separator" aria-label="eller">
                 <div className="h-px flex-1" style={{ backgroundColor: "var(--primary-border)" }}></div>
                 <span
@@ -125,7 +126,6 @@ export default function SignIn() {
                 <div className="h-px flex-1" style={{ backgroundColor: "var(--primary-border)" }}></div>
               </div>
 
-              {/* Email Sign In */}
               <form onSubmit={(e) => void handleEmailSignIn(e)} className="flex w-full flex-col gap-4">
                 <div className="flex flex-col gap-2">
                   <label
@@ -178,6 +178,7 @@ export default function SignIn() {
                   {isLoading ? "Skickar..." : "Skicka inloggningslänk"}
                 </button>
               </form>
+*/}
             </div>
           )}
         </div>

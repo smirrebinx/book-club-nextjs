@@ -23,7 +23,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
         <h2
           className="text-2xl font-bold tracking-wide"
           style={{
-            fontFamily: "var(--font-newyorker)",
+            fontFamily: "var(--font-heading)",
             color: "var(--primary-text)",
           }}
         >
