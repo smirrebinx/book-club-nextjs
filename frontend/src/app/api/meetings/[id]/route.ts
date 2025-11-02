@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 
+import { requireApproved, requireAdmin } from '@/lib/auth-helpers';
 import connectDB from '@/lib/mongodb';
 import Meeting from '@/models/Meeting';
 
@@ -12,9 +13,11 @@ interface RouteParams {
   }>;
 }
 
-// GET /api/meetings/[id] - Get a specific meeting by ID
+// GET /api/meetings/[id] - Get a specific meeting by ID (approved users can view)
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
+    await requireApproved();
+
     await connectDB();
     const { id } = await params;
 
@@ -36,6 +39,12 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error('Error fetching meeting:', error);
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 403 }
+      );
+    }
     return NextResponse.json(
       {
         success: false,
@@ -46,9 +55,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// PUT /api/meetings/[id] - Update a specific meeting
+// PUT /api/meetings/[id] - Update a specific meeting (admin only)
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    await requireAdmin();
+
     await connectDB();
     const { id } = await params;
     const body: Partial<MeetingData> = await request.json();
@@ -96,9 +107,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-// DELETE /api/meetings/[id] - Delete a specific meeting
+// DELETE /api/meetings/[id] - Delete a specific meeting (admin only)
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    await requireAdmin();
+
     await connectDB();
     const { id } = await params;
 
@@ -120,6 +133,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     });
   } catch (error) {
     console.error('Error deleting meeting:', error);
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 403 }
+      );
+    }
     return NextResponse.json(
       {
         success: false,

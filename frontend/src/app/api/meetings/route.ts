@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 
+import { requireApproved, requireAdmin } from '@/lib/auth-helpers';
 import connectDB from '@/lib/mongodb';
 import Meeting from '@/models/Meeting';
 
 import type { MeetingData } from '@/types/meeting';
 import type { NextRequest } from 'next/server';
 
-// GET /api/meetings - Get all meetings
+// GET /api/meetings - Get all meetings (approved users can view)
 export async function GET() {
   try {
+    await requireApproved();
+
     await connectDB();
     const meetings = await Meeting.find({}).sort({ date: -1 });
 
@@ -18,6 +21,12 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error fetching meetings:', error);
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 403 }
+      );
+    }
     return NextResponse.json(
       {
         success: false,
@@ -28,9 +37,11 @@ export async function GET() {
   }
 }
 
-// POST /api/meetings - Create a new meeting
+// POST /api/meetings - Create a new meeting (admin only)
 export async function POST(request: NextRequest) {
   try {
+    await requireAdmin();
+
     await connectDB();
 
     const body: MeetingData = await request.json();

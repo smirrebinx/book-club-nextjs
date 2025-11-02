@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 
+import { requireApproved } from '@/lib/auth-helpers';
 import connectDB from '@/lib/mongodb';
 import Meeting from '@/models/Meeting';
 
-// GET /api/meetings/next - Get the next upcoming meeting
+// GET /api/meetings/next - Get the next upcoming meeting (approved users can view)
 export async function GET() {
   try {
+    await requireApproved();
+
     await connectDB();
 
     // For now, we'll just get the most recently created meeting
@@ -28,6 +31,12 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error fetching next meeting:', error);
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 403 }
+      );
+    }
     return NextResponse.json(
       {
         success: false,

@@ -10,13 +10,28 @@ import Logo from "@/components/navbar/Logo";
 import MobileMenuButton from "@/components/navbar/MobileMenuButton";
 import MobileNav from "@/components/navbar/MobileNav";
 
-const navLinks = [
-  { href: "/", label: "Hem" },
-  { href: "/NextMeeting", label: "Nästa bokträff" },
-  { href: "/BooksRead", label: "Lästa böcker" },
-  { href: "/BookSuggestions", label: "Bokförslag" },
-  { href: "/Vote", label: "Rösta" },
-];
+const getNavLinks = (role?: string, isApproved?: boolean) => {
+  const links = [
+    { href: "/", label: "Hem" },
+  ];
+
+  // Only show navigation links to approved users
+  if (isApproved) {
+    links.push(
+      { href: "/NextMeeting", label: "Nästa bokträff" },
+      { href: "/BooksRead", label: "Lästa böcker" },
+      { href: "/suggestions", label: "Bokförslag" },
+      { href: "/Vote", label: "Rösta" }
+    );
+
+    // Add admin link for admins
+    if (role === 'admin') {
+      links.push({ href: "/admin/users", label: "Admin" });
+    }
+  }
+
+  return links;
+};
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -72,6 +87,14 @@ export default function Navbar() {
       document.body.style.overflow = "";
     };
   }, [isMobileMenuOpen]);
+
+  // Don't show navbar for pending users
+  if (session?.user && !session.user.isApproved) {
+    return null;
+  }
+
+  // Get navigation links based on user role and approval status
+  const navLinks = getNavLinks(session?.user?.role, session?.user?.isApproved);
 
   return (
     <nav

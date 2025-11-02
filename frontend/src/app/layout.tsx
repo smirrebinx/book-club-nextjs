@@ -2,6 +2,7 @@ import { Geist, Geist_Mono, Merriweather, Playfair_Display } from "next/font/goo
 
 import Navbar from "@/components/Navbar";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import { ToastProvider } from "@/components/Toast";
 
 import type { Metadata } from "next";
 
@@ -46,8 +47,10 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <SessionProviderWrapper>
-          <Navbar />
-          {children}
+          <ToastProvider>
+            <Navbar />
+            {children}
+          </ToastProvider>
         </SessionProviderWrapper>
       </body>
     </html>

@@ -1,13 +1,22 @@
+import { redirect } from 'next/navigation';
+
 import LottieAnimation from "@/components/LottieAnimation";
 import NextMeetingCard from "@/components/NextMeetingCard";
 import { APP_NAME } from "@/constants";
 import { nextMeetingData } from "@/data/nextMeeting";
+import { auth } from '@/lib/auth';
 
 export const metadata = {
   title: APP_NAME,
 };
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+
+  // Redirect pending users to pending page
+  if (session?.user && !session.user.isApproved) {
+    redirect('/auth/pending');
+  }
   return (
     <div
       className="flex min-h-screen items-start justify-center"

@@ -4,7 +4,11 @@ import Google from "next-auth/providers/google";
 import Nodemailer from "next-auth/providers/nodemailer";
 
 import { authConfig } from "@/lib/auth.config";
+import connectDB from "@/lib/mongodb";
 import clientPromise from "@/lib/mongodb-client";
+import User from "@/models/User";
+
+import type { UserRole } from "@/models/User";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -27,19 +31,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   session: {
-    strategy: "jwt", // Use JWT for edge-compatible middleware
+    strategy: "database", // Use database sessions for immediate access revocation
   },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
+    async signIn({ user, account: _account }) {
+      // Auto-assign admin role if email matches ADMIN_EMAIL
+      if (user.email === process.env.ADMIN_EMAIL) {
+        await connectDB();
+        await User.findOneAndUpdate(
+          { email: user.email },
+          {
+            role: 'admin',
+            isApproved: true
+          },
+          { upsert: true, new: true }
+        );
       }
-      return token;
+      return true;
     },
-    async session({ session, token }) {
-      if (session.user && token.id) {
-        session.user.id = token.id as string;
+    async session({ session, user }) {
+      // Fetch fresh user data from database to get role and approval status
+      await connectDB();
+      const dbUser = await User.findOne({ email: session.user.email });
+
+      if (dbUser && session.user) {
+        session.user.id = user.id;
+        session.user.role = dbUser.role as UserRole;
+        session.user.isApproved = dbUser.isApproved;
       }
+
       return session;
     },
   },
