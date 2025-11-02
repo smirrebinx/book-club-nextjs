@@ -29,21 +29,39 @@ export default async function SuggestionsPage() {
     .sort({ createdAt: -1 })
     .lean();
 
-  const suggestionsData = suggestions.map((s) => ({
-    _id: s._id.toString(),
-    title: s.title,
-    author: s.author,
-    description: s.description,
-    status: s.status,
-    votes: s.votes?.map((v) => v.toString()) || [],
-    voteCount: s.votes?.length || 0,
-    hasVoted: s.votes?.some((v) => v.toString() === session.user.id) || false,
-    suggestedBy: {
-      _id: s.suggestedBy?._id?.toString(),
-      name: s.suggestedBy?.name || 'Okänd',
-    },
-    createdAt: s.createdAt?.toISOString() || new Date().toISOString(),
-  }));
+  const suggestionsData = suggestions.map((s) => {
+    // Type assertion: suggestedBy could be ObjectId or populated user object
+    const suggestedByRaw = s.suggestedBy as unknown;
+    let userId = '';
+    let userName = 'Okänd';
+
+    // Check if it's a populated user object (has name property)
+    if (
+      suggestedByRaw &&
+      typeof suggestedByRaw === 'object' &&
+      'name' in suggestedByRaw
+    ) {
+      const populatedUser = suggestedByRaw as { _id?: { toString(): string }; name?: string };
+      userId = populatedUser._id?.toString() || '';
+      userName = populatedUser.name || 'Okänd';
+    }
+
+    return {
+      _id: s._id.toString(),
+      title: s.title,
+      author: s.author,
+      description: s.description,
+      status: s.status,
+      votes: s.votes?.map((v) => v.toString()) || [],
+      voteCount: s.votes?.length || 0,
+      hasVoted: s.votes?.some((v) => v.toString() === session.user.id) || false,
+      suggestedBy: {
+        _id: userId,
+        name: userName,
+      },
+      createdAt: s.createdAt?.toISOString() || new Date().toISOString(),
+    };
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

@@ -7,14 +7,16 @@ export const approveUserSchema = z.object({
 export const changeRoleSchema = z.object({
   userId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Ogiltigt användar-ID'),
   role: z.enum(['pending', 'user', 'admin'], {
-    errorMap: () => ({ message: 'Rollen måste vara pending, user eller admin' })
+    required_error: 'Roll krävs',
+    invalid_type_error: 'Rollen måste vara pending, user eller admin'
   })
 });
 
 export const updateSuggestionStatusSchema = z.object({
   suggestionId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Ogiltigt förslags-ID'),
   status: z.enum(['pending', 'approved', 'currently_reading', 'rejected'], {
-    errorMap: () => ({ message: 'Status måste vara pending, approved, currently_reading eller rejected' })
+    required_error: 'Status krävs',
+    invalid_type_error: 'Status måste vara pending, approved, currently_reading eller rejected'
   })
 });
 

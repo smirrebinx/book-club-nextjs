@@ -1,4 +1,4 @@
-import type { BookInfo } from "./nextMeeting";
+import type { BookInfo } from "@/types/meeting";
 
 export interface ReadBook extends BookInfo {
   meetingDate: string; // When the book was discussed
