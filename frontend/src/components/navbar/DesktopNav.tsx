@@ -9,6 +9,7 @@ import type { Session } from "next-auth";
 interface NavLink {
   href: string;
   label: string;
+  badge?: number;
 }
 
 interface DesktopNavProps {
@@ -38,7 +39,21 @@ export default function DesktopNav({ navLinks, pathname, session }: DesktopNavPr
                 backgroundColor: "transparent",
               }}
             >
-              {link.label}
+              <span className="flex items-center gap-2">
+                {link.label}
+                {link.badge && link.badge > 0 && (
+                  <span
+                    className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold"
+                    style={{
+                      backgroundColor: "var(--accent)",
+                      color: "var(--background)",
+                    }}
+                    aria-label={`${link.badge} väntande användare`}
+                  >
+                    {link.badge}
+                  </span>
+                )}
+              </span>
               {/* Active indicator underline */}
               {isActive && (
                 <span

@@ -1,17 +1,24 @@
 "use client";
 
-import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
 import DesktopNav from "@/components/navbar/DesktopNav";
 import Logo from "@/components/navbar/Logo";
 import MobileMenuButton from "@/components/navbar/MobileMenuButton";
 import MobileNav from "@/components/navbar/MobileNav";
+import MobileUserAvatar from "@/components/navbar/MobileUserAvatar";
+import { usePendingCount } from "@/hooks/usePendingCount";
 
-const getNavLinks = (role?: string, isApproved?: boolean) => {
-  const links = [
+interface NavLink {
+  href: string;
+  label: string;
+  badge?: number;
+}
+
+const getNavLinks = (role?: string, isApproved?: boolean, pendingCount?: number): NavLink[] => {
+  const links: NavLink[] = [
     { href: "/", label: "Hem" },
   ];
 
@@ -24,9 +31,13 @@ const getNavLinks = (role?: string, isApproved?: boolean) => {
       { href: "/Vote", label: "Rösta" }
     );
 
-    // Add admin link for admins
+    // Add admin link for admins with badge
     if (role === 'admin') {
-      links.push({ href: "/admin/users", label: "Admin" });
+      links.push({
+        href: "/admin/users",
+        label: "Admin",
+        badge: pendingCount && pendingCount > 0 ? pendingCount : undefined
+      });
     }
   }
 
@@ -40,12 +51,15 @@ export default function Navbar() {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
+  // Fetch pending user count for admins
+  const pendingCount = usePendingCount(session?.user?.role === 'admin');
+
   // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Close mobile menu when clicking outside
+  // Handle mobile menu interactions
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -59,12 +73,6 @@ export default function Navbar() {
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isMobileMenuOpen]);
-
-  // Handle escape key to close mobile menu
-  useEffect(() => {
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape" && isMobileMenuOpen) {
         setIsMobileMenuOpen(false);
@@ -72,18 +80,15 @@ export default function Navbar() {
       }
     }
 
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [isMobileMenuOpen]);
+    // Prevent body scroll when mobile menu is open
+    document.body.style.overflow = isMobileMenuOpen ? "hidden" : "";
 
-  // Prevent body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
     return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "";
     };
   }, [isMobileMenuOpen]);
@@ -94,7 +99,7 @@ export default function Navbar() {
   }
 
   // Get navigation links based on user role and approval status
-  const navLinks = getNavLinks(session?.user?.role, session?.user?.isApproved);
+  const navLinks = getNavLinks(session?.user?.role, session?.user?.isApproved, pendingCount);
 
   return (
     <nav
@@ -116,43 +121,7 @@ export default function Navbar() {
 
               {/* Mobile: User Avatar and Menu Button */}
               <div className="flex items-center gap-3 lg:hidden">
-                {/* User Avatar - Mobile */}
-                <button
-                  onClick={() => void signOut({ callbackUrl: "/auth/signin" })}
-                  className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-2 focus:outline-offset-2"
-                  style={{
-                    backgroundColor: "var(--secondary-bg)",
-                    outlineColor: "var(--secondary-border)",
-                  }}
-                  aria-label="Logga ut"
-                  title="Logga ut"
-                >
-                  {session.user.image ? (
-                    <Image
-                      src={session.user.image}
-                      alt={session.user.name || "User"}
-                      width={44}
-                      height={44}
-                      className="h-full w-full rounded-full"
-                    />
-                  ) : (
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                      stroke="currentColor"
-                      style={{ color: "var(--background)" }}
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                      />
-                    </svg>
-                  )}
-                </button>
+                <MobileUserAvatar session={session} />
 
                 <MobileMenuButton
                   isMobileMenuOpen={isMobileMenuOpen}

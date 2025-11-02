@@ -5,6 +5,7 @@ import type { RefObject } from "react";
 interface NavLink {
   href: string;
   label: string;
+  badge?: number;
 }
 
 interface MobileNavProps {
@@ -73,7 +74,21 @@ export default function MobileNav({
                   boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1)",
                 }}
               >
-                {link.label}
+                <span className="flex items-center justify-center gap-2">
+                  {link.label}
+                  {link.badge && link.badge > 0 && (
+                    <span
+                      className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold"
+                      style={{
+                        backgroundColor: "var(--accent)",
+                        color: "var(--background)",
+                      }}
+                      aria-label={`${link.badge} väntande användare`}
+                    >
+                      {link.badge}
+                    </span>
+                  )}
+                </span>
               </Link>
             );
           })}
