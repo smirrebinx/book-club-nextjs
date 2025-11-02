@@ -10,6 +10,16 @@ import User from "@/models/User";
 
 import type { UserRole } from "@/models/User";
 
+interface AdapterUser {
+  id: string;
+  email: string;
+  emailVerified?: Date | null;
+  name?: string;
+  image?: string;
+  role?: UserRole;
+  isApproved?: boolean;
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   adapter: MongoDBAdapter(clientPromise),
@@ -96,13 +106,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, user }) {
       // The user object from database sessions already has fresh data
       // Add our custom fields to the session
+      const adapterUser = user as AdapterUser;
+
       if (session.user) {
-        session.user.id = user.id;
+        session.user.id = adapterUser.id;
 
         // Get role and isApproved from the adapter's user object
         // The adapter pulls this from the database on each request
-        session.user.role = (user as any).role || 'pending';
-        session.user.isApproved = (user as any).isApproved || false;
+        session.user.role = adapterUser.role || 'pending';
+        session.user.isApproved = adapterUser.isApproved || false;
       }
 
       return session;
