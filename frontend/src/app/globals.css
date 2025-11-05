@@ -24,6 +24,8 @@
   --secondary-label: #568b7f;
   --primary-placeholder: #94b1aa;
   --secondary-placeholder: #568b7f;
+  --focus-ring: #568b7f;
+  --focus-border: #568b7f;
 
   --font-newyorker: 'NewYorker', Georgia, serif;
   /* --font-heading and --font-body are defined by Next.js font loader in layout.tsx */
