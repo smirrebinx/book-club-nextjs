@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 
+import GdprInfoModal from "@/components/GdprInfoModal";
 import LottieAnimation from "@/components/LottieAnimation";
 import { APP_NAME } from "@/constants";
 
@@ -10,6 +11,7 @@ export default function SignIn() {
   const [email, _setEmail] = useState("");
   const [_isLoading, setIsLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [isGdprModalOpen, setIsGdprModalOpen] = useState(false);
 
   const _handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +113,35 @@ export default function SignIn() {
                 <span className="font-semibold">Fortsätt med Google</span>
               </button>
 
+              {/* GDPR Information Link */}
+              <div className="mt-2 flex justify-center">
+                <button
+                  onClick={() => setIsGdprModalOpen(true)}
+                  className="inline-flex items-center gap-2 rounded px-3 py-2 text-sm underline transition-opacity hover:opacity-70 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                  style={{
+                    color: "var(--secondary-text)",
+                    fontFamily: "var(--font-body)",
+                  }}
+                  type="button"
+                  aria-label="Läs information om personuppgifter"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4M12 8h.01" />
+                  </svg>
+                  Information om personuppgifter
+                </button>
+              </div>
+
 {/* Commented out until Magic Link is configured
               <div className="flex items-center gap-4" role="separator" aria-label="eller">
                 <div className="h-px flex-1" style={{ backgroundColor: "var(--primary-border)" }}></div>
@@ -183,6 +214,12 @@ export default function SignIn() {
           )}
         </div>
       </main>
+
+      {/* GDPR Modal */}
+      <GdprInfoModal
+        isOpen={isGdprModalOpen}
+        onClose={() => setIsGdprModalOpen(false)}
+      />
     </div>
   );
 }
