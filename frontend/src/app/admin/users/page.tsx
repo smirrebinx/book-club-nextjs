@@ -79,8 +79,8 @@ export default async function AdminUsersPage({
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Användarhantering</h1>
-        <p className="text-gray-600 mt-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Användarhantering</h1>
+        <p className="text-sm md:text-base text-gray-600 mt-2">
           Godkänn, avvisa och hantera användarroller
         </p>
       </div>

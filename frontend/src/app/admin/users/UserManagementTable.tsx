@@ -102,8 +102,8 @@ export function UserManagementTable({
   return (
     <div className="bg-white rounded-lg shadow">
       {/* Filters */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="p-4 md:p-6 border-b border-gray-200">
+        <div className="flex flex-col md:flex-row gap-2 md:gap-4">
           <form onSubmit={handleSearch} className="flex-1">
             <input
               type="text"
@@ -140,24 +140,24 @@ export function UserManagementTable({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Desktop Table - hidden on mobile */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Användare
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Roll
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Registrerad
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Åtgärder
               </th>
             </tr>
@@ -165,7 +165,7 @@ export function UserManagementTable({
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((user) => (
               <tr key={user._id}>
-                <td className="px-6 py-4">
+                <td className="px-2 sm:px-4 md:px-6 py-4">
                   <div>
                     <div className="text-sm font-medium text-gray-900">
                       {user.name || 'Inget namn'}
@@ -173,7 +173,7 @@ export function UserManagementTable({
                     <div className="text-sm text-gray-500">{user.email}</div>
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-2 sm:px-4 md:px-6 py-4">
                   <select
                     value={user.role}
                     onChange={(e) => void handleRoleChange(user._id, e.target.value as UserRole)}
@@ -186,7 +186,7 @@ export function UserManagementTable({
                     <option value="admin">Admin</option>
                   </select>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-2 sm:px-4 md:px-6 py-4">
                   <span
                     className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       user.isApproved
@@ -197,10 +197,10 @@ export function UserManagementTable({
                     {user.isApproved ? 'Godkänd' : 'Väntande'}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm text-gray-500">
+                <td className="px-2 sm:px-4 md:px-6 py-4 text-sm text-gray-500">
                   {new Date(user.createdAt).toLocaleDateString('sv-SE')}
                 </td>
-                <td className="px-6 py-4 text-sm space-x-2">
+                <td className="px-2 sm:px-4 md:px-6 py-4 text-sm space-x-2">
                   {!user.isApproved && (
                     <button
                       onClick={() => void handleApprove(user._id)}
@@ -226,9 +226,88 @@ export function UserManagementTable({
         </table>
       </div>
 
+      {/* Mobile Card Layout - visible only on mobile */}
+      <div className="md:hidden space-y-4">
+        {users.map((user) => (
+          <div key={user._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            {/* User Info */}
+            <div className="mb-3">
+              <div className="text-xs font-medium text-gray-500 uppercase mb-1">Användare</div>
+              <div className="text-sm font-medium text-gray-900">
+                {user.name || 'Inget namn'}
+              </div>
+              <div className="text-sm text-gray-500">{user.email}</div>
+            </div>
+
+            {/* Roll */}
+            <div className="mb-3">
+              <div className="text-xs font-medium text-gray-500 uppercase mb-1">Roll</div>
+              <select
+                value={user.role}
+                onChange={(e) => void handleRoleChange(user._id, e.target.value as UserRole)}
+                disabled={isPending}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-transparent"
+                style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
+              >
+                <option value="pending">Pending</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            {/* Status */}
+            <div className="mb-3">
+              <div className="text-xs font-medium text-gray-500 uppercase mb-1">Status</div>
+              <span
+                className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  user.isApproved
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}
+              >
+                {user.isApproved ? 'Godkänd' : 'Väntande'}
+              </span>
+            </div>
+
+            {/* Registrerad */}
+            <div className="mb-3">
+              <div className="text-xs font-medium text-gray-500 uppercase mb-1">Registrerad</div>
+              <div className="text-sm text-gray-500">
+                {new Date(user.createdAt).toLocaleDateString('sv-SE')}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div>
+              <div className="text-xs font-medium text-gray-500 uppercase mb-2">Åtgärder</div>
+              <div className="flex gap-2">
+                {!user.isApproved && (
+                  <button
+                    onClick={() => void handleApprove(user._id)}
+                    disabled={isPending}
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium disabled:opacity-50 text-sm"
+                  >
+                    Godkänn
+                  </button>
+                )}
+                {user.isApproved && user.role !== 'admin' && (
+                  <button
+                    onClick={() => void handleReject(user._id)}
+                    disabled={isPending}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium disabled:opacity-50 text-sm"
+                  >
+                    Avvisa
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Pagination */}
       {pagination.pages > 1 && (
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <div className="px-4 md:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="text-sm text-gray-700">
             Visar {(pagination.page - 1) * pagination.limit + 1} till{' '}
             {Math.min(pagination.page * pagination.limit, pagination.total)} av{' '}
