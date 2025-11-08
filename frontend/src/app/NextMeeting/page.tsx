@@ -1,5 +1,7 @@
 import LottieAnimation from "@/components/LottieAnimation";
 import { APP_NAME } from "@/constants";
+import connectDB from "@/lib/mongodb";
+import Meeting from "@/models/Meeting";
 
 import type { MeetingData } from "@/types/meeting";
 
@@ -10,18 +12,24 @@ export const metadata = {
 
 async function getNextMeeting(): Promise<MeetingData | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/meetings/next`, {
-      cache: 'no-store', // Always fetch fresh data
-    });
+    await connectDB();
 
-    if (!res.ok) {
-      console.error('Failed to fetch next meeting');
+    // Get the most recently created meeting
+    const meeting = await Meeting.findOne({}).sort({ createdAt: -1 }).lean();
+
+    if (!meeting) {
       return null;
     }
 
-    const data = await res.json();
-    return data.success ? data.data : null;
+    // Convert MongoDB document to plain object and transform _id to id
+    return {
+      id: meeting.id,
+      date: meeting.date,
+      time: meeting.time,
+      location: meeting.location,
+      book: meeting.book,
+      additionalInfo: meeting.additionalInfo,
+    } as MeetingData;
   } catch (error) {
     console.error('Error fetching next meeting:', error);
     return null;
