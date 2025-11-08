@@ -5,6 +5,9 @@ import Meeting from "@/models/Meeting";
 
 import type { MeetingData } from "@/types/meeting";
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: `Nästa bokträff - ${APP_NAME}`,
   description: "Information om nästa bokträff: datum, tid, plats och vilken bok vi ska läsa.",
