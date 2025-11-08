@@ -1,7 +1,8 @@
-import LottieAnimation from "@/components/LottieAnimation";
 import { APP_NAME } from "@/constants";
 import connectDB from "@/lib/mongodb";
 import Meeting from "@/models/Meeting";
+
+import StaticCalendar from "./StaticCalendar";
 
 import type { MeetingData } from "@/types/meeting";
 
@@ -71,13 +72,7 @@ export default async function NextMeeting() {
       >
         <div className="flex w-full flex-col items-start gap-6 text-left">
           <div className="flex w-full justify-center sm:justify-start">
-            <LottieAnimation
-              src="/animations/Calendar.lottie"
-              width={200}
-              height={200}
-              ariaLabel="Animerad kalender"
-              isDecorative={false}
-            />
+            <StaticCalendar />
           </div>
 
           {/* Heading */}
