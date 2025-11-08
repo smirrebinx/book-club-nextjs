@@ -54,7 +54,8 @@ export function AddSuggestionForm() {
             onChange={(e) => setTitle(e.target.value)}
             required
             maxLength={200}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#94b1aa] focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             placeholder="Bokens titel"
           />
         </div>
@@ -70,7 +71,8 @@ export function AddSuggestionForm() {
             onChange={(e) => setAuthor(e.target.value)}
             required
             maxLength={100}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#94b1aa] focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             placeholder="Författarens namn"
           />
         </div>
@@ -87,7 +89,8 @@ export function AddSuggestionForm() {
             minLength={10}
             maxLength={1000}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#94b1aa] focus:border-transparent resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent resize-none"
+            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             placeholder="Varför vill du läsa den här boken?"
           />
           <p className="text-xs text-gray-500 mt-1">

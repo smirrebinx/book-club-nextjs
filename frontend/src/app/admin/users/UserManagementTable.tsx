@@ -110,14 +110,16 @@ export function UserManagementTable({
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Sök efter namn eller e-post..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#94b1aa] focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+              style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             />
           </form>
 
           <select
             value={currentRole}
             onChange={(e) => updateFilters('role', e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#94b1aa] focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
           >
             <option value="">Alla roller</option>
             <option value="pending">Pending</option>
@@ -128,7 +130,8 @@ export function UserManagementTable({
           <select
             value={currentStatus}
             onChange={(e) => updateFilters('status', e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#94b1aa] focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
           >
             <option value="">Alla statusar</option>
             <option value="approved">Godkända</option>
@@ -175,7 +178,8 @@ export function UserManagementTable({
                     value={user.role}
                     onChange={(e) => void handleRoleChange(user._id, e.target.value as UserRole)}
                     disabled={isPending}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-[#94b1aa] focus:border-transparent"
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-transparent"
+                    style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
                   >
                     <option value="pending">Pending</option>
                     <option value="user">User</option>
