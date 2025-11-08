@@ -3,6 +3,9 @@ import BookSuggestion from '@/models/BookSuggestion';
 
 import { AdminSuggestionsTable } from './AdminSuggestionsTable';
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic';
+
 export default async function AdminSuggestionsPage() {
   await connectDB();
 

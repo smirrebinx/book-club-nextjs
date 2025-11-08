@@ -7,6 +7,9 @@ import BookSuggestion from '@/models/BookSuggestion';
 import { AddSuggestionForm } from './AddSuggestionForm';
 import { SuggestionsList } from './SuggestionsList';
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic';
+
 export default async function SuggestionsPage() {
   const session = await auth();
 
