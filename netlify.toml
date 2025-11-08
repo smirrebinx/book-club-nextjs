@@ -1,5 +1,6 @@
 [build]
   base = "frontend"
+  publish = ".netlify"
   command = "npm run build"
 
 [build.environment]
