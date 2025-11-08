@@ -65,4 +65,5 @@ small, .muted {
 /* Cursor Pointer for Interactive Elements */
 button, a, [role="button"] {
   cursor: pointer;
+  text-decoration: none;
 }
