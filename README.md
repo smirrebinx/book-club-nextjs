@@ -224,15 +224,49 @@ All UI text is in Swedish:
 
 ## Deployment
 
-### Deploy to Vercel
+### Deploy to Netlify
 
-1. Push your code to GitHub
-2. Import your repository on [Vercel](https://vercel.com)
-3. Configure environment variables in Vercel dashboard
-4. Set the root directory to `frontend`
-5. Deploy!
+1. **Push your code to GitHub**
 
-**Important**: Update `NEXTAUTH_URL` to your production URL in environment variables.
+2. **Connect to Netlify**
+   - Go to [Netlify](https://netlify.com) and sign in
+   - Click "Add new site" → "Import an existing project"
+   - Connect your GitHub repository
+
+3. **Configure Build Settings**
+   - Base directory: `frontend`
+   - Build command: `npm run build`
+   - Publish directory: `frontend/.next`
+   - Node version: 18 or higher (set in `netlify.toml` or environment variable `NODE_VERSION`)
+
+4. **Set Environment Variables** (in Netlify dashboard under Site settings → Environment variables)
+   ```bash
+   MONGODB_URI=your-mongodb-atlas-connection-string
+   AUTH_SECRET=your-random-secret-key
+   AUTH_URL=https://your-app.netlify.app
+   NEXTAUTH_URL=https://your-app.netlify.app
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+   ADMIN_EMAIL=your-email@gmail.com
+   ```
+
+5. **Deploy!**
+
+**Important**: Update `NEXTAUTH_URL` and `AUTH_URL` to your production Netlify URL in environment variables.
+
+### Google OAuth Configuration for Production
+
+After deployment, update your Google OAuth settings:
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Edit your OAuth 2.0 Client ID
+3. Add authorized redirect URI: `https://your-app.netlify.app/api/auth/callback/google`
+
+### MongoDB Atlas Configuration
+
+Whitelist Netlify's IP addresses in MongoDB Atlas:
+1. Go to MongoDB Atlas → Network Access
+2. Either add `0.0.0.0/0` (allow all - easier but less secure)
+3. Or add Netlify's IP ranges (more secure - check Netlify documentation)
 
 ## License
 
