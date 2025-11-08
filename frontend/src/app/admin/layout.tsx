@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 
 import { requireAdmin } from '@/lib/auth-helpers';
 
+import AdminMobileNav from './AdminMobileNav';
+
 export default async function AdminLayout({
   children,
 }: {
@@ -16,10 +18,13 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white shadow-md min-h-screen">
-          <div className="p-6">
+      {/* Mobile Navigation */}
+      <AdminMobileNav />
+
+      <div className="flex flex-col md:flex-row">
+        {/* Desktop Sidebar */}
+        <aside className="hidden md:block md:w-64 bg-white shadow-md min-h-screen">
+          <div className="p-4 md:p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6">
               Administration
             </h2>
@@ -53,7 +58,7 @@ export default async function AdminLayout({
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 md:p-8">
           {children}
         </main>
       </div>

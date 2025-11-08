@@ -50,8 +50,8 @@ export default async function AdminSuggestionsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Bokförslag</h1>
-        <p className="text-gray-600 mt-2">Hantera och godkänn bokförslag</p>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Bokförslag</h1>
+        <p className="text-sm md:text-base text-gray-600 mt-2">Hantera och godkänn bokförslag</p>
       </div>
 
       <AdminSuggestionsTable suggestions={suggestionsData} />
