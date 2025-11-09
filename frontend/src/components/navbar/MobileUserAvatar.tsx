@@ -1,5 +1,10 @@
+'use client';
+
 import Image from "next/image";
 import { signOut } from "next-auth/react";
+import { useState } from "react";
+
+import { ConfirmModal } from "@/components/ConfirmModal";
 
 import type { Session } from "next-auth";
 
@@ -8,23 +13,25 @@ interface MobileUserAvatarProps {
 }
 
 export default function MobileUserAvatar({ session }: MobileUserAvatarProps) {
-  const handleSignOut = () => {
-    if (confirm("Logga ut?")) {
-      void signOut({ callbackUrl: "/auth/signin" });
-    }
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleConfirmSignOut = () => {
+    setIsModalOpen(false);
+    void signOut({ callbackUrl: "/auth/signin" });
   };
 
   return (
-    <button
-      onClick={handleSignOut}
-      className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-2 focus:outline-offset-2"
-      style={{
-        backgroundColor: "var(--secondary-bg)",
-        outlineColor: "var(--focus-ring)",
-      }}
-      aria-label="Logga ut"
-      title="Logga ut"
-    >
+    <>
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-2 focus:outline-offset-2"
+        style={{
+          backgroundColor: "var(--secondary-bg)",
+          outlineColor: "var(--focus-ring)",
+        }}
+        aria-label="Logga ut"
+        title="Logga ut"
+      >
       {session.user?.image ? (
         <Image
           src={session.user.image}
@@ -51,5 +58,16 @@ export default function MobileUserAvatar({ session }: MobileUserAvatarProps) {
         </svg>
       )}
     </button>
+
+    <ConfirmModal
+      isOpen={isModalOpen}
+      onClose={() => setIsModalOpen(false)}
+      onConfirm={handleConfirmSignOut}
+      title="Logga ut?"
+      message="Är du säker på att du vill logga ut?"
+      confirmText="Logga ut"
+      cancelText="Avbryt"
+    />
+  </>
   );
 }
