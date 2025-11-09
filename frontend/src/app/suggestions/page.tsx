@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 
 import { auth } from '@/lib/auth';
@@ -69,24 +70,35 @@ export default async function SuggestionsPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
-        <div className="mb-8">
+        {/* Hero Section with SVG */}
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="mb-6 w-full max-w-[200px]">
+            <Image
+              src="/animations/undraw_book-lover_m9n3.svg"
+              alt="Book lover illustration"
+              width={200}
+              height={150}
+              className="w-full h-auto"
+              priority
+            />
+          </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Bokförslag</h1>
           <p className="text-gray-600">
-            Föreslå böcker och rösta på dina favoriter
+            Här kan du föreslå böcker till bokklubben.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
+        <div className="flex flex-col items-center gap-8">
+          <div className="w-full max-w-md">
+            <AddSuggestionForm />
+          </div>
+
+          <div className="w-full">
             <SuggestionsList
               suggestions={suggestionsData}
               currentUserId={session.user.id}
               userRole={session.user.role}
             />
-          </div>
-
-          <div>
-            <AddSuggestionForm />
           </div>
         </div>
       </div>

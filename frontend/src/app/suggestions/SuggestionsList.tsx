@@ -149,12 +149,6 @@ export function SuggestionsList({
           </div>
         </div>
       ))}
-
-      {optimisticSuggestions.length === 0 && (
-        <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
-          Inga bokförslag ännu. Var först med att lägga till ett!
-        </div>
-      )}
     </div>
   );
 }
