@@ -188,3 +188,35 @@ export async function deleteSuggestionAsAdmin(suggestionId: string) {
     return { success: false, error: 'Kunde inte ta bort förslag' };
   }
 }
+
+/**
+ * Delete user (admin only)
+ */
+export async function deleteUser(userId: string) {
+  try {
+    await requireAdmin();
+
+    await connectDB();
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return { success: false, error: 'Användare hittades inte' };
+    }
+
+    // Prevent deleting admins
+    if (user.role === 'admin') {
+      return { success: false, error: 'Kan inte ta bort en administratör' };
+    }
+
+    await user.deleteOne();
+
+    revalidatePath('/admin/users');
+    return { success: true, message: 'Användare borttagen' };
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Kunde inte ta bort användare' };
+  }
+}

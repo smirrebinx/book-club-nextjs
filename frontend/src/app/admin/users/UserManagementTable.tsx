@@ -3,8 +3,9 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
-import { approveUser, rejectUser, changeUserRole } from '@/app/admin/actions';
+import { approveUser, rejectUser, changeUserRole, deleteUser } from '@/app/admin/actions';
 import { ActionButton, ActionLink } from '@/components/ActionButton';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { StatusBadge } from '@/components/StatusBadge';
 import { useToast } from '@/components/Toast';
 
@@ -44,6 +45,7 @@ export function UserManagementTable({
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [searchInput, setSearchInput] = useState(currentSearch);
+  const [userToDelete, setUserToDelete] = useState<{ id: string; name: string; email: string } | null>(null);
 
   const handleApprove = async (userId: string) => {
     startTransition(async () => {
@@ -81,6 +83,22 @@ export function UserManagementTable({
         router.refresh();
       } else {
         showToast(result.error || 'Ett fel uppstod', 'error');
+      }
+    });
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    startTransition(async () => {
+      const result = await deleteUser(userToDelete.id);
+      if (result.success) {
+        showToast(result.message || 'Användare borttagen', 'success');
+        setUserToDelete(null);
+        router.refresh();
+      } else {
+        showToast(result.error || 'Ett fel uppstod', 'error');
+        setUserToDelete(null);
       }
     });
   };
@@ -196,25 +214,36 @@ export function UserManagementTable({
                 <td className="px-2 sm:px-4 md:px-6 py-4 text-sm text-gray-500">
                   {new Date(user.createdAt).toLocaleDateString('sv-SE')}
                 </td>
-                <td className="px-2 sm:px-4 md:px-6 py-4 text-sm space-x-2">
-                  {!user.isApproved && (
-                    <>
-                      <ActionLink
-                        variant="success"
-                        onClick={() => void handleApprove(user._id)}
-                        disabled={isPending}
-                      >
-                        Godkänn
-                      </ActionLink>
+                <td className="px-2 sm:px-4 md:px-6 py-4 text-sm">
+                  <div className="flex flex-wrap gap-2">
+                    {!user.isApproved && (
+                      <>
+                        <ActionLink
+                          variant="success"
+                          onClick={() => void handleApprove(user._id)}
+                          disabled={isPending}
+                        >
+                          Godkänn
+                        </ActionLink>
+                        <ActionLink
+                          variant="danger"
+                          onClick={() => void handleReject(user._id)}
+                          disabled={isPending}
+                        >
+                          Avvisa
+                        </ActionLink>
+                      </>
+                    )}
+                    {user.role !== 'admin' && (
                       <ActionLink
                         variant="danger"
-                        onClick={() => void handleReject(user._id)}
+                        onClick={() => setUserToDelete({ id: user._id, name: user.name, email: user.email })}
                         disabled={isPending}
                       >
-                        Avvisa
+                        Ta bort
                       </ActionLink>
-                    </>
-                  )}
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -268,26 +297,40 @@ export function UserManagementTable({
             </div>
 
             {/* Actions */}
-            {!user.isApproved && (
+            {(!user.isApproved || user.role !== 'admin') && (
               <div>
                 <div className="text-xs font-medium text-gray-500 uppercase mb-2">Åtgärder</div>
-                <div className="flex gap-2">
-                  <ActionButton
-                    variant="success"
-                    onClick={() => void handleApprove(user._id)}
-                    disabled={isPending}
-                    fullWidth
-                  >
-                    Godkänn
-                  </ActionButton>
-                  <ActionButton
-                    variant="danger"
-                    onClick={() => void handleReject(user._id)}
-                    disabled={isPending}
-                    fullWidth
-                  >
-                    Avvisa
-                  </ActionButton>
+                <div className="flex flex-col gap-2">
+                  {!user.isApproved && (
+                    <div className="flex gap-2">
+                      <ActionButton
+                        variant="success"
+                        onClick={() => void handleApprove(user._id)}
+                        disabled={isPending}
+                        fullWidth
+                      >
+                        Godkänn
+                      </ActionButton>
+                      <ActionButton
+                        variant="danger"
+                        onClick={() => void handleReject(user._id)}
+                        disabled={isPending}
+                        fullWidth
+                      >
+                        Avvisa
+                      </ActionButton>
+                    </div>
+                  )}
+                  {user.role !== 'admin' && (
+                    <ActionButton
+                      variant="danger"
+                      onClick={() => setUserToDelete({ id: user._id, name: user.name, email: user.email })}
+                      disabled={isPending}
+                      fullWidth
+                    >
+                      Ta bort användare
+                    </ActionButton>
+                  )}
                 </div>
               </div>
             )}
@@ -323,6 +366,21 @@ export function UserManagementTable({
           </div>
         </div>
       )}
+
+      {/* Delete User Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!userToDelete}
+        onClose={() => setUserToDelete(null)}
+        onConfirm={handleDeleteUser}
+        title="Ta bort användare?"
+        message={
+          userToDelete
+            ? `Är du säker på att du vill ta bort användaren ${userToDelete.name} (${userToDelete.email})? Denna åtgärd kan inte ångras.`
+            : ''
+        }
+        confirmText="Ta bort"
+        cancelText="Avbryt"
+      />
     </div>
   );
 }
