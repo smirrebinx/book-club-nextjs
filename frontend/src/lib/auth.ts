@@ -5,6 +5,8 @@ import Nodemailer from "next-auth/providers/nodemailer";
 
 import { authConfig } from "@/lib/auth.config";
 import clientPromise from "@/lib/mongodb-client";
+import User from "@/models/User";
+import dbConnect from "@/lib/mongodb";
 
 import type { UserRole } from "@/models/User";
 
@@ -34,25 +36,32 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, trigger }) {
-      // On signin, check if user should be admin
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
+      // On signin or update, fetch the latest user data from database
+      if (user || trigger === 'update') {
+        await dbConnect();
 
-        // Check if this is the admin email
-        if (user.email === process.env.ADMIN_EMAIL) {
-          token.role = 'admin';
-          token.isApproved = true;
-        } else {
-          // Default for new users
-          token.role = 'pending';
-          token.isApproved = false;
+        const email = user?.email || token.email;
+        const dbUser = await User.findOne({ email }).lean();
+
+        if (dbUser) {
+          token.id = dbUser._id.toString();
+          token.email = dbUser.email;
+          token.role = dbUser.role;
+          token.isApproved = dbUser.isApproved;
+        } else if (user) {
+          // New user - set defaults
+          token.id = user.id;
+          token.email = user.email;
+
+          // Check if this is the admin email
+          if (user.email === process.env.ADMIN_EMAIL) {
+            token.role = 'admin';
+            token.isApproved = true;
+          } else {
+            token.role = 'pending';
+            token.isApproved = false;
+          }
         }
-      }
-
-      // On update, you can refresh token data from database if needed
-      if (trigger === 'update') {
-        // Optionally fetch fresh data from database here
       }
 
       return token;
