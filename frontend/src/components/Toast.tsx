@@ -30,7 +30,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const showToast = (message: string, type: ToastType = 'info') => {
     const id = nextId;
-    setNextId(nextId + 1);
+    setNextId((prev) => prev + 1);
     setToasts((prev) => [...prev, { id, message, type }]);
 
     // Auto remove after 5 seconds

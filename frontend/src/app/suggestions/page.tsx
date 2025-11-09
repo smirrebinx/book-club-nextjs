@@ -33,13 +33,11 @@ export default async function SuggestionsPage() {
     .sort({ createdAt: -1 })
     .lean();
 
-  const suggestionsData = suggestions.map((s) => {
-    // Type assertion: suggestedBy could be ObjectId or populated user object
-    const suggestedByRaw = s.suggestedBy as unknown;
+  // Helper function to extract user info from populated field
+  const extractUserInfo = (suggestedByRaw: unknown) => {
     let userId = '';
     let userName = 'Okänd';
 
-    // Check if it's a populated user object (has name property)
     if (
       suggestedByRaw &&
       typeof suggestedByRaw === 'object' &&
@@ -50,11 +48,17 @@ export default async function SuggestionsPage() {
       userName = populatedUser.name || 'Okänd';
     }
 
+    return { userId, userName };
+  };
+
+  const suggestionsData = suggestions.map((s) => {
+    const { userId, userName } = extractUserInfo(s.suggestedBy as unknown);
+
     return {
       _id: s._id.toString(),
       title: s.title,
       author: s.author,
-      description: s.description,
+      description: s.description || '',
       status: s.status,
       votes: s.votes?.map((v) => v.toString()) || [],
       voteCount: s.votes?.length || 0,
@@ -69,7 +73,7 @@ export default async function SuggestionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4">
         {/* Hero Section with SVG */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-6 w-full max-w-[200px]">
@@ -84,16 +88,19 @@ export default async function SuggestionsPage() {
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Bokförslag</h1>
           <p className="text-gray-600">
-            Här kan du föreslå böcker till bokklubben.
+            Här kan du föreslå böcker till bokklubben. Längre ned på sidan visas föreslagna böcker. 
           </p>
         </div>
 
-        <div className="flex flex-col items-center gap-8">
-          <div className="w-full max-w-md">
+        {/* Two-column layout on larger screens, stacked on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Form on left/top - takes 1 column on large screens */}
+          <div className="lg:col-span-1">
             <AddSuggestionForm />
           </div>
 
-          <div className="w-full">
+          {/* Suggestions list on right/bottom - takes 2 columns on large screens */}
+          <div className="lg:col-span-2">
             <SuggestionsList
               suggestions={suggestionsData}
               currentUserId={session.user.id}

@@ -8,8 +8,9 @@ export const createSuggestionSchema = z.object({
     .min(1, 'Författare krävs')
     .max(100, 'Författarnamnet får max vara 100 tecken'),
   description: z.string()
-    .min(10, 'Beskrivning måste vara minst 10 tecken')
-    .max(1000, 'Beskrivningen får max vara 1000 tecken')
+    .max(1000, 'Motiveringen får max vara 1000 tecken')
+    .optional()
+    .default('')
 });
 
 export const updateSuggestionSchema = z.object({
@@ -22,9 +23,9 @@ export const updateSuggestionSchema = z.object({
     .max(100, 'Författarnamnet får max vara 100 tecken')
     .optional(),
   description: z.string()
-    .min(10, 'Beskrivning måste vara minst 10 tecken')
-    .max(1000, 'Beskrivningen får max vara 1000 tecken')
+    .max(1000, 'Motiveringen får max vara 1000 tecken')
     .optional()
+    .default('')
 });
 
 export const voteSchema = z.object({

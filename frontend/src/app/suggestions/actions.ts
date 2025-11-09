@@ -39,7 +39,7 @@ export async function createSuggestion(formData: FormData) {
 
     await connectDB();
 
-    const suggestion = await BookSuggestion.create({
+    await BookSuggestion.create({
       ...sanitized,
       suggestedBy: session.user.id,
       votes: [],
@@ -47,7 +47,7 @@ export async function createSuggestion(formData: FormData) {
     });
 
     revalidatePath('/suggestions');
-    return { success: true, message: 'Förslag skapat', data: suggestion };
+    return { success: true, message: 'Förslag skapat' };
   } catch (error) {
     console.error('Error creating suggestion:', error);
     if (error instanceof Error) {

@@ -81,12 +81,11 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
                   value={s.status}
                   onChange={(e) => void handleStatusChange(s._id, e.target.value as SuggestionStatus)}
                   disabled={isPending}
-                  className="px-3 py-1 border rounded-md text-sm"
+                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
+                  style={{ outlineColor: 'var(--focus-ring)' }}
                 >
                   <option value="pending">Väntande</option>
-                  <option value="approved">Godkänd</option>
                   <option value="currently_reading">Läser nu</option>
-                  <option value="rejected">Avvisad</option>
                 </select>
               </td>
               <td className="px-2 md:px-6 py-4">
