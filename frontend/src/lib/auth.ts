@@ -4,9 +4,9 @@ import Google from "next-auth/providers/google";
 import Nodemailer from "next-auth/providers/nodemailer";
 
 import { authConfig } from "@/lib/auth.config";
+import dbConnect from "@/lib/mongodb";
 import clientPromise from "@/lib/mongodb-client";
 import User from "@/models/User";
-import dbConnect from "@/lib/mongodb";
 
 import type { UserRole } from "@/models/User";
 
