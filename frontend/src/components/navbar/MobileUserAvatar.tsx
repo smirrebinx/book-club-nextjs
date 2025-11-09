@@ -8,9 +8,15 @@ interface MobileUserAvatarProps {
 }
 
 export default function MobileUserAvatar({ session }: MobileUserAvatarProps) {
+  const handleSignOut = () => {
+    if (confirm("Logga ut?")) {
+      void signOut({ callbackUrl: "/auth/signin" });
+    }
+  };
+
   return (
     <button
-      onClick={() => void signOut({ callbackUrl: "/auth/signin" })}
+      onClick={handleSignOut}
       className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-2 focus:outline-offset-2"
       style={{
         backgroundColor: "var(--secondary-bg)",
