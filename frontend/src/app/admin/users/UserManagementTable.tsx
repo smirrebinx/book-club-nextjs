@@ -202,22 +202,22 @@ export function UserManagementTable({
                 </td>
                 <td className="px-2 sm:px-4 md:px-6 py-4 text-sm space-x-2">
                   {!user.isApproved && (
-                    <button
-                      onClick={() => void handleApprove(user._id)}
-                      disabled={isPending}
-                      className="text-green-600 hover:text-green-900 font-medium disabled:opacity-50"
-                    >
-                      Godkänn
-                    </button>
-                  )}
-                  {user.isApproved && user.role !== 'admin' && (
-                    <button
-                      onClick={() => void handleReject(user._id)}
-                      disabled={isPending}
-                      className="text-red-600 hover:text-red-900 font-medium disabled:opacity-50"
-                    >
-                      Avvisa
-                    </button>
+                    <>
+                      <button
+                        onClick={() => void handleApprove(user._id)}
+                        disabled={isPending}
+                        className="text-green-700 hover:text-green-900 font-medium disabled:opacity-50"
+                      >
+                        Godkänn
+                      </button>
+                      <button
+                        onClick={() => void handleReject(user._id)}
+                        disabled={isPending}
+                        className="text-red-600 hover:text-red-900 font-medium disabled:opacity-50"
+                      >
+                        Avvisa
+                      </button>
+                    </>
                   )}
                 </td>
               </tr>
@@ -278,19 +278,17 @@ export function UserManagementTable({
             </div>
 
             {/* Actions */}
-            <div>
-              <div className="text-xs font-medium text-gray-500 uppercase mb-2">Åtgärder</div>
-              <div className="flex gap-2">
-                {!user.isApproved && (
+            {!user.isApproved && (
+              <div>
+                <div className="text-xs font-medium text-gray-500 uppercase mb-2">Åtgärder</div>
+                <div className="flex gap-2">
                   <button
                     onClick={() => void handleApprove(user._id)}
                     disabled={isPending}
-                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium disabled:opacity-50 text-sm"
+                    className="flex-1 px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 font-medium disabled:opacity-50 text-sm"
                   >
                     Godkänn
                   </button>
-                )}
-                {user.isApproved && user.role !== 'admin' && (
                   <button
                     onClick={() => void handleReject(user._id)}
                     disabled={isPending}
@@ -298,9 +296,9 @@ export function UserManagementTable({
                   >
                     Avvisa
                   </button>
-                )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
