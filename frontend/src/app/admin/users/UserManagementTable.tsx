@@ -4,10 +4,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { approveUser, rejectUser, changeUserRole, deleteUser } from '@/app/admin/actions';
-import { ActionButton, ActionLink } from '@/components/ActionButton';
 import { ConfirmModal } from '@/components/ConfirmModal';
-import { StatusBadge } from '@/components/StatusBadge';
 import { useToast } from '@/components/Toast';
+
+import { UserMobileCard } from './UserMobileCard';
+import { UserTableRow } from './UserTableRow';
 
 import type { UserRole } from '@/models/User';
 
@@ -125,7 +126,11 @@ export function UserManagementTable({
       <div className="p-4 md:p-6 border-b border-gray-200">
         <div className="flex flex-col md:flex-row gap-2 md:gap-4">
           <form onSubmit={handleSearch} className="flex-1">
+            <label htmlFor="user-search" className="sr-only">
+              Sök efter namn eller e-post
+            </label>
             <input
+              id="user-search"
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -135,28 +140,40 @@ export function UserManagementTable({
             />
           </form>
 
-          <select
-            value={currentRole}
-            onChange={(e) => updateFilters('role', e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
-            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
-          >
-            <option value="">Alla roller</option>
-            <option value="pending">Pending</option>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
+          <div>
+            <label htmlFor="role-filter" className="sr-only">
+              Filtrera efter roll
+            </label>
+            <select
+              id="role-filter"
+              value={currentRole}
+              onChange={(e) => updateFilters('role', e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
+              style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
+            >
+              <option value="">Alla roller</option>
+              <option value="pending">Pending</option>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
 
-          <select
-            value={currentStatus}
-            onChange={(e) => updateFilters('status', e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
-            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
-          >
-            <option value="">Alla statusar</option>
-            <option value="approved">Godkända</option>
-            <option value="pending">Väntande</option>
-          </select>
+          <div>
+            <label htmlFor="status-filter" className="sr-only">
+              Filtrera efter status
+            </label>
+            <select
+              id="status-filter"
+              value={currentStatus}
+              onChange={(e) => updateFilters('status', e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
+              style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
+            >
+              <option value="">Alla statusar</option>
+              <option value="approved">Godkända</option>
+              <option value="pending">Väntande</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -184,68 +201,21 @@ export function UserManagementTable({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((user) => (
-              <tr key={user._id}>
-                <td className="px-2 sm:px-4 md:px-6 py-4">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {user.name || 'Inget namn'}
-                    </div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
-                  </div>
-                </td>
-                <td className="px-2 sm:px-4 md:px-6 py-4">
-                  <select
-                    value={user.role}
-                    onChange={(e) => void handleRoleChange(user._id, e.target.value as UserRole)}
-                    disabled={isPending}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
-                    style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
-                  >
-                    <option value="pending">Pending</option>
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                  </select>
-                </td>
-                <td className="px-2 sm:px-4 md:px-6 py-4">
-                  <StatusBadge variant={user.isApproved ? 'success' : 'warning'}>
-                    {user.isApproved ? 'Godkänd' : 'Väntande'}
-                  </StatusBadge>
-                </td>
-                <td className="px-2 sm:px-4 md:px-6 py-4 text-sm text-gray-500">
-                  {new Date(user.createdAt).toLocaleDateString('sv-SE')}
-                </td>
-                <td className="px-2 sm:px-4 md:px-6 py-4 text-sm">
-                  <div className="flex flex-wrap gap-2">
-                    {!user.isApproved && (
-                      <>
-                        <ActionLink
-                          variant="success"
-                          onClick={() => void handleApprove(user._id)}
-                          disabled={isPending}
-                        >
-                          Godkänn
-                        </ActionLink>
-                        <ActionLink
-                          variant="danger"
-                          onClick={() => void handleReject(user._id)}
-                          disabled={isPending}
-                        >
-                          Avvisa
-                        </ActionLink>
-                      </>
-                    )}
-                    {user.role !== 'admin' && (
-                      <ActionLink
-                        variant="danger"
-                        onClick={() => setUserToDelete({ id: user._id, name: user.name, email: user.email })}
-                        disabled={isPending}
-                      >
-                        Ta bort
-                      </ActionLink>
-                    )}
-                  </div>
-                </td>
-              </tr>
+              <UserTableRow
+                key={user._id}
+                user={user}
+                isPending={isPending}
+                onRoleChange={(userId, role) => {
+                  void handleRoleChange(userId, role);
+                }}
+                onApprove={(userId) => {
+                  void handleApprove(userId);
+                }}
+                onReject={(userId) => {
+                  void handleReject(userId);
+                }}
+                onDelete={(id, name, email) => setUserToDelete({ id, name, email })}
+              />
             ))}
           </tbody>
         </table>
@@ -254,87 +224,21 @@ export function UserManagementTable({
       {/* Mobile Card Layout - visible only on mobile */}
       <div className="md:hidden space-y-4">
         {users.map((user) => (
-          <div key={user._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-            {/* User Info */}
-            <div className="mb-3">
-              <div className="text-xs font-medium text-gray-500 uppercase mb-1">Användare</div>
-              <div className="text-sm font-medium text-gray-900">
-                {user.name || 'Inget namn'}
-              </div>
-              <div className="text-sm text-gray-500">{user.email}</div>
-            </div>
-
-            {/* Roll */}
-            <div className="mb-3">
-              <div className="text-xs font-medium text-gray-500 uppercase mb-1">Roll</div>
-              <select
-                value={user.role}
-                onChange={(e) => void handleRoleChange(user._id, e.target.value as UserRole)}
-                disabled={isPending}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
-                style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
-              >
-                <option value="pending">Pending</option>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
-
-            {/* Status */}
-            <div className="mb-3">
-              <div className="text-xs font-medium text-gray-500 uppercase mb-1">Status</div>
-              <StatusBadge variant={user.isApproved ? 'success' : 'warning'}>
-                {user.isApproved ? 'Godkänd' : 'Väntande'}
-              </StatusBadge>
-            </div>
-
-            {/* Registrerad */}
-            <div className="mb-3">
-              <div className="text-xs font-medium text-gray-500 uppercase mb-1">Registrerad</div>
-              <div className="text-sm text-gray-500">
-                {new Date(user.createdAt).toLocaleDateString('sv-SE')}
-              </div>
-            </div>
-
-            {/* Actions */}
-            {(!user.isApproved || user.role !== 'admin') && (
-              <div>
-                <div className="text-xs font-medium text-gray-500 uppercase mb-2">Åtgärder</div>
-                <div className="flex flex-col gap-2">
-                  {!user.isApproved && (
-                    <div className="flex gap-2">
-                      <ActionButton
-                        variant="success"
-                        onClick={() => void handleApprove(user._id)}
-                        disabled={isPending}
-                        fullWidth
-                      >
-                        Godkänn
-                      </ActionButton>
-                      <ActionButton
-                        variant="danger"
-                        onClick={() => void handleReject(user._id)}
-                        disabled={isPending}
-                        fullWidth
-                      >
-                        Avvisa
-                      </ActionButton>
-                    </div>
-                  )}
-                  {user.role !== 'admin' && (
-                    <ActionButton
-                      variant="danger"
-                      onClick={() => setUserToDelete({ id: user._id, name: user.name, email: user.email })}
-                      disabled={isPending}
-                      fullWidth
-                    >
-                      Ta bort användare
-                    </ActionButton>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+          <UserMobileCard
+            key={user._id}
+            user={user}
+            isPending={isPending}
+            onRoleChange={(userId, role) => {
+              void handleRoleChange(userId, role);
+            }}
+            onApprove={(userId) => {
+              void handleApprove(userId);
+            }}
+            onReject={(userId) => {
+              void handleReject(userId);
+            }}
+            onDelete={(id, name, email) => setUserToDelete({ id, name, email })}
+          />
         ))}
       </div>
 
@@ -371,7 +275,9 @@ export function UserManagementTable({
       <ConfirmModal
         isOpen={!!userToDelete}
         onClose={() => setUserToDelete(null)}
-        onConfirm={handleDeleteUser}
+        onConfirm={() => {
+          void handleDeleteUser();
+        }}
         title="Ta bort användare?"
         message={
           userToDelete

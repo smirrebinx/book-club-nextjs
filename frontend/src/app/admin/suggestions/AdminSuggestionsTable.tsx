@@ -77,17 +77,21 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
                 <td className="px-2 md:px-6 py-4 text-sm text-gray-500">{s.suggestedBy.name}</td>
                 <td className="px-2 md:px-6 py-4 text-sm text-gray-500">{s.voteCount}</td>
                 <td className="px-2 md:px-6 py-4">
-                <select
-                  value={s.status}
-                  onChange={(e) => void handleStatusChange(s._id, e.target.value as SuggestionStatus)}
-                  disabled={isPending}
-                  className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
-                  style={{ outlineColor: 'var(--focus-ring)' }}
-                >
-                  <option value="pending">Väntande</option>
-                  <option value="currently_reading">Läser nu</option>
-                </select>
-              </td>
+                  <label htmlFor={`status-${s._id}`} className="sr-only">
+                    Ändra status för {s.title}
+                  </label>
+                  <select
+                    id={`status-${s._id}`}
+                    value={s.status}
+                    onChange={(e) => void handleStatusChange(s._id, e.target.value as SuggestionStatus)}
+                    disabled={isPending}
+                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
+                    style={{ outlineColor: 'var(--focus-ring)' }}
+                  >
+                    <option value="pending">Väntande</option>
+                    <option value="currently_reading">Läser nu</option>
+                  </select>
+                </td>
               <td className="px-2 md:px-6 py-4">
                 <ActionLink
                   variant="danger"

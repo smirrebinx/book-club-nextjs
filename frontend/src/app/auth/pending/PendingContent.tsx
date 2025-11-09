@@ -1,7 +1,7 @@
 'use client';
 
-import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/Button';
@@ -98,7 +98,9 @@ export function PendingContent({ email }: PendingContentProps) {
 
         <div className="space-y-3">
           <Button
-            onClick={handleCheckStatus}
+            onClick={() => {
+              void handleCheckStatus();
+            }}
             disabled={isChecking}
             variant="secondary"
             size="lg"
