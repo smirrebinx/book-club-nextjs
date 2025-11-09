@@ -14,7 +14,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
       style={{
         borderColor: "var(--primary-border)",
         backgroundColor: "var(--background)",
-        outlineColor: "var(--secondary-border)",
+        outlineColor: "var(--focus-ring)",
       }}
       aria-label="Visa information om nästa bokträff"
     >

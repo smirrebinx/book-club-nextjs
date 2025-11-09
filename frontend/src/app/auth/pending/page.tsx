@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { Button } from '@/components/Button';
 import { auth, signOut } from '@/lib/auth';
 
 export default async function PendingPage() {
@@ -54,12 +55,14 @@ export default async function PendingPage() {
             await signOut({ redirectTo: '/auth/signin' });
           }}
         >
-          <button
+          <Button
             type="submit"
-            className="w-full bg-[#94b1aa] hover:bg-[#568b7f] text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            variant="primary"
+            size="lg"
+            fullWidth
           >
             Logga ut
-          </button>
+          </Button>
         </form>
       </div>
     </div>

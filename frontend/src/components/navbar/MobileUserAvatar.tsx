@@ -14,7 +14,7 @@ export default function MobileUserAvatar({ session }: MobileUserAvatarProps) {
       className="flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 focus:outline-2 focus:outline-offset-2"
       style={{
         backgroundColor: "var(--secondary-bg)",
-        outlineColor: "var(--secondary-border)",
+        outlineColor: "var(--focus-ring)",
       }}
       aria-label="Logga ut"
       title="Logga ut"

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
 import { updateSuggestionStatus, deleteSuggestionAsAdmin } from '@/app/admin/actions';
+import { ActionLink } from '@/components/ActionButton';
 import { useToast } from '@/components/Toast';
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
@@ -89,13 +90,14 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
                 </select>
               </td>
               <td className="px-2 md:px-6 py-4">
-                <button
+                <ActionLink
+                  variant="danger"
                   onClick={() => void handleDelete(s._id)}
                   disabled={isPending}
-                  className="text-red-600 hover:text-red-900 text-sm font-medium disabled:opacity-50"
+                  className="text-sm"
                 >
                   Ta bort
-                </button>
+                </ActionLink>
               </td>
             </tr>
           ))}

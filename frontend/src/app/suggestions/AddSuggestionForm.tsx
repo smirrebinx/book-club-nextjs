@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
+import { Button } from '@/components/Button';
 import { useToast } from '@/components/Toast';
 
 import { createSuggestion } from './actions';
@@ -54,7 +55,7 @@ export function AddSuggestionForm() {
             onChange={(e) => setTitle(e.target.value)}
             required
             maxLength={200}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
             style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             placeholder="Bokens titel"
           />
@@ -71,7 +72,7 @@ export function AddSuggestionForm() {
             onChange={(e) => setAuthor(e.target.value)}
             required
             maxLength={100}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
             style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             placeholder="Författarens namn"
           />
@@ -89,7 +90,7 @@ export function AddSuggestionForm() {
             minLength={10}
             maxLength={1000}
             rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none resize-none"
             style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             placeholder="Varför vill du läsa den här boken?"
           />
@@ -98,13 +99,15 @@ export function AddSuggestionForm() {
           </p>
         </div>
 
-        <button
+        <Button
           type="submit"
           disabled={isPending}
-          className="w-full bg-[#94b1aa] hover:bg-[#568b7f] text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          variant="secondary"
+          size="lg"
+          fullWidth
         >
           {isPending ? 'Lägger till...' : 'Lägg till förslag'}
-        </button>
+        </Button>
       </form>
     </div>
   );

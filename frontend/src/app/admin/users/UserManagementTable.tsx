@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { approveUser, rejectUser, changeUserRole } from '@/app/admin/actions';
+import { ActionButton, ActionLink } from '@/components/ActionButton';
+import { StatusBadge } from '@/components/StatusBadge';
 import { useToast } from '@/components/Toast';
 
 import type { UserRole } from '@/models/User';
@@ -110,7 +112,7 @@ export function UserManagementTable({
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Sök efter namn eller e-post..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
               style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             />
           </form>
@@ -118,7 +120,7 @@ export function UserManagementTable({
           <select
             value={currentRole}
             onChange={(e) => updateFilters('role', e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
             style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
           >
             <option value="">Alla roller</option>
@@ -130,7 +132,7 @@ export function UserManagementTable({
           <select
             value={currentStatus}
             onChange={(e) => updateFilters('status', e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
             style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
           >
             <option value="">Alla statusar</option>
@@ -178,7 +180,7 @@ export function UserManagementTable({
                     value={user.role}
                     onChange={(e) => void handleRoleChange(user._id, e.target.value as UserRole)}
                     disabled={isPending}
-                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-transparent"
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
                     style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
                   >
                     <option value="pending">Pending</option>
@@ -187,15 +189,9 @@ export function UserManagementTable({
                   </select>
                 </td>
                 <td className="px-2 sm:px-4 md:px-6 py-4">
-                  <span
-                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      user.isApproved
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
+                  <StatusBadge variant={user.isApproved ? 'success' : 'warning'}>
                     {user.isApproved ? 'Godkänd' : 'Väntande'}
-                  </span>
+                  </StatusBadge>
                 </td>
                 <td className="px-2 sm:px-4 md:px-6 py-4 text-sm text-gray-500">
                   {new Date(user.createdAt).toLocaleDateString('sv-SE')}
@@ -203,20 +199,20 @@ export function UserManagementTable({
                 <td className="px-2 sm:px-4 md:px-6 py-4 text-sm space-x-2">
                   {!user.isApproved && (
                     <>
-                      <button
+                      <ActionLink
+                        variant="success"
                         onClick={() => void handleApprove(user._id)}
                         disabled={isPending}
-                        className="text-green-700 hover:text-green-900 font-medium disabled:opacity-50"
                       >
                         Godkänn
-                      </button>
-                      <button
+                      </ActionLink>
+                      <ActionLink
+                        variant="danger"
                         onClick={() => void handleReject(user._id)}
                         disabled={isPending}
-                        className="text-red-600 hover:text-red-900 font-medium disabled:opacity-50"
                       >
                         Avvisa
-                      </button>
+                      </ActionLink>
                     </>
                   )}
                 </td>
@@ -246,7 +242,7 @@ export function UserManagementTable({
                 value={user.role}
                 onChange={(e) => void handleRoleChange(user._id, e.target.value as UserRole)}
                 disabled={isPending}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
                 style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
               >
                 <option value="pending">Pending</option>
@@ -258,15 +254,9 @@ export function UserManagementTable({
             {/* Status */}
             <div className="mb-3">
               <div className="text-xs font-medium text-gray-500 uppercase mb-1">Status</div>
-              <span
-                className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                  user.isApproved
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}
-              >
+              <StatusBadge variant={user.isApproved ? 'success' : 'warning'}>
                 {user.isApproved ? 'Godkänd' : 'Väntande'}
-              </span>
+              </StatusBadge>
             </div>
 
             {/* Registrerad */}
@@ -282,20 +272,22 @@ export function UserManagementTable({
               <div>
                 <div className="text-xs font-medium text-gray-500 uppercase mb-2">Åtgärder</div>
                 <div className="flex gap-2">
-                  <button
+                  <ActionButton
+                    variant="success"
                     onClick={() => void handleApprove(user._id)}
                     disabled={isPending}
-                    className="flex-1 px-4 py-2 bg-green-700 text-white rounded-md hover:bg-green-800 font-medium disabled:opacity-50 text-sm"
+                    fullWidth
                   >
                     Godkänn
-                  </button>
-                  <button
+                  </ActionButton>
+                  <ActionButton
+                    variant="danger"
                     onClick={() => void handleReject(user._id)}
                     disabled={isPending}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 font-medium disabled:opacity-50 text-sm"
+                    fullWidth
                   >
                     Avvisa
-                  </button>
+                  </ActionButton>
                 </div>
               </div>
             )}

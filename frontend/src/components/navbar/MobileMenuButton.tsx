@@ -23,7 +23,7 @@ export default function MobileMenuButton({
         color: "var(--primary-text)",
         borderColor: "var(--primary-border)",
         backgroundColor: "transparent",
-        outlineColor: "var(--secondary-border)",
+        outlineColor: "var(--focus-ring)",
       }}
       title={isMobileMenuOpen ? "Stäng meny" : "Öppna meny"}
     >

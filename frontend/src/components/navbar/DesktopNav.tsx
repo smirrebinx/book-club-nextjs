@@ -35,7 +35,7 @@ export default function DesktopNav({ navLinks, pathname, session }: DesktopNavPr
               style={{
                 fontFamily: "var(--font-body)",
                 color: "var(--secondary-text)",
-                outlineColor: "var(--secondary-border)",
+                outlineColor: "var(--focus-ring)",
                 backgroundColor: "transparent",
               }}
             >
@@ -84,7 +84,7 @@ export default function DesktopNav({ navLinks, pathname, session }: DesktopNavPr
               color: "var(--secondary-text)",
               borderColor: "var(--secondary-border)",
               backgroundColor: "transparent",
-              outlineColor: "var(--secondary-border)",
+              outlineColor: "var(--focus-ring)",
             }}
             aria-label="Logga ut"
           >

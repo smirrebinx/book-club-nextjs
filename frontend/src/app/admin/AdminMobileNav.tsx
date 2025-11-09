@@ -13,7 +13,7 @@ export default function AdminMobileNav() {
         <h2 className="text-lg font-bold text-gray-900">Administration</h2>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
           aria-label="Toggle menu"
           style={{ outlineColor: "var(--focus-ring)" }}
         >
@@ -42,28 +42,32 @@ export default function AdminMobileNav() {
             <Link
               href="/admin/users"
               onClick={() => setIsOpen(false)}
-              className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
+              style={{ outlineColor: "var(--focus-ring)" }}
             >
               Användare
             </Link>
             <Link
               href="/admin/suggestions"
               onClick={() => setIsOpen(false)}
-              className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
+              style={{ outlineColor: "var(--focus-ring)" }}
             >
               Bokförslag
             </Link>
             <Link
               href="/admin/meetings"
               onClick={() => setIsOpen(false)}
-              className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+              className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
+              style={{ outlineColor: "var(--focus-ring)" }}
             >
               Möten
             </Link>
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
-              className="block px-4 py-3 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors mt-4 border-t border-gray-200 pt-4"
+              className="block px-4 py-3 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors mt-4 border-t border-gray-200 pt-4 focus:outline-2 focus:outline-offset-2"
+              style={{ outlineColor: "var(--focus-ring)" }}
             >
               ← Tillbaka till hemsidan
             </Link>

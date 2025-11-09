@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 
+import { Button } from "@/components/Button";
 import GdprInfoModal from "@/components/GdprInfoModal";
 import LottieAnimation from "@/components/LottieAnimation";
 import { APP_NAME } from "@/constants";
@@ -81,16 +82,12 @@ export default function SignIn() {
           ) : (
             <div className="flex w-full flex-col gap-4">
               {/* Google Sign In */}
-              <button
+              <Button
                 onClick={handleGoogleSignIn}
-                className="flex w-full items-center justify-center gap-3 rounded-lg border px-6 py-3 transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
-                style={{
-                  borderColor: "var(--secondary-border)",
-                  backgroundColor: "var(--secondary-bg)",
-                  color: "var(--background)",
-                  fontFamily: "var(--font-body)",
-                  "--tw-ring-color": "var(--focus-ring)",
-                } as React.CSSProperties}
+                variant="secondary"
+                size="lg"
+                fullWidth
+                className="flex items-center justify-center gap-3"
                 aria-label="Logga in med Google"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
@@ -112,7 +109,7 @@ export default function SignIn() {
                   />
                 </svg>
                 <span className="font-semibold">Logga in med Google</span>
-              </button>
+              </Button>
 
               {/* GDPR Information Link */}
               <div className="mt-2 flex justify-center">

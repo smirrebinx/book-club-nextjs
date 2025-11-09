@@ -9,7 +9,7 @@ export default function Logo() {
         style={{
           fontFamily: "var(--font-newyorker)",
           color: "var(--primary-text)",
-          outlineColor: "var(--secondary-border)",
+          outlineColor: "var(--focus-ring)",
           textShadow:
             "0 1px 2px rgba(148, 177, 170, 0.3), 0 2px 4px rgba(148, 177, 170, 0.2)",
         }}

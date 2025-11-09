@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
+import { Button } from "@/components/Button";
+
 interface GdprInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -226,22 +228,15 @@ export default function GdprInfoModal({ isOpen, onClose }: GdprInfoModalProps) {
 
         {/* Footer button */}
         <div className="mt-6 flex justify-end">
-          <button
+          <Button
             onClick={onClose}
-            className="rounded-lg px-6 py-3 font-semibold transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2"
-            style={
-              {
-                backgroundColor: "var(--secondary-bg)",
-                color: "var(--background)",
-                fontFamily: "var(--font-body)",
-                "--tw-ring-color": "var(--focus-ring)",
-              } as React.CSSProperties
-            }
+            variant="secondary"
+            size="lg"
             type="button"
             aria-label="Jag förstår och godkänner"
           >
             Jag förstår
-          </button>
+          </Button>
         </div>
       </div>
     </div>

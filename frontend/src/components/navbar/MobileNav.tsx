@@ -70,7 +70,7 @@ export default function MobileNav({
                   color: "var(--secondary-text)",
                   backgroundColor: "var(--background)",
                   borderColor: "var(--primary-border)",
-                  outlineColor: "var(--secondary-border)",
+                  outlineColor: "var(--focus-ring)",
                   boxShadow: "0 1px 3px 0 rgb(0 0 0 / 0.1)",
                 }}
               >

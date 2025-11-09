@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useOptimistic, useTransition } from 'react';
 
+import { ActionLink } from '@/components/ActionButton';
+import { Button } from '@/components/Button';
 import { useToast } from '@/components/Toast';
 
 import { toggleVote, deleteSuggestion } from './actions';
@@ -103,14 +105,11 @@ export function SuggestionsList({
             </div>
 
             <div className="ml-4 text-center">
-              <button
+              <Button
                 onClick={() => void handleVote(suggestion._id)}
                 disabled={isPending}
-                className={`flex flex-col items-center p-3 rounded-lg transition-colors ${
-                  suggestion.hasVoted
-                    ? 'bg-[#94b1aa] text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                } disabled:opacity-50`}
+                variant={suggestion.hasVoted ? 'primary' : 'ghost'}
+                className="flex flex-col items-center"
               >
                 <svg
                   className="w-6 h-6 mb-1"
@@ -120,7 +119,7 @@ export function SuggestionsList({
                   <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
                 </svg>
                 <span className="text-sm font-semibold">{suggestion.voteCount}</span>
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -139,13 +138,13 @@ export function SuggestionsList({
             </div>
 
             {canDelete(suggestion) && (
-              <button
+              <ActionLink
+                variant="danger"
                 onClick={() => void handleDelete(suggestion._id)}
                 disabled={isPending}
-                className="text-red-600 hover:text-red-900 disabled:opacity-50"
               >
                 Ta bort
-              </button>
+              </ActionLink>
             )}
           </div>
         </div>

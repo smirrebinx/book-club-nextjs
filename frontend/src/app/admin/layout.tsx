@@ -31,25 +31,29 @@ export default async function AdminLayout({
             <nav className="space-y-2">
               <Link
                 href="/admin/users"
-                className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
+                style={{ outlineColor: "var(--focus-ring)" }}
               >
                 Användare
               </Link>
               <Link
                 href="/admin/suggestions"
-                className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
+                style={{ outlineColor: "var(--focus-ring)" }}
               >
                 Bokförslag
               </Link>
               <Link
                 href="/admin/meetings"
-                className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                className="block px-4 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
+                style={{ outlineColor: "var(--focus-ring)" }}
               >
                 Möten
               </Link>
               <Link
                 href="/"
-                className="block px-4 py-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors mt-4"
+                className="block px-4 py-2 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors mt-4 focus:outline-2 focus:outline-offset-2"
+                style={{ outlineColor: "var(--focus-ring)" }}
               >
                 ← Tillbaka till hemsidan
               </Link>
