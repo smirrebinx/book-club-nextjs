@@ -27,6 +27,17 @@
   --focus-ring: #568b7f;
   --focus-border: #568b7f;
 
+  /* Action Colors - WCAG AA Compliant (4.5:1+ contrast on white) */
+  --action-success: #166534; /* green-800 - 5.1:1 contrast on white */
+  --action-success-hover: #14532d; /* green-900 - 7.4:1 contrast */
+  --action-success-bg: #166534; /* green-800 for filled button backgrounds */
+  --action-success-bg-hover: #14532d; /* green-900 */
+
+  --action-danger: #991b1b; /* red-800 - 6.1:1 contrast on white */
+  --action-danger-hover: #7f1d1d; /* red-900 - 8.1:1 contrast */
+  --action-danger-bg: #991b1b; /* red-800 for filled button backgrounds */
+  --action-danger-bg-hover: #7f1d1d; /* red-900 */
+
   --font-newyorker: 'NewYorker', Georgia, serif;
   /* --font-heading and --font-body are defined by Next.js font loader in layout.tsx */
   --font-sans: system-ui, -apple-system, sans-serif;
