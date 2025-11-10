@@ -1,7 +1,7 @@
 'use client';
 
 
-import { ActionLink } from '@/components/ActionButton';
+import { ActionButton } from '@/components/ActionButton';
 import { StatusBadge } from '@/components/StatusBadge';
 
 import type { UserRole } from '@/models/User';
@@ -22,6 +22,7 @@ interface UserTableRowProps {
   onApprove: (userId: string) => void;
   onReject: (userId: string) => void;
   onDelete: (userId: string, name: string, email: string) => void;
+  onForceLogout: (userId: string, name: string, email: string) => void;
 }
 
 export function UserTableRow({
@@ -31,6 +32,7 @@ export function UserTableRow({
   onApprove,
   onReject,
   onDelete,
+  onForceLogout,
 }: UserTableRowProps) {
   return (
     <tr>
@@ -73,34 +75,47 @@ export function UserTableRow({
         <div className="flex flex-wrap gap-2">
           {!user.isApproved && (
             <>
-              <ActionLink
+              <ActionButton
                 variant="success"
+                size="sm"
                 onClick={() => {
                   onApprove(user._id);
                 }}
                 disabled={isPending}
               >
                 Godkänn
-              </ActionLink>
-              <ActionLink
+              </ActionButton>
+              <ActionButton
                 variant="danger"
+                size="sm"
                 onClick={() => {
                   onReject(user._id);
                 }}
                 disabled={isPending}
               >
                 Avvisa
-              </ActionLink>
+              </ActionButton>
             </>
           )}
           {user.role !== 'admin' && (
-            <ActionLink
-              variant="danger"
-              onClick={() => onDelete(user._id, user.name, user.email)}
-              disabled={isPending}
-            >
-              Ta bort
-            </ActionLink>
+            <>
+              <ActionButton
+                variant="warning"
+                size="sm"
+                onClick={() => onForceLogout(user._id, user.name, user.email)}
+                disabled={isPending}
+              >
+                Logga ut
+              </ActionButton>
+              <ActionButton
+                variant="danger"
+                size="sm"
+                onClick={() => onDelete(user._id, user.name, user.email)}
+                disabled={isPending}
+              >
+                Ta bort
+              </ActionButton>
+            </>
           )}
         </div>
       </td>

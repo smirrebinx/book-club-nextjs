@@ -48,6 +48,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.email = dbUser.email;
           token.role = dbUser.role;
           token.isApproved = dbUser.isApproved;
+
+          // Check if admin has forced this user to logout
+          if (dbUser.forcedLogoutAt) {
+            const tokenIssuedAt = token.iat ? new Date(token.iat * 1000) : new Date(0);
+            const forcedLogoutAt = new Date(dbUser.forcedLogoutAt);
+
+            // If token was issued before forced logout, invalidate it by returning empty token
+            if (tokenIssuedAt < forcedLogoutAt) {
+              return {}; // This will invalidate the session
+            }
+          }
         } else if (user) {
           // New user - set defaults
           token.id = user.id;

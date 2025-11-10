@@ -1,6 +1,6 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-type ActionButtonVariant = 'success' | 'danger';
+type ActionButtonVariant = 'success' | 'danger' | 'warning';
 type ActionButtonSize = 'sm' | 'md' | 'lg';
 
 interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -46,6 +46,16 @@ export function ActionButton({
       disabled:hover:bg-[var(--action-danger-bg)]
       disabled:hover:text-white
     `,
+    warning: `
+      bg-[var(--action-warning-bg)]
+      text-white
+      hover:bg-white
+      hover:text-[var(--action-warning)]
+      border-2
+      border-[var(--action-warning-bg)]
+      disabled:hover:bg-[var(--action-warning-bg)]
+      disabled:hover:text-white
+    `,
   };
 
   const sizeStyles = {
@@ -89,13 +99,15 @@ export function ActionLink({
   const variantStyles = {
     success: 'text-[var(--action-success)] hover:text-[var(--action-success-hover)] transition-colors duration-300',
     danger: 'text-[var(--action-danger)] hover:text-[var(--action-danger-hover)] transition-colors duration-300',
+    warning: 'text-[var(--action-warning)] hover:text-[var(--action-warning-hover)] transition-colors duration-300',
   };
 
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`font-medium disabled:opacity-50 ${variantStyles[variant]} ${className}`.trim()}
+      className={`font-medium focus:outline-2 focus:outline-offset-2 disabled:opacity-50 ${variantStyles[variant]} ${className}`.trim()}
+      style={{ outlineColor: 'var(--focus-ring)' }}
     >
       {children}
     </button>

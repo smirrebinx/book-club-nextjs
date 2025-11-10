@@ -220,3 +220,38 @@ export async function deleteUser(userId: string) {
     return { success: false, error: 'Kunde inte ta bort användare' };
   }
 }
+
+/**
+ * Force logout user (admin only)
+ * Sets forcedLogoutAt timestamp to invalidate existing sessions
+ */
+export async function forceLogoutUser(userId: string) {
+  try {
+    await requireAdmin();
+
+    await connectDB();
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return { success: false, error: 'Användare hittades inte' };
+    }
+
+    // Prevent logging out admins
+    if (user.role === 'admin') {
+      return { success: false, error: 'Kan inte logga ut en administratör' };
+    }
+
+    // Set forcedLogoutAt to current time to invalidate all existing tokens
+    user.forcedLogoutAt = new Date();
+    await user.save();
+
+    revalidatePath('/admin/users');
+    return { success: true, message: 'Användare utloggad' };
+  } catch (error) {
+    console.error('Error forcing logout:', error);
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Kunde inte logga ut användare' };
+  }
+}

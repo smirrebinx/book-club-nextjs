@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
-import { approveUser, rejectUser, changeUserRole, deleteUser } from '@/app/admin/actions';
+import { approveUser, rejectUser, changeUserRole, deleteUser, forceLogoutUser } from '@/app/admin/actions';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
 
@@ -47,6 +47,7 @@ export function UserManagementTable({
   const [isPending, startTransition] = useTransition();
   const [searchInput, setSearchInput] = useState(currentSearch);
   const [userToDelete, setUserToDelete] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [userToLogout, setUserToLogout] = useState<{ id: string; name: string; email: string } | null>(null);
 
   const handleApprove = async (userId: string) => {
     startTransition(async () => {
@@ -100,6 +101,22 @@ export function UserManagementTable({
       } else {
         showToast(result.error || 'Ett fel uppstod', 'error');
         setUserToDelete(null);
+      }
+    });
+  };
+
+  const handleForceLogout = async () => {
+    if (!userToLogout) return;
+
+    startTransition(async () => {
+      const result = await forceLogoutUser(userToLogout.id);
+      if (result.success) {
+        showToast(result.message || 'Användare utloggad', 'success');
+        setUserToLogout(null);
+        router.refresh();
+      } else {
+        showToast(result.error || 'Ett fel uppstod', 'error');
+        setUserToLogout(null);
       }
     });
   };
@@ -215,6 +232,7 @@ export function UserManagementTable({
                   void handleReject(userId);
                 }}
                 onDelete={(id, name, email) => setUserToDelete({ id, name, email })}
+                onForceLogout={(id, name, email) => setUserToLogout({ id, name, email })}
               />
             ))}
           </tbody>
@@ -238,6 +256,7 @@ export function UserManagementTable({
               void handleReject(userId);
             }}
             onDelete={(id, name, email) => setUserToDelete({ id, name, email })}
+            onForceLogout={(id, name, email) => setUserToLogout({ id, name, email })}
           />
         ))}
       </div>
@@ -254,7 +273,8 @@ export function UserManagementTable({
             {pagination.page > 1 && (
               <button
                 onClick={() => updateFilters('page', String(pagination.page - 1))}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-2 focus:outline-offset-2"
+                style={{ outlineColor: 'var(--focus-ring)' }}
               >
                 Föregående
               </button>
@@ -262,7 +282,8 @@ export function UserManagementTable({
             {pagination.page < pagination.pages && (
               <button
                 onClick={() => updateFilters('page', String(pagination.page + 1))}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-5 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-2 focus:outline-offset-2"
+                style={{ outlineColor: 'var(--focus-ring)' }}
               >
                 Nästa
               </button>
@@ -285,6 +306,23 @@ export function UserManagementTable({
             : ''
         }
         confirmText="Ta bort"
+        cancelText="Avbryt"
+      />
+
+      {/* Logout User Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!userToLogout}
+        onClose={() => setUserToLogout(null)}
+        onConfirm={() => {
+          void handleForceLogout();
+        }}
+        title="Logga ut användare?"
+        message={
+          userToLogout
+            ? `Användaren ${userToLogout.name} (${userToLogout.email}) kommer att loggas ut vid nästa sidladdning eller aktivitet.\n\nDetta kan användas för:\n• Systemuppdateringar - för att säkerställa att användare får den senaste versionen\n• Säkerhetsåtgärder - för att omedelbart återkalla åtkomst\n• Före borttagning - för att avsluta aktiva sessioner\n\nAnvändaren kan logga in igen om inte kontot raderas eller avvisas.`
+            : ''
+        }
+        confirmText="Logga ut"
         cancelText="Avbryt"
       />
     </div>

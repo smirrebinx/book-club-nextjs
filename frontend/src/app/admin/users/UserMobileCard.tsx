@@ -21,6 +21,7 @@ interface UserMobileCardProps {
   onApprove: (userId: string) => void;
   onReject: (userId: string) => void;
   onDelete: (userId: string, name: string, email: string) => void;
+  onForceLogout: (userId: string, name: string, email: string) => void;
 }
 
 export function UserMobileCard({
@@ -30,6 +31,7 @@ export function UserMobileCard({
   onApprove,
   onReject,
   onDelete,
+  onForceLogout,
 }: UserMobileCardProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
@@ -109,14 +111,24 @@ export function UserMobileCard({
               </div>
             )}
             {user.role !== 'admin' && (
-              <ActionButton
-                variant="danger"
-                onClick={() => onDelete(user._id, user.name, user.email)}
-                disabled={isPending}
-                fullWidth
-              >
-                Ta bort användare
-              </ActionButton>
+              <>
+                <ActionButton
+                  variant="warning"
+                  onClick={() => onForceLogout(user._id, user.name, user.email)}
+                  disabled={isPending}
+                  fullWidth
+                >
+                  Logga ut användare
+                </ActionButton>
+                <ActionButton
+                  variant="danger"
+                  onClick={() => onDelete(user._id, user.name, user.email)}
+                  disabled={isPending}
+                  fullWidth
+                >
+                  Ta bort användare
+                </ActionButton>
+              </>
             )}
           </div>
         </div>

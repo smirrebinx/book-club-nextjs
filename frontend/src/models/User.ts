@@ -11,6 +11,7 @@ export interface IUser {
   image?: string;
   role: UserRole;
   isApproved: boolean;
+  forcedLogoutAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -37,7 +38,8 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
       required: true
-    }
+    },
+    forcedLogoutAt: { type: Date }
   },
   {
     timestamps: true,
