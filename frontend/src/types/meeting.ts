@@ -17,9 +17,15 @@ export interface MeetingData {
   updatedAt?: Date;
 }
 
-// Meeting with MongoDB _id for client components
-export interface Meeting extends MeetingData {
+// Meeting with MongoDB _id for client components (dates as strings for JSON serialization)
+export interface Meeting {
   _id: string;
+  id: string;
+  date: string;
+  time: string;
+  location: string;
+  book: BookInfo;
+  additionalInfo: string;
   createdAt?: string;
   updatedAt?: string;
 }
