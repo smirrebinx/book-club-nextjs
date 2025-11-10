@@ -178,13 +178,17 @@ export async function toggleVote(suggestionId: string) {
     );
 
     if (userVoteIndex > -1) {
-      // Remove vote
-      suggestion.votes.splice(userVoteIndex, 1);
+      // Remove vote - create new array to ensure Mongoose detects the change
+      suggestion.votes = suggestion.votes.filter(
+        (vote) => vote.toString() !== session.user.id
+      );
     } else {
-      // Add vote
-      suggestion.votes.push(new Types.ObjectId(session.user.id));
+      // Add vote - create new array to ensure Mongoose detects the change
+      suggestion.votes = [...suggestion.votes, new Types.ObjectId(session.user.id)];
     }
 
+    // Mark the votes field as modified to ensure Mongoose saves it
+    suggestion.markModified('votes');
     await suggestion.save();
 
     revalidatePath('/suggestions');
