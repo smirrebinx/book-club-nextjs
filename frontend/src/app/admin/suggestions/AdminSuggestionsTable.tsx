@@ -4,8 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
 import { updateSuggestionStatus, deleteSuggestionAsAdmin } from '@/app/admin/actions';
-import { ActionLink } from '@/components/ActionButton';
 import { useToast } from '@/components/Toast';
+
+import { SuggestionMobileCard } from './SuggestionMobileCard';
+import { SuggestionTableRow } from './SuggestionTableRow';
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
 
@@ -55,8 +57,9 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
   };
 
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="bg-white rounded-lg shadow">
+      {/* Desktop Table - hidden on mobile */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
@@ -69,43 +72,37 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
           </thead>
           <tbody className="divide-y divide-gray-200">
             {suggestions.map((s) => (
-              <tr key={s._id}>
-                <td className="px-2 md:px-6 py-4">
-                  <div className="text-sm font-medium text-gray-900">{s.title}</div>
-                  <div className="text-sm text-gray-500">{s.author}</div>
-                </td>
-                <td className="px-2 md:px-6 py-4 text-sm text-gray-500">{s.suggestedBy.name}</td>
-                <td className="px-2 md:px-6 py-4 text-sm text-gray-500">{s.voteCount}</td>
-                <td className="px-2 md:px-6 py-4">
-                  <label htmlFor={`status-${s._id}`} className="sr-only">
-                    Ändra status för {s.title}
-                  </label>
-                  <select
-                    id={`status-${s._id}`}
-                    value={s.status}
-                    onChange={(e) => void handleStatusChange(s._id, e.target.value as SuggestionStatus)}
-                    disabled={isPending}
-                    className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
-                    style={{ outlineColor: 'var(--focus-ring)' }}
-                  >
-                    <option value="pending">Väntande</option>
-                    <option value="currently_reading">Läser nu</option>
-                  </select>
-                </td>
-              <td className="px-2 md:px-6 py-4">
-                <ActionLink
-                  variant="danger"
-                  onClick={() => void handleDelete(s._id)}
-                  disabled={isPending}
-                  className="text-sm"
-                >
-                  Ta bort
-                </ActionLink>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+              <SuggestionTableRow
+                key={s._id}
+                suggestion={s}
+                isPending={isPending}
+                onStatusChange={(id, status) => {
+                  void handleStatusChange(id, status);
+                }}
+                onDelete={(id) => {
+                  void handleDelete(id);
+                }}
+              />
+            ))}
+          </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card Layout - visible only on mobile */}
+      <div className="md:hidden space-y-4 p-4">
+        {suggestions.map((s) => (
+          <SuggestionMobileCard
+            key={s._id}
+            suggestion={s}
+            isPending={isPending}
+            onStatusChange={(id, status) => {
+              void handleStatusChange(id, status);
+            }}
+            onDelete={(id) => {
+              void handleDelete(id);
+            }}
+          />
+        ))}
       </div>
     </div>
   );
