@@ -16,3 +16,10 @@ export interface MeetingData {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+// Meeting with MongoDB _id for client components
+export interface Meeting extends MeetingData {
+  _id: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
