@@ -25,6 +25,9 @@ export async function createSuggestion(formData: FormData) {
       title: formData.get('title') as string,
       author: formData.get('author') as string,
       description: formData.get('description') as string,
+      isbn: formData.get('isbn') as string | undefined,
+      coverImage: formData.get('coverImage') as string | undefined,
+      googleBooksId: formData.get('googleBooksId') as string | undefined,
     };
 
     // Validate with Zod
@@ -35,6 +38,9 @@ export async function createSuggestion(formData: FormData) {
       title: DOMPurify.sanitize(validated.title, { ALLOWED_TAGS: [] }),
       author: DOMPurify.sanitize(validated.author, { ALLOWED_TAGS: [] }),
       description: DOMPurify.sanitize(validated.description, { ALLOWED_TAGS: [] }),
+      isbn: validated.isbn,
+      coverImage: validated.coverImage,
+      googleBooksId: validated.googleBooksId,
     };
 
     await connectDB();

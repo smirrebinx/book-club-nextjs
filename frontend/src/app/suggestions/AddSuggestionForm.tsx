@@ -1,9 +1,20 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
+import { BookSearchInput } from '@/components/BookSearchInput';
+
 import { createSuggestion } from './actions';
+
+interface BookData {
+  title: string;
+  author: string;
+  isbn?: string;
+  coverImage?: string;
+  googleBooksId?: string;
+}
 
 export function AddSuggestionForm() {
   const router = useRouter();
@@ -11,8 +22,29 @@ export function AddSuggestionForm() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [description, setDescription] = useState('');
+  const [isbn, setIsbn] = useState('');
+  const [coverImage, setCoverImage] = useState('');
+  const [googleBooksId, setGoogleBooksId] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showManualInput, setShowManualInput] = useState(false);
+
+  const handleBookSelect = (book: BookData) => {
+    setTitle(book.title);
+    setAuthor(book.author);
+    setIsbn(book.isbn || '');
+    setCoverImage(book.coverImage || '');
+    setGoogleBooksId(book.googleBooksId || '');
+  };
+
+  const resetForm = () => {
+    setTitle('');
+    setAuthor('');
+    setDescription('');
+    setIsbn('');
+    setCoverImage('');
+    setGoogleBooksId('');
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -28,16 +60,16 @@ export function AddSuggestionForm() {
     formData.append('title', title);
     formData.append('author', author);
     formData.append('description', description);
+    if (isbn) formData.append('isbn', isbn);
+    if (coverImage) formData.append('coverImage', coverImage);
+    if (googleBooksId) formData.append('googleBooksId', googleBooksId);
 
     startTransition(async () => {
       const result = await createSuggestion(formData);
       if (result.success) {
         setSuccessMessage('Förslag skapat!');
-        setTitle('');
-        setAuthor('');
-        setDescription('');
+        resetForm();
         router.refresh();
-        // Clear success message after 5 seconds
         setTimeout(() => setSuccessMessage(''), 5000);
       } else {
         setErrorMessage(result.error || 'Ett fel uppstod');
@@ -72,6 +104,25 @@ export function AddSuggestionForm() {
       )}
 
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+        {/* Book Search */}
+        {!showManualInput && (
+          <BookSearchInput
+            onSelectBook={handleBookSelect}
+            disabled={isPending}
+          />
+        )}
+
+        {/* Toggle between search and manual input */}
+        <button
+          type="button"
+          onClick={() => setShowManualInput(!showManualInput)}
+          className="text-sm text-[var(--secondary-bg)] hover:underline focus:outline-2 focus:outline-offset-2"
+          style={{ outlineColor: 'var(--focus-ring)' }}
+        >
+          {showManualInput ? '← Tillbaka till sökning' : 'Hittar du inte boken? Skriv in den manuellt →'}
+        </button>
+
+        {/* Title field - always visible */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Titel <span className="text-red-500">*</span>
@@ -86,9 +137,11 @@ export function AddSuggestionForm() {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
             style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             placeholder="Bokens titel"
+            disabled={isPending}
           />
         </div>
 
+        {/* Author field - always visible */}
         <div>
           <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
             Författare <span className="text-red-500">*</span>
@@ -103,8 +156,30 @@ export function AddSuggestionForm() {
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
             style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
             placeholder="Författarens namn"
+            disabled={isPending}
           />
         </div>
+
+        {/* Show cover preview if available */}
+        {coverImage && (
+          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="relative w-16 h-20 flex-shrink-0">
+              <Image
+                src={coverImage}
+                alt={`Omslag för ${title}`}
+                fill
+                sizes="64px"
+                className="object-cover rounded"
+              />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-900">Bok vald från Google Books</p>
+              {isbn && (
+                <p className="text-xs text-gray-600 mt-1">ISBN: {isbn}</p>
+              )}
+            </div>
+          </div>
+        )}
 
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">

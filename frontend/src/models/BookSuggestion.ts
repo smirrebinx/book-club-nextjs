@@ -11,6 +11,9 @@ export interface IBookSuggestion {
   suggestedBy: Types.ObjectId;
   votes: Types.ObjectId[];
   status: SuggestionStatus;
+  isbn?: string;
+  coverImage?: string;
+  googleBooksId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -50,6 +53,21 @@ const BookSuggestionSchema = new Schema<IBookSuggestion>(
       enum: ['pending', 'approved', 'currently_reading', 'rejected'],
       default: 'pending',
       required: true
+    },
+    isbn: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    coverImage: {
+      type: String,
+      required: false,
+      trim: true
+    },
+    googleBooksId: {
+      type: String,
+      required: false,
+      trim: true
     }
   },
   {

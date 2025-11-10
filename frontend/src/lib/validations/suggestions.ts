@@ -10,7 +10,15 @@ export const createSuggestionSchema = z.object({
   description: z.string()
     .max(1000, 'Motiveringen får max vara 1000 tecken')
     .optional()
-    .default('')
+    .default(''),
+  isbn: z.string()
+    .optional(),
+  coverImage: z.string()
+    .url('Omslagsbildens URL måste vara giltig')
+    .optional()
+    .or(z.literal('')),
+  googleBooksId: z.string()
+    .optional()
 });
 
 export const updateSuggestionSchema = z.object({

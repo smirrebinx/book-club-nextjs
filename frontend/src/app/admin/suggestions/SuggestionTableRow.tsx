@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 import { ActionButton } from '@/components/ActionButton';
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
@@ -16,6 +18,8 @@ interface Suggestion {
     email: string;
   };
   createdAt: string;
+  coverImage?: string;
+  isbn?: string;
 }
 
 interface SuggestionTableRowProps {
@@ -34,8 +38,26 @@ export function SuggestionTableRow({
   return (
     <tr>
       <td className="px-2 md:px-6 py-4">
-        <div className="text-sm font-medium text-gray-900">{suggestion.title}</div>
-        <div className="text-sm text-gray-500">{suggestion.author}</div>
+        <div className="flex gap-3 items-center">
+          {suggestion.coverImage && (
+            <div className="relative w-10 h-14 flex-shrink-0">
+              <Image
+                src={suggestion.coverImage}
+                alt=""
+                fill
+                sizes="40px"
+                className="object-cover rounded"
+              />
+            </div>
+          )}
+          <div>
+            <div className="text-sm font-medium text-gray-900">{suggestion.title}</div>
+            <div className="text-sm text-gray-500">{suggestion.author}</div>
+            {suggestion.isbn && (
+              <div className="text-xs text-gray-400 mt-1">ISBN: {suggestion.isbn}</div>
+            )}
+          </div>
+        </div>
       </td>
       <td className="px-2 md:px-6 py-4 text-sm text-gray-500">{suggestion.suggestedBy.name}</td>
       <td className="px-2 md:px-6 py-4 text-sm text-gray-500">{suggestion.voteCount}</td>

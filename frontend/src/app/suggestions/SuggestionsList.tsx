@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 
@@ -26,6 +27,8 @@ interface Suggestion {
     name: string;
   };
   createdAt: string;
+  coverImage?: string;
+  isbn?: string;
 }
 
 export function SuggestionsList({
@@ -63,12 +66,28 @@ export function SuggestionsList({
     <div className="space-y-4">
       {suggestions.map((suggestion) => (
         <div key={suggestion._id} className="bg-white rounded-lg shadow p-6">
-          <div className="mb-4">
-            <h3 className="text-xl font-bold text-gray-900 mb-1">
-              {suggestion.title}
-            </h3>
-            <p className="text-gray-600 mb-2">av {suggestion.author}</p>
-            <p className="text-gray-700">{suggestion.description}</p>
+          <div className="flex gap-4 mb-4">
+            {suggestion.coverImage && (
+              <div className="relative w-24 h-32 flex-shrink-0">
+                <Image
+                  src={suggestion.coverImage}
+                  alt={`Omslag för ${suggestion.title}`}
+                  fill
+                  sizes="96px"
+                  className="object-cover rounded shadow-sm"
+                />
+              </div>
+            )}
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-gray-900 mb-1">
+                {suggestion.title}
+              </h3>
+              <p className="text-gray-600 mb-2">av {suggestion.author}</p>
+              {suggestion.isbn && (
+                <p className="text-xs text-gray-500 mb-2">ISBN: {suggestion.isbn}</p>
+              )}
+              <p className="text-gray-700">{suggestion.description}</p>
+            </div>
           </div>
 
           <div className="flex items-center justify-between text-sm text-gray-500">

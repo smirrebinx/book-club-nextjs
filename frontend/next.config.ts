@@ -10,6 +10,16 @@ const nextConfig: NextConfig = {
         hostname: 'lh3.googleusercontent.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'books.google.com',
+        pathname: '/books/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'books.google.com',
+        pathname: '/books/**',
+      },
     ],
   },
 };

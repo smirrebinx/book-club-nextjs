@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useOptimistic, useTransition, useState } from 'react';
 
@@ -20,6 +21,8 @@ interface Suggestion {
     name: string;
   };
   createdAt: string;
+  coverImage?: string;
+  isbn?: string;
 }
 
 export function VotingList({
@@ -134,14 +137,30 @@ export function VotingList({
                   </div>
                 </div>
 
+                {/* Book cover */}
+                {suggestion.coverImage && (
+                  <div className="relative w-20 h-28 sm:w-24 sm:h-32 flex-shrink-0">
+                    <Image
+                      src={suggestion.coverImage}
+                      alt={`Omslag för ${suggestion.title}`}
+                      fill
+                      sizes="(max-width: 640px) 80px, 96px"
+                      className="object-cover rounded shadow-sm"
+                    />
+                  </div>
+                )}
+
                 {/* Book info */}
-                <div className="flex-1 w-full">
+                <div className="flex-1 w-full min-w-0">
                   <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">
                     {suggestion.title}
                   </h3>
                   <p className="text-sm sm:text-base text-gray-600 mb-2 sm:mb-3">
                     av {suggestion.author}
                   </p>
+                  {suggestion.isbn && (
+                    <p className="text-xs text-gray-500 mb-2">ISBN: {suggestion.isbn}</p>
+                  )}
                   {suggestion.description && (
                     <p className="text-sm sm:text-base text-gray-700 mb-2 sm:mb-3">
                       {suggestion.description}
