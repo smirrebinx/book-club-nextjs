@@ -122,46 +122,51 @@ export function AddSuggestionForm() {
           {showManualInput ? '← Tillbaka till sökning' : 'Hittar du inte boken? Skriv in den manuellt →'}
         </button>
 
-        {/* Title field - always visible */}
-        <div>
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-            Titel <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            maxLength={200}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
-            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
-            placeholder="Bokens titel"
-            disabled={isPending}
-          />
-        </div>
+        {/* Manual input fields - only visible when showManualInput is true */}
+        {showManualInput && (
+          <>
+            {/* Title field */}
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                Titel <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                maxLength={200}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
+                style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
+                placeholder="Bokens titel"
+                disabled={isPending}
+              />
+            </div>
 
-        {/* Author field - always visible */}
-        <div>
-          <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
-            Författare <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="author"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            required
-            maxLength={100}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
-            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
-            placeholder="Författarens namn"
-            disabled={isPending}
-          />
-        </div>
+            {/* Author field */}
+            <div>
+              <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
+                Författare <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="author"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                required
+                maxLength={100}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
+                style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
+                placeholder="Författarens namn"
+                disabled={isPending}
+              />
+            </div>
+          </>
+        )}
 
-        {/* Show cover preview if available */}
-        {coverImage && (
+        {/* Show cover preview if available (from search) */}
+        {!showManualInput && coverImage && (
           <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
             <div className="relative w-16 h-20 flex-shrink-0">
               <Image
@@ -173,32 +178,37 @@ export function AddSuggestionForm() {
               />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">Bok vald från Google Books</p>
+              <p className="text-sm font-medium text-gray-900">{title}</p>
+              <p className="text-xs text-gray-600">{author}</p>
               {isbn && (
-                <p className="text-xs text-gray-600 mt-1">ISBN: {isbn}</p>
+                <p className="text-xs text-gray-500 mt-1">ISBN: {isbn}</p>
               )}
             </div>
           </div>
         )}
 
-        <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-            Berätta gäran varför du vill läsa boken (frivilligt)
-          </label>
-          <textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={1000}
-            rows={4}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none resize-none"
-            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
-            placeholder="Berätta gärna varför du vill läsa boken"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            {description.length}/1000 tecken
-          </p>
-        </div>
+        {/* Description field - only visible after selecting/entering a book */}
+        {(showManualInput || coverImage) && (
+          <div>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              Berätta gärna varför du vill läsa boken (frivilligt)
+            </label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              maxLength={1000}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none resize-none"
+              style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
+              placeholder="Berätta gärna varför du vill läsa boken"
+              disabled={isPending}
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              {description.length}/1000 tecken
+            </p>
+          </div>
+        )}
 
         <button
           type="submit"
