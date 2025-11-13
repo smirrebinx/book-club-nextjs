@@ -20,14 +20,14 @@ export async function createSuggestion(formData: FormData) {
   try {
     const session = await requireApproved();
 
-    // Parse form data
+    // Parse form data - convert null to undefined for optional fields
     const data = {
       title: formData.get('title') as string,
       author: formData.get('author') as string,
       description: formData.get('description') as string,
-      isbn: formData.get('isbn') as string | undefined,
-      coverImage: formData.get('coverImage') as string | undefined,
-      googleBooksId: formData.get('googleBooksId') as string | undefined,
+      isbn: formData.get('isbn') as string | null,
+      coverImage: formData.get('coverImage') as string | null,
+      googleBooksId: formData.get('googleBooksId') as string | null,
     };
 
     // Validate with Zod
