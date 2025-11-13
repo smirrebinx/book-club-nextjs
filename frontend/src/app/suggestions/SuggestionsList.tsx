@@ -2,9 +2,10 @@
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 
 import { ActionLink } from '@/components/ActionButton';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
 
 import { deleteSuggestion } from './actions';
@@ -43,19 +44,33 @@ export function SuggestionsList({
   const router = useRouter();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [suggestionToDelete, setSuggestionToDelete] = useState<{ id: string; title: string } | null>(null);
 
-  const handleDelete = async (suggestionId: string) => {
-    if (!confirm('Är du säker på att du vill ta bort detta förslag?')) return;
+  const handleDeleteClick = (suggestionId: string, title: string) => {
+    setSuggestionToDelete({ id: suggestionId, title });
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!suggestionToDelete) return;
 
     startTransition(async () => {
-      const result = await deleteSuggestion(suggestionId);
+      const result = await deleteSuggestion(suggestionToDelete.id);
       if (result.success) {
         showToast('Förslag borttaget', 'success');
         router.refresh();
       } else {
         showToast(result.error || 'Ett fel uppstod', 'error');
       }
+      setDeleteModalOpen(false);
+      setSuggestionToDelete(null);
     });
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteModalOpen(false);
+    setSuggestionToDelete(null);
   };
 
   const canDelete = (suggestion: Suggestion) => {
@@ -107,7 +122,7 @@ export function SuggestionsList({
             {canDelete(suggestion) && (
               <ActionLink
                 variant="danger"
-                onClick={() => void handleDelete(suggestion._id)}
+                onClick={() => handleDeleteClick(suggestion._id, suggestion.title)}
                 disabled={isPending}
               >
                 Ta bort
@@ -116,6 +131,16 @@ export function SuggestionsList({
           </div>
         </div>
       ))}
+
+      <ConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={handleCancelDelete}
+        onConfirm={() => void handleConfirmDelete()}
+        title="Ta bort bokförslag"
+        message={suggestionToDelete ? `Är du säker på att du vill ta bort "${suggestionToDelete.title}"? Detta kan inte ångras.` : ''}
+        confirmText="Ta bort"
+        cancelText="Avbryt"
+      />
     </div>
   );
 }
