@@ -11,14 +11,19 @@ export const createSuggestionSchema = z.object({
     .max(1000, 'Motiveringen får max vara 1000 tecken')
     .optional()
     .default(''),
-  isbn: z.string()
-    .optional(),
-  coverImage: z.string()
-    .url('Omslagsbildens URL måste vara giltig')
+  isbn: z.union([z.string(), z.null()])
     .optional()
-    .or(z.literal('')),
-  googleBooksId: z.string()
+    .transform(val => val || undefined),
+  coverImage: z.union([
+    z.string().url('Omslagsbildens URL måste vara giltig'),
+    z.literal(''),
+    z.null()
+  ])
     .optional()
+    .transform(val => val || undefined),
+  googleBooksId: z.union([z.string(), z.null()])
+    .optional()
+    .transform(val => val || undefined)
 });
 
 export const updateSuggestionSchema = z.object({
