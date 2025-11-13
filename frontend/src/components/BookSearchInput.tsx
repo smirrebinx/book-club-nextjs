@@ -106,7 +106,7 @@ export function BookSearchInput({ onSelectBook, disabled = false }: BookSearchIn
   return (
     <div ref={containerRef} className="relative">
       <label htmlFor="book-search" className="block text-sm font-medium text-[var(--primary-text)] mb-1">
-        Sök efter bok
+        Sök efter bok genom Google Books
       </label>
       <input
         type="text"
@@ -124,9 +124,6 @@ export function BookSearchInput({ onSelectBook, disabled = false }: BookSearchIn
         aria-controls="search-results"
         aria-autocomplete="list"
       />
-      <p id="search-help" className="text-xs text-[var(--color-muted)] mt-1">
-        Sök i Google Books (svenska böcker prioriteras)
-      </p>
 
       {isSearching && (
         <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white border border-gray-300 rounded-md shadow-lg z-10">
