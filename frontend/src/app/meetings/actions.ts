@@ -184,7 +184,27 @@ export async function createMeeting(formData: FormData) {
 
     await connectDB();
 
-    const meeting = await Meeting.create(sanitized);
+    // Filter out undefined values to avoid Mongoose issues in serverless
+    const filterUndefined = (obj: Record<string, unknown>): Record<string, unknown> | undefined => {
+      if (obj === null || obj === undefined) return undefined;
+      if (typeof obj !== 'object') return obj as Record<string, unknown>;
+      if (Array.isArray(obj)) return obj as unknown as Record<string, unknown>;
+
+      const filtered: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(obj)) {
+        if (value !== undefined) {
+          if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+            filtered[key] = filterUndefined(value as Record<string, unknown>);
+          } else {
+            filtered[key] = value;
+          }
+        }
+      }
+      return Object.keys(filtered).length > 0 ? filtered : undefined;
+    };
+
+    const cleanedData = filterUndefined(sanitized as Record<string, unknown>);
+    const meeting = await Meeting.create(cleanedData);
 
     revalidatePath('/admin/meetings');
     revalidatePath('/NextMeeting');

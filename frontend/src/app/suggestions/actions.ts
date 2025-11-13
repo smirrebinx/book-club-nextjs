@@ -45,12 +45,17 @@ export async function createSuggestion(formData: FormData) {
 
     await connectDB();
 
-    await BookSuggestion.create({
-      ...sanitized,
-      suggestedBy: session.user.id,
-      votes: [],
-      status: 'pending',
-    });
+    // Filter out undefined values to avoid Mongoose issues in serverless
+    const dataToCreate = Object.fromEntries(
+      Object.entries({
+        ...sanitized,
+        suggestedBy: session.user.id,
+        votes: [],
+        status: 'pending',
+      }).filter(([_, value]) => value !== undefined)
+    );
+
+    await BookSuggestion.create(dataToCreate);
 
     revalidatePath('/suggestions');
     return { success: true, message: 'Förslag skapat' };

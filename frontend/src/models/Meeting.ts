@@ -16,8 +16,6 @@ const MeetingSchema = new Schema<MeetingData>(
     id: {
       type: String,
       required: false,
-      unique: true,
-      sparse: true,
       index: true
     },
     date: { type: String, required: false },
