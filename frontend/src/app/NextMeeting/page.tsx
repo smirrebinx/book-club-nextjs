@@ -130,10 +130,10 @@ export default async function NextMeeting() {
             </h2>
             <div className="flex flex-col gap-1">
               <p className="text-lg leading-7">
-                <span className="font-semibold">Titel:</span> {meetingData.book.title}
+                <span className="font-semibold">Titel:</span> {meetingData.book?.title || 'Ingen bok vald'}
               </p>
               <p className="text-lg leading-7">
-                <span className="font-semibold">Författare:</span> {meetingData.book.author}
+                <span className="font-semibold">Författare:</span> {meetingData.book?.author || '-'}
               </p>
             </div>
           </section>

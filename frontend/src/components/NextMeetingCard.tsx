@@ -59,7 +59,10 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
             <span className="font-semibold" style={{ color: "var(--primary-text)" }}>
               Bok
             </span>
-            <span>{meetingData.book.title} av {meetingData.book.author}</span>
+            <span>
+              {meetingData.book?.title || 'Ingen bok vald'}
+              {meetingData.book?.author && ` av ${meetingData.book.author}`}
+            </span>
           </div>
         </div>
 
