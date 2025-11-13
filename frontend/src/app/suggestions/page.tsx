@@ -88,7 +88,7 @@ export default async function SuggestionsPage() {
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Bokförslag</h1>
           <p className="text-gray-600">
-            Här kan du föreslå böcker till bokklubben. Här visas också föreslagna böcker. 
+            Här kan du föreslå böcker till bokklubben och se vilka böcker andra har föreslagit.
           </p>
         </div>
 
