@@ -70,12 +70,12 @@ export default async function Vote() {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Hero Section */}
+        {/* Hero Section with SVG */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-6 w-full max-w-[200px]">
             <Image
-              src="/animations/undraw_book-lover_m9n3.svg"
-              alt="Book lover illustration"
+              src="/animations/undraw_election-day_puwv.svg"
+              alt="Voting illustration"
               width={200}
               height={150}
               className="w-full h-auto"
