@@ -12,6 +12,7 @@ interface BookResult {
   isbn?: string;
   publishedDate?: string;
   description?: string;
+  googleBooksId?: string;
 }
 
 interface BookSearchInputProps {
@@ -86,7 +87,11 @@ export function BookSearchInput({ onSelectBook, disabled = false }: BookSearchIn
   };
 
   const handleSelectBook = (book: BookResult) => {
-    onSelectBook(book);
+    // Pass book with googleBooksId set to the id field
+    onSelectBook({
+      ...book,
+      googleBooksId: book.id,
+    });
     setQuery('');
     setResults([]);
     setShowResults(false);
