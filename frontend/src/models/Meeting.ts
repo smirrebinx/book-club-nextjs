@@ -4,9 +4,9 @@ import type { BookInfo, MeetingData } from '@/types/meeting';
 import type { Model } from 'mongoose';
 
 const BookInfoSchema = new Schema<BookInfo>({
-  id: { type: String, required: true },
-  title: { type: String, required: true },
-  author: { type: String, required: true },
+  id: { type: String, required: false },
+  title: { type: String, required: false },
+  author: { type: String, required: false },
   coverImage: { type: String },
   isbn: { type: String },
 }, { _id: false });
@@ -15,15 +15,16 @@ const MeetingSchema = new Schema<MeetingData>(
   {
     id: {
       type: String,
-      required: true,
+      required: false,
       unique: true,
+      sparse: true,
       index: true
     },
-    date: { type: String, required: true },
-    time: { type: String, required: true },
-    location: { type: String, required: true },
-    book: { type: BookInfoSchema, required: true },
-    additionalInfo: { type: String, required: true },
+    date: { type: String, required: false },
+    time: { type: String, required: false },
+    location: { type: String, required: false },
+    book: { type: BookInfoSchema, required: false },
+    additionalInfo: { type: String, required: false },
   },
   {
     timestamps: true,

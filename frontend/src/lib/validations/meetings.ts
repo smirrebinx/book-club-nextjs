@@ -1,27 +1,31 @@
 import { z } from 'zod';
 
 export const bookInfoSchema = z.object({
-  id: z.string().min(1, 'Bok-ID krävs'),
-  title: z.string().min(1, 'Boktitel krävs'),
-  author: z.string().min(1, 'Författare krävs'),
-  coverImage: z.string().url('Ogiltig bild-URL').optional(),
+  id: z.string().optional(),
+  title: z.string().optional(),
+  author: z.string().optional(),
+  coverImage: z.union([
+    z.string().url('Ogiltig bild-URL'),
+    z.literal(''),
+    z.null()
+  ]).optional().transform(val => val || undefined),
   isbn: z.string().optional()
 });
 
 export const createMeetingSchema = z.object({
-  id: z.string().min(1, 'Mötes-ID krävs'),
-  date: z.string().min(1, 'Datum krävs'),
-  time: z.string().min(1, 'Tid krävs'),
-  location: z.string().min(1, 'Plats krävs'),
-  book: bookInfoSchema,
-  additionalInfo: z.string().default('')
+  id: z.string().optional(),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  location: z.string().optional(),
+  book: bookInfoSchema.optional(),
+  additionalInfo: z.string().optional().default('')
 });
 
 export const updateMeetingSchema = z.object({
-  id: z.string().min(1, 'Mötes-ID krävs').optional(),
-  date: z.string().min(1, 'Datum krävs').optional(),
-  time: z.string().min(1, 'Tid krävs').optional(),
-  location: z.string().min(1, 'Plats krävs').optional(),
+  id: z.string().optional(),
+  date: z.string().optional(),
+  time: z.string().optional(),
+  location: z.string().optional(),
   book: bookInfoSchema.optional(),
   additionalInfo: z.string().optional()
 });

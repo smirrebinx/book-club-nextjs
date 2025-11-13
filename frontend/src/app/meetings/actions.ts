@@ -17,13 +17,49 @@ type PartialMeetingUpdate = Partial<{
   location: string;
   additionalInfo: string;
   book: {
-    id: string;
-    title: string;
-    author: string;
+    id?: string;
+    title?: string;
+    author?: string;
     coverImage?: string;
     isbn?: string;
   };
 }>;
+
+/**
+ * Helper: Get form field or return undefined
+ */
+function getFormField(formData: FormData, fieldName: string): string | undefined {
+  const value = formData.get(fieldName);
+  return value ? (value as string) : undefined;
+}
+
+/**
+ * Helper: Get field value with fallback
+ */
+function getFieldWithFallback(formValue: string | undefined, currentValue: string | undefined): string | undefined {
+  return formValue || currentValue || undefined;
+}
+
+/**
+ * Helper: Parse book data from form
+ */
+function parseBookData(formData: FormData, currentBook?: { id?: string; title?: string; author?: string; coverImage?: string; isbn?: string }) {
+  const bookId = getFormField(formData, 'bookId');
+  const bookTitle = getFormField(formData, 'bookTitle');
+  const bookAuthor = getFormField(formData, 'bookAuthor');
+
+  if (!bookId && !bookTitle && !bookAuthor) {
+    return undefined;
+  }
+
+  return {
+    id: getFieldWithFallback(bookId, currentBook?.id),
+    title: getFieldWithFallback(bookTitle, currentBook?.title),
+    author: getFieldWithFallback(bookAuthor, currentBook?.author),
+    coverImage: getFieldWithFallback(getFormField(formData, 'bookCoverImage'), currentBook?.coverImage),
+    isbn: getFieldWithFallback(getFormField(formData, 'bookIsbn'), currentBook?.isbn),
+  };
+}
 
 /**
  * Helper: Parse form data for meeting updates
@@ -31,31 +67,20 @@ type PartialMeetingUpdate = Partial<{
 function parseFormDataToMeetingUpdate(formData: FormData, currentMeeting: MeetingData): PartialMeetingUpdate {
   const data: PartialMeetingUpdate = {};
 
-  const id = formData.get('id');
-  const date = formData.get('date');
-  const time = formData.get('time');
-  const location = formData.get('location');
-  const additionalInfo = formData.get('additionalInfo');
+  const id = getFormField(formData, 'id');
+  const date = getFormField(formData, 'date');
+  const time = getFormField(formData, 'time');
+  const location = getFormField(formData, 'location');
+  const additionalInfo = getFormField(formData, 'additionalInfo');
 
-  if (id) data.id = id as string;
-  if (date) data.date = date as string;
-  if (time) data.time = time as string;
-  if (location) data.location = location as string;
-  if (additionalInfo !== null) data.additionalInfo = additionalInfo as string;
+  if (id) data.id = id;
+  if (date) data.date = date;
+  if (time) data.time = time;
+  if (location) data.location = location;
+  if (additionalInfo !== undefined) data.additionalInfo = additionalInfo;
 
-  const bookId = formData.get('bookId');
-  const bookTitle = formData.get('bookTitle');
-  const bookAuthor = formData.get('bookAuthor');
-
-  if (bookId || bookTitle || bookAuthor) {
-    data.book = {
-      id: bookId as string || currentMeeting.book.id,
-      title: bookTitle as string || currentMeeting.book.title,
-      author: bookAuthor as string || currentMeeting.book.author,
-      coverImage: formData.get('bookCoverImage') as string || currentMeeting.book.coverImage,
-      isbn: formData.get('bookIsbn') as string || currentMeeting.book.isbn,
-    };
-  }
+  const book = parseBookData(formData, currentMeeting.book);
+  if (book) data.book = book;
 
   return data;
 }
@@ -63,11 +88,17 @@ function parseFormDataToMeetingUpdate(formData: FormData, currentMeeting: Meetin
 /**
  * Helper: Sanitize book data
  */
-function sanitizeBookData(book: { id: string; title: string; author: string; coverImage?: string; isbn?: string }) {
+function sanitizeBookData(book: { id?: string; title?: string; author?: string; coverImage?: string; isbn?: string }): {
+  id?: string;
+  title?: string;
+  author?: string;
+  coverImage?: string;
+  isbn?: string;
+} {
   return {
-    id: DOMPurify.sanitize(book.id, { ALLOWED_TAGS: [] }),
-    title: DOMPurify.sanitize(book.title, { ALLOWED_TAGS: [] }),
-    author: DOMPurify.sanitize(book.author, { ALLOWED_TAGS: [] }),
+    id: book.id ? DOMPurify.sanitize(book.id, { ALLOWED_TAGS: [] }) : undefined,
+    title: book.title ? DOMPurify.sanitize(book.title, { ALLOWED_TAGS: [] }) : undefined,
+    author: book.author ? DOMPurify.sanitize(book.author, { ALLOWED_TAGS: [] }) : undefined,
     coverImage: book.coverImage
       ? DOMPurify.sanitize(book.coverImage, { ALLOWED_TAGS: [] })
       : undefined,
@@ -133,22 +164,22 @@ export async function createMeeting(formData: FormData) {
 
     // Sanitize inputs
     const sanitized = {
-      id: DOMPurify.sanitize(validated.id, { ALLOWED_TAGS: [] }),
-      date: DOMPurify.sanitize(validated.date, { ALLOWED_TAGS: [] }),
-      time: DOMPurify.sanitize(validated.time, { ALLOWED_TAGS: [] }),
-      location: DOMPurify.sanitize(validated.location, { ALLOWED_TAGS: [] }),
-      book: {
-        id: DOMPurify.sanitize(validated.book.id, { ALLOWED_TAGS: [] }),
-        title: DOMPurify.sanitize(validated.book.title, { ALLOWED_TAGS: [] }),
-        author: DOMPurify.sanitize(validated.book.author, { ALLOWED_TAGS: [] }),
+      id: validated.id ? DOMPurify.sanitize(validated.id, { ALLOWED_TAGS: [] }) : undefined,
+      date: validated.date ? DOMPurify.sanitize(validated.date, { ALLOWED_TAGS: [] }) : undefined,
+      time: validated.time ? DOMPurify.sanitize(validated.time, { ALLOWED_TAGS: [] }) : undefined,
+      location: validated.location ? DOMPurify.sanitize(validated.location, { ALLOWED_TAGS: [] }) : undefined,
+      book: validated.book ? {
+        id: validated.book.id ? DOMPurify.sanitize(validated.book.id, { ALLOWED_TAGS: [] }) : undefined,
+        title: validated.book.title ? DOMPurify.sanitize(validated.book.title, { ALLOWED_TAGS: [] }) : undefined,
+        author: validated.book.author ? DOMPurify.sanitize(validated.book.author, { ALLOWED_TAGS: [] }) : undefined,
         coverImage: validated.book.coverImage
           ? DOMPurify.sanitize(validated.book.coverImage, { ALLOWED_TAGS: [] })
           : undefined,
         isbn: validated.book.isbn
           ? DOMPurify.sanitize(validated.book.isbn, { ALLOWED_TAGS: [] })
           : undefined,
-      },
-      additionalInfo: DOMPurify.sanitize(validated.additionalInfo, { ALLOWED_TAGS: [] }),
+      } : undefined,
+      additionalInfo: validated.additionalInfo ? DOMPurify.sanitize(validated.additionalInfo, { ALLOWED_TAGS: [] }) : undefined,
     };
 
     await connectDB();

@@ -18,11 +18,13 @@ export function MeetingMobileCard({
   onDelete,
 }: MeetingMobileCardProps) {
   // Format date to Swedish locale
-  const formattedDate = new Date(meeting.date).toLocaleDateString('sv-SE', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = meeting.date
+    ? new Date(meeting.date).toLocaleDateString('sv-SE', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : 'Inget datum';
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
@@ -30,26 +32,26 @@ export function MeetingMobileCard({
       <div className="mb-3">
         <div className="text-xs font-medium text-gray-500 uppercase mb-1">Datum</div>
         <div className="text-sm font-medium text-gray-900">{formattedDate}</div>
-        <div className="text-xs text-[var(--color-muted)] mt-1">ID: {meeting.id}</div>
+        <div className="text-xs text-[var(--color-muted)] mt-1">ID: {meeting.id || 'Inget ID'}</div>
       </div>
 
       {/* Time */}
       <div className="mb-3">
         <div className="text-xs font-medium text-gray-500 uppercase mb-1">Tid</div>
-        <div className="text-sm text-gray-500">{meeting.time}</div>
+        <div className="text-sm text-gray-500">{meeting.time || '-'}</div>
       </div>
 
       {/* Location */}
       <div className="mb-3">
         <div className="text-xs font-medium text-gray-500 uppercase mb-1">Plats</div>
-        <div className="text-sm text-gray-500">{meeting.location}</div>
+        <div className="text-sm text-gray-500">{meeting.location || '-'}</div>
       </div>
 
       {/* Book Info */}
       <div className="mb-3 pb-3 border-b border-gray-200">
         <div className="text-xs font-medium text-gray-500 uppercase mb-1">Bok</div>
-        <div className="text-sm font-medium text-gray-900">{meeting.book.title}</div>
-        <div className="text-sm text-gray-500">av {meeting.book.author}</div>
+        <div className="text-sm font-medium text-gray-900">{meeting.book?.title || 'Ingen bok vald'}</div>
+        <div className="text-sm text-gray-500">av {meeting.book?.author || '-'}</div>
       </div>
 
       {/* Additional Info (if exists) */}
@@ -74,7 +76,7 @@ export function MeetingMobileCard({
           </ActionButton>
           <ActionButton
             variant="danger"
-            onClick={() => onDelete(meeting.id, meeting._id, formattedDate)}
+            onClick={() => onDelete(meeting.id || '', meeting._id, formattedDate)}
             disabled={isPending}
             fullWidth
           >

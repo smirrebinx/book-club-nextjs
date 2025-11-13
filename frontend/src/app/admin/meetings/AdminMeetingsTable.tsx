@@ -87,9 +87,11 @@ export function AdminMeetingsTable({ meetings }: AdminMeetingsTableProps) {
   };
 
   // Sort meetings by date (ascending)
-  const sortedMeetings = [...meetings].sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
+  const sortedMeetings = [...meetings].sort((a, b) => {
+    const dateA = a.date ? new Date(a.date).getTime() : 0;
+    const dateB = b.date ? new Date(b.date).getTime() : 0;
+    return dateA - dateB;
+  });
 
   return (
     <div>

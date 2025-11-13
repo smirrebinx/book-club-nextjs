@@ -19,13 +19,13 @@ export default async function AdminMeetingsPage() {
     date: m.date,
     time: m.time,
     location: m.location,
-    book: {
+    book: m.book ? {
       id: m.book.id,
       title: m.book.title,
       author: m.book.author,
       coverImage: m.book.coverImage,
       isbn: m.book.isbn,
-    },
+    } : undefined,
     additionalInfo: m.additionalInfo,
     createdAt: m.createdAt?.toISOString(),
     updatedAt: m.updatedAt?.toISOString(),

@@ -92,7 +92,6 @@ function MeetingBasicFields({ formData, handleChange, isEditing, isPending, toda
         label="Mötes-ID"
         value={formData.id}
         onChange={handleChange}
-        required
         disabled={isEditing || isPending}
         placeholder="next-meeting"
         helpText='Unikt ID för mötet, t.ex. "next-meeting" för nästa möte'
@@ -106,7 +105,6 @@ function MeetingBasicFields({ formData, handleChange, isEditing, isPending, toda
           type="date"
           value={formData.date}
           onChange={handleChange}
-          required
           disabled={isPending}
           min={today}
           helpText="Datum för mötet"
@@ -119,7 +117,6 @@ function MeetingBasicFields({ formData, handleChange, isEditing, isPending, toda
           type="time"
           value={formData.time}
           onChange={handleChange}
-          required
           disabled={isPending}
           placeholder="18:00"
           helpText="Ange tid i 24-timmarsformat, t.ex. 18:00"
@@ -132,9 +129,7 @@ function MeetingBasicFields({ formData, handleChange, isEditing, isPending, toda
         label="Plats"
         value={formData.location}
         onChange={handleChange}
-        required
         disabled={isPending}
-        minLength={3}
         placeholder="Biblioteket, Stockholm"
       />
     </>
@@ -166,7 +161,6 @@ function BookFields({ formData, handleChange, isPending }: BookFieldsProps) {
             label="Boktitel"
             value={formData.bookTitle}
             onChange={handleChange}
-            required
             disabled={isPending}
           />
 
@@ -176,7 +170,6 @@ function BookFields({ formData, handleChange, isPending }: BookFieldsProps) {
             label="Författare"
             value={formData.bookAuthor}
             onChange={handleChange}
-            required
             disabled={isPending}
           />
         </div>
@@ -188,7 +181,6 @@ function BookFields({ formData, handleChange, isPending }: BookFieldsProps) {
             label="Bok-ID"
             value={formData.bookId}
             onChange={handleChange}
-            required
             disabled={isPending}
             placeholder="unique-book-id"
             helpText="Unikt ID för boken i systemet"
@@ -197,7 +189,7 @@ function BookFields({ formData, handleChange, isPending }: BookFieldsProps) {
           <FormField
             id="book-isbn"
             name="bookIsbn"
-            label="ISBN (valfritt)"
+            label="ISBN"
             value={formData.bookIsbn}
             onChange={handleChange}
             disabled={isPending}
@@ -208,7 +200,7 @@ function BookFields({ formData, handleChange, isPending }: BookFieldsProps) {
         <FormField
           id="book-cover"
           name="bookCoverImage"
-          label="Omslagsbild URL (valfritt)"
+          label="Omslagsbild URL"
           type="url"
           value={formData.bookCoverImage}
           onChange={handleChange}
@@ -251,33 +243,37 @@ function FormActions({ isPending, isEditing, onCancel }: FormActionsProps) {
   );
 }
 
+const EMPTY_FORM_DATA = {
+  id: '',
+  date: '',
+  time: '',
+  location: '',
+  bookId: '',
+  bookTitle: '',
+  bookAuthor: '',
+  bookCoverImage: '',
+  bookIsbn: '',
+  additionalInfo: '',
+};
+
 function getInitialFormData(meeting?: Meeting) {
   if (!meeting) {
-    return {
-      id: '',
-      date: '',
-      time: '',
-      location: '',
-      bookId: '',
-      bookTitle: '',
-      bookAuthor: '',
-      bookCoverImage: '',
-      bookIsbn: '',
-      additionalInfo: '',
-    };
+    return EMPTY_FORM_DATA;
   }
 
+  const book = meeting.book || {};
+
   return {
-    id: meeting.id,
-    date: meeting.date,
-    time: meeting.time,
-    location: meeting.location,
-    bookId: meeting.book.id,
-    bookTitle: meeting.book.title,
-    bookAuthor: meeting.book.author,
-    bookCoverImage: meeting.book.coverImage ?? '',
-    bookIsbn: meeting.book.isbn ?? '',
-    additionalInfo: meeting.additionalInfo,
+    id: meeting.id || '',
+    date: meeting.date || '',
+    time: meeting.time || '',
+    location: meeting.location || '',
+    bookId: book.id || '',
+    bookTitle: book.title || '',
+    bookAuthor: book.author || '',
+    bookCoverImage: book.coverImage || '',
+    bookIsbn: book.isbn || '',
+    additionalInfo: meeting.additionalInfo || '',
   };
 }
 
