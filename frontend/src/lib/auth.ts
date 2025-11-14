@@ -6,7 +6,65 @@ import { authConfig } from "@/lib/auth.config";
 import dbConnect from "@/lib/mongodb";
 import User from "@/models/User";
 
-import type { UserRole } from "@/models/User";
+import type { IUser, UserRole } from "@/models/User";
+import type { JWT } from "next-auth/jwt";
+
+// Lean document type includes MongoDB _id
+type UserLeanDoc = IUser & { _id: { toString: () => string } };
+
+/**
+ * Helper: Create new user in database
+ */
+async function createNewUser(email: string, name?: string | null, image?: string | null) {
+  const isAdmin = email === process.env.ADMIN_EMAIL;
+  console.log('[Auth] Creating new user:', email);
+
+  const newUser = await User.create({
+    name: name || '',
+    email: email,
+    image: image || '',
+    role: isAdmin ? 'admin' : 'pending',
+    isApproved: isAdmin,
+  });
+
+  console.log('[Auth] User created successfully:', newUser._id);
+  return newUser.toObject();
+}
+
+/**
+ * Helper: Check if user should be logged out
+ */
+function shouldForceLogout(dbUser: UserLeanDoc, tokenIssuedAt?: number): boolean {
+  if (!dbUser.forcedLogoutAt) return false;
+
+  const tokenDate = tokenIssuedAt ? new Date(tokenIssuedAt * 1000) : new Date(0);
+  const forcedDate = new Date(dbUser.forcedLogoutAt);
+
+  return tokenDate < forcedDate;
+}
+
+/**
+ * Helper: Populate token with user data
+ */
+function populateToken(token: JWT, dbUser: UserLeanDoc): JWT {
+  token.id = dbUser._id.toString();
+  token.email = dbUser.email;
+  token.role = dbUser.role;
+  token.isApproved = dbUser.isApproved;
+  return token;
+}
+
+/**
+ * Helper: Get fallback token for failed user creation
+ */
+function getFallbackToken(token: JWT, email: string, userId?: string): JWT {
+  const isAdmin = email === process.env.ADMIN_EMAIL;
+  token.id = userId || email;
+  token.email = email;
+  token.role = isAdmin ? 'admin' : 'pending';
+  token.isApproved = isAdmin;
+  return token;
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -34,70 +92,47 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, trigger }) {
-      // On signin or update, fetch/create user in database
-      if (user || trigger === 'update') {
-        console.log('[Auth JWT] Processing token for user:', user?.email || token.email);
-        await dbConnect();
+      // Only process on signin or update
+      if (!user && trigger !== 'update') {
+        return token;
+      }
 
-        const email = user?.email || token.email as string;
+      console.log('[Auth JWT] Processing token for user:', user?.email || token.email);
+      await dbConnect();
 
-        if (!email) {
-          console.error('[Auth JWT] No email found in user or token');
-          return token;
-        }
+      const email = user?.email || token.email as string;
+      if (!email) {
+        console.error('[Auth JWT] No email found');
+        return token;
+      }
 
-        let dbUser = await User.findOne({ email }).lean();
+      // Fetch existing user
+      let dbUser = await User.findOne({ email }).lean() as UserLeanDoc | null;
 
-        if (!dbUser && user) {
-          // New user - create in database
-          console.log('[Auth JWT] Creating new user:', email);
-          const isAdmin = email === process.env.ADMIN_EMAIL;
-
-          try {
-            const newUser = await User.create({
-              name: user.name || '',
-              email: email,
-              image: user.image || '',
-              role: isAdmin ? 'admin' : 'pending',
-              isApproved: isAdmin,
-            });
-
-            dbUser = newUser.toObject();
-            console.log('[Auth JWT] User created successfully:', dbUser._id);
-          } catch (error) {
-            console.error('[Auth JWT] Error creating user:', error);
-            // If user creation fails, still allow login with defaults
-            token.id = user.id || email;
-            token.email = email;
-            token.role = email === process.env.ADMIN_EMAIL ? 'admin' : 'pending';
-            token.isApproved = email === process.env.ADMIN_EMAIL;
-            return token;
-          }
-        }
-
-        if (dbUser) {
-          token.id = dbUser._id.toString();
-          token.email = dbUser.email;
-          token.role = dbUser.role;
-          token.isApproved = dbUser.isApproved;
-
-          // Check if admin has forced this user to logout
-          if (dbUser.forcedLogoutAt) {
-            const tokenIssuedAt = token.iat ? new Date(token.iat * 1000) : new Date(0);
-            const forcedLogoutAt = new Date(dbUser.forcedLogoutAt);
-
-            // If token was issued before forced logout, invalidate it by returning empty token
-            if (tokenIssuedAt < forcedLogoutAt) {
-              console.log('[Auth JWT] User was forced to logout, invalidating token');
-              return {}; // This will invalidate the session
-            }
-          }
-
-          console.log('[Auth JWT] Token updated successfully for user:', token.id);
+      // Create new user if needed
+      if (!dbUser && user) {
+        try {
+          dbUser = await createNewUser(email, user.name, user.image) as UserLeanDoc;
+        } catch (error) {
+          console.error('[Auth JWT] Error creating user:', error);
+          return getFallbackToken(token, email, user.id);
         }
       }
 
-      return token;
+      // No user found and couldn't create
+      if (!dbUser) {
+        return token;
+      }
+
+      // Check forced logout
+      if (shouldForceLogout(dbUser, token.iat)) {
+        console.log('[Auth JWT] User forced to logout');
+        return {}; // Invalidate session
+      }
+
+      // Populate and return token
+      console.log('[Auth JWT] Token updated for user:', dbUser._id);
+      return populateToken(token, dbUser);
     },
     async session({ session, token }) {
       // Add data from JWT token to session
