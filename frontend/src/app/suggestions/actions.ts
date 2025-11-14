@@ -18,7 +18,9 @@ import BookSuggestion from '@/models/BookSuggestion';
  */
 export async function createSuggestion(formData: FormData) {
   try {
+    console.log('[createSuggestion] Starting...');
     const session = await requireApproved();
+    console.log('[createSuggestion] Session approved, user:', session.user.id);
 
     // Parse form data - convert null to undefined for optional fields
     const data = {
@@ -29,9 +31,11 @@ export async function createSuggestion(formData: FormData) {
       coverImage: formData.get('coverImage') as string | null,
       googleBooksId: formData.get('googleBooksId') as string | null,
     };
+    console.log('[createSuggestion] Parsed form data');
 
     // Validate with Zod
     const validated = createSuggestionSchema.parse(data);
+    console.log('[createSuggestion] Validated with Zod');
 
     // Sanitize inputs server-side with DOMPurify
     const sanitized = {
@@ -42,8 +46,11 @@ export async function createSuggestion(formData: FormData) {
       coverImage: validated.coverImage,
       googleBooksId: validated.googleBooksId,
     };
+    console.log('[createSuggestion] Sanitized inputs');
 
+    console.log('[createSuggestion] Connecting to database...');
     await connectDB();
+    console.log('[createSuggestion] Database connected');
 
     // Filter out undefined values to avoid Mongoose issues in serverless
     const dataToCreate = Object.fromEntries(
@@ -54,15 +61,19 @@ export async function createSuggestion(formData: FormData) {
         status: 'pending',
       }).filter(([_, value]) => value !== undefined)
     );
+    console.log('[createSuggestion] Creating suggestion...');
 
     await BookSuggestion.create(dataToCreate);
+    console.log('[createSuggestion] Suggestion created successfully');
 
     revalidatePath('/suggestions');
     return { success: true, message: 'Förslag skapat' };
   } catch (error) {
-    console.error('Error creating suggestion:', error);
+    console.error('[createSuggestion] ERROR:', error);
+    console.error('[createSuggestion] Error stack:', error instanceof Error ? error.stack : 'No stack');
+    console.error('[createSuggestion] Error details:', JSON.stringify(error, null, 2));
     if (error instanceof Error) {
-      return { success: false, error: error.message };
+      return { success: false, error: `${error.name}: ${error.message}` };
     }
     return { success: false, error: 'Kunde inte skapa förslag' };
   }
@@ -171,36 +182,50 @@ export async function deleteSuggestion(suggestionId: string) {
  */
 export async function toggleVote(suggestionId: string) {
   try {
+    console.log('[toggleVote] Starting for suggestion:', suggestionId);
     const session = await requireApproved();
+    console.log('[toggleVote] Session approved, user:', session.user.id);
 
     // Validate input
     const validated = voteSchema.parse({ suggestionId });
+    console.log('[toggleVote] Input validated');
 
+    console.log('[toggleVote] Connecting to database...');
     await connectDB();
+    console.log('[toggleVote] Database connected');
+
+    console.log('[toggleVote] Finding suggestion...');
     const suggestion = await BookSuggestion.findById(validated.suggestionId);
 
     if (!suggestion) {
+      console.error('[toggleVote] Suggestion not found:', validated.suggestionId);
       return { success: false, error: 'Förslag hittades inte' };
     }
+    console.log('[toggleVote] Suggestion found, current votes:', suggestion.votes.length);
 
     // Check if user already voted
     const userVoteIndex = suggestion.votes.findIndex(
       (vote) => vote.toString() === session.user.id
     );
+    console.log('[toggleVote] User vote index:', userVoteIndex);
 
     if (userVoteIndex > -1) {
       // Remove vote - create new array to ensure Mongoose detects the change
+      console.log('[toggleVote] Removing vote');
       suggestion.votes = suggestion.votes.filter(
         (vote) => vote.toString() !== session.user.id
       );
     } else {
       // Add vote - create new array to ensure Mongoose detects the change
+      console.log('[toggleVote] Adding vote');
       suggestion.votes = [...suggestion.votes, new Types.ObjectId(session.user.id)];
     }
 
     // Mark the votes field as modified to ensure Mongoose saves it
     suggestion.markModified('votes');
+    console.log('[toggleVote] Saving suggestion with', suggestion.votes.length, 'votes...');
     await suggestion.save();
+    console.log('[toggleVote] Suggestion saved successfully');
 
     revalidatePath('/suggestions');
     return {
@@ -210,9 +235,11 @@ export async function toggleVote(suggestionId: string) {
       hasVoted: userVoteIndex === -1,
     };
   } catch (error) {
-    console.error('Error toggling vote:', error);
+    console.error('[toggleVote] ERROR:', error);
+    console.error('[toggleVote] Error stack:', error instanceof Error ? error.stack : 'No stack');
+    console.error('[toggleVote] Error details:', JSON.stringify(error, null, 2));
     if (error instanceof Error) {
-      return { success: false, error: error.message };
+      return { success: false, error: `${error.name}: ${error.message}` };
     }
     return { success: false, error: 'Kunde inte rösta' };
   }

@@ -30,6 +30,7 @@ if (!global.mongoose) {
 
 async function connectDB(): Promise<typeof mongoose> {
   if (cached.conn) {
+    console.log('[MongoDB] Using cached connection');
     return cached.conn;
   }
 
@@ -38,14 +39,19 @@ async function connectDB(): Promise<typeof mongoose> {
       bufferCommands: false,
     };
 
+    console.log('[MongoDB] Creating new connection to:', MONGODB_URI?.substring(0, 30) + '...');
     cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongoose) => {
+      console.log('[MongoDB] Connection established successfully');
       return mongoose;
     });
   }
 
   try {
     cached.conn = await cached.promise;
+    console.log('[MongoDB] Connection ready');
   } catch (e) {
+    console.error('[MongoDB] Connection failed:', e);
+    console.error('[MongoDB] Error details:', e instanceof Error ? e.message : 'Unknown error');
     cached.promise = null;
     throw e;
   }
