@@ -1,18 +1,16 @@
-import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Nodemailer from "next-auth/providers/nodemailer";
 
 import { authConfig } from "@/lib/auth.config";
 import dbConnect from "@/lib/mongodb";
-import clientPromise from "@/lib/mongodb-client";
 import User from "@/models/User";
 
 import type { UserRole } from "@/models/User";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  adapter: MongoDBAdapter(clientPromise),
+  // No adapter - we manage users manually with JWT sessions
   debug: process.env.NODE_ENV === 'development',
   providers: [
     Google({
@@ -32,16 +30,50 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   session: {
-    strategy: "jwt", // Temporarily use JWT to test if login works
+    strategy: "jwt", // Using JWT for serverless compatibility
   },
   callbacks: {
     async jwt({ token, user, trigger }) {
-      // On signin or update, fetch the latest user data from database
+      // On signin or update, fetch/create user in database
       if (user || trigger === 'update') {
+        console.log('[Auth JWT] Processing token for user:', user?.email || token.email);
         await dbConnect();
 
-        const email = user?.email || token.email;
-        const dbUser = await User.findOne({ email }).lean();
+        const email = user?.email || token.email as string;
+
+        if (!email) {
+          console.error('[Auth JWT] No email found in user or token');
+          return token;
+        }
+
+        let dbUser = await User.findOne({ email }).lean();
+
+        if (!dbUser && user) {
+          // New user - create in database
+          console.log('[Auth JWT] Creating new user:', email);
+          const isAdmin = email === process.env.ADMIN_EMAIL;
+
+          try {
+            const newUser = await User.create({
+              name: user.name || '',
+              email: email,
+              image: user.image || '',
+              role: isAdmin ? 'admin' : 'pending',
+              isApproved: isAdmin,
+            });
+
+            dbUser = newUser.toObject();
+            console.log('[Auth JWT] User created successfully:', dbUser._id);
+          } catch (error) {
+            console.error('[Auth JWT] Error creating user:', error);
+            // If user creation fails, still allow login with defaults
+            token.id = user.id || email;
+            token.email = email;
+            token.role = email === process.env.ADMIN_EMAIL ? 'admin' : 'pending';
+            token.isApproved = email === process.env.ADMIN_EMAIL;
+            return token;
+          }
+        }
 
         if (dbUser) {
           token.id = dbUser._id.toString();
@@ -56,22 +88,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             // If token was issued before forced logout, invalidate it by returning empty token
             if (tokenIssuedAt < forcedLogoutAt) {
+              console.log('[Auth JWT] User was forced to logout, invalidating token');
               return {}; // This will invalidate the session
             }
           }
-        } else if (user) {
-          // New user - set defaults
-          token.id = user.id;
-          token.email = user.email;
 
-          // Check if this is the admin email
-          if (user.email === process.env.ADMIN_EMAIL) {
-            token.role = 'admin';
-            token.isApproved = true;
-          } else {
-            token.role = 'pending';
-            token.isApproved = false;
-          }
+          console.log('[Auth JWT] Token updated successfully for user:', token.id);
         }
       }
 
