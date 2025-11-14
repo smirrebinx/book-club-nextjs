@@ -92,47 +92,53 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user, trigger }) {
-      // Only process on signin or update
-      if (!user && trigger !== 'update') {
-        return token;
-      }
-
-      console.log('[Auth JWT] Processing token for user:', user?.email || token.email);
-      await dbConnect();
-
-      const email = user?.email || token.email as string;
-      if (!email) {
-        console.error('[Auth JWT] No email found');
-        return token;
-      }
-
-      // Fetch existing user
-      let dbUser = await User.findOne({ email }).lean() as UserLeanDoc | null;
-
-      // Create new user if needed
-      if (!dbUser && user) {
-        try {
-          dbUser = await createNewUser(email, user.name, user.image) as UserLeanDoc;
-        } catch (error) {
-          console.error('[Auth JWT] Error creating user:', error);
-          return getFallbackToken(token, email, user.id);
+      try {
+        // Only process on signin or update
+        if (!user && trigger !== 'update') {
+          return token;
         }
-      }
 
-      // No user found and couldn't create
-      if (!dbUser) {
+        console.log('[Auth JWT] Processing token for user:', user?.email || token.email);
+        await dbConnect();
+
+        const email = user?.email || token.email as string;
+        if (!email) {
+          console.error('[Auth JWT] No email found');
+          return token;
+        }
+
+        // Fetch existing user
+        let dbUser = await User.findOne({ email }).lean() as UserLeanDoc | null;
+
+        // Create new user if needed
+        if (!dbUser && user) {
+          try {
+            dbUser = await createNewUser(email, user.name, user.image) as UserLeanDoc;
+          } catch (error) {
+            console.error('[Auth JWT] Error creating user:', error);
+            return getFallbackToken(token, email, user.id);
+          }
+        }
+
+        // No user found and couldn't create
+        if (!dbUser) {
+          return token;
+        }
+
+        // Check forced logout
+        if (shouldForceLogout(dbUser, token.iat)) {
+          console.log('[Auth JWT] User forced to logout');
+          return {}; // Invalidate session
+        }
+
+        // Populate and return token
+        console.log('[Auth JWT] Token updated for user:', dbUser._id);
+        return populateToken(token, dbUser);
+      } catch (error) {
+        console.error('[Auth JWT] FATAL ERROR:', error);
+        // Return token as-is to prevent session crashes
         return token;
       }
-
-      // Check forced logout
-      if (shouldForceLogout(dbUser, token.iat)) {
-        console.log('[Auth JWT] User forced to logout');
-        return {}; // Invalidate session
-      }
-
-      // Populate and return token
-      console.log('[Auth JWT] Token updated for user:', dbUser._id);
-      return populateToken(token, dbUser);
     },
     async session({ session, token }) {
       // Add data from JWT token to session
