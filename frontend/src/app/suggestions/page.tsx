@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import BookSuggestion from '@/models/BookSuggestion';
+import User from '@/models/User';
 
 import { AddSuggestionForm } from './AddSuggestionForm';
 import { SuggestionsList } from './SuggestionsList';
@@ -25,34 +26,22 @@ export default async function SuggestionsPage() {
 
   await connectDB();
 
-  // Get all suggestions with populated user data
+  // Get all suggestions
   const suggestions = await BookSuggestion.find({
     status: { $in: ['pending', 'approved', 'currently_reading'] },
   })
-    .populate('suggestedBy', 'name email')
     .sort({ createdAt: -1 })
     .lean();
 
-  // Helper function to extract user info from populated field
-  const extractUserInfo = (suggestedByRaw: unknown) => {
-    let userId = '';
-    let userName = 'Okänd';
-
-    if (
-      suggestedByRaw &&
-      typeof suggestedByRaw === 'object' &&
-      'name' in suggestedByRaw
-    ) {
-      const populatedUser = suggestedByRaw as { _id?: { toString(): string }; name?: string };
-      userId = populatedUser._id?.toString() || '';
-      userName = populatedUser.name || 'Okänd';
-    }
-
-    return { userId, userName };
-  };
+  // Manually fetch users to avoid populate issues with MongoDB adapter
+  const userIds = suggestions.map(s => s.suggestedBy).filter(Boolean);
+  const users = await User.find({ _id: { $in: userIds } }).lean();
+  const userMap = new Map(users.map(u => [u._id.toString(), u]));
 
   const suggestionsData = suggestions.map((s) => {
-    const { userId, userName } = extractUserInfo(s.suggestedBy as unknown);
+    const userId = s.suggestedBy?.toString() || '';
+    const user = userId ? userMap.get(userId) : null;
+    const userName = user?.name || 'Okänd';
 
     return {
       _id: s._id.toString(),

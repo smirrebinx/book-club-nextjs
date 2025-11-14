@@ -5,6 +5,7 @@ import { APP_NAME } from "@/constants";
 import { auth } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import BookSuggestion from '@/models/BookSuggestion';
+import User from '@/models/User';
 
 import { VotingList } from './VotingList';
 
@@ -42,25 +43,33 @@ export default async function Vote() {
     const suggestions = await BookSuggestion.find({
       status: { $in: ['pending', 'approved', 'currently_reading'] },
     })
-      .populate('suggestedBy', 'name email')
       .sort({ createdAt: -1 })
       .lean();
 
     console.log('[Vote] Found', suggestions.length, 'suggestions');
 
+    // Manually fetch users to avoid populate issues with MongoDB adapter
+    console.log('[Vote] Fetching users...');
+    const userIds = suggestions.map(s => s.suggestedBy).filter(Boolean);
+    console.log('[Vote] User IDs to fetch:', userIds.map(id => id?.toString()));
+
+    const users = await User.find({ _id: { $in: userIds } }).lean();
+    console.log('[Vote] Found', users.length, 'users out of', userIds.length, 'requested');
+
+    // If no users found, check if ANY users exist in database
+    if (users.length === 0 && userIds.length > 0) {
+      const allUsers = await User.find({}).limit(5).lean();
+      console.log('[Vote] Total users in database:', allUsers.length);
+      console.log('[Vote] Sample users:', allUsers.map(u => ({ id: u._id.toString(), email: u.email })));
+    }
+
+    const userMap = new Map(users.map(u => [u._id.toString(), u]));
+
     console.log('[Vote] Mapping suggestions data...');
     const suggestionsData = suggestions.map((s) => {
-      const suggestedByRaw = s.suggestedBy as unknown;
-      let userName = 'Okänd';
-
-      if (
-        suggestedByRaw &&
-        typeof suggestedByRaw === 'object' &&
-        'name' in suggestedByRaw
-      ) {
-        const populatedUser = suggestedByRaw as { name?: string };
-        userName = populatedUser.name || 'Okänd';
-      }
+      const userId = s.suggestedBy?.toString();
+      const user = userId ? userMap.get(userId) : null;
+      const userName = user?.name || 'Okänd';
 
       return {
         _id: s._id.toString(),
