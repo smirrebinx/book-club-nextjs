@@ -73,8 +73,11 @@ export function SuggestionTableRow({
           className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
           style={{ outlineColor: 'var(--focus-ring)' } as React.CSSProperties}
         >
-          <option value="pending">Väntande</option>
+          <option value="pending">Inväntar röst</option>
+          <option value="approved">Godkänd</option>
           <option value="currently_reading">Läser nu</option>
+          <option value="read">Läst</option>
+          <option value="rejected">Avvisad</option>
         </select>
       </td>
       <td className="px-2 md:px-6 py-4">

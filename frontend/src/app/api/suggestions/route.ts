@@ -26,6 +26,10 @@ interface PopulatedLeanSuggestion {
   status: string;
   createdAt?: Date;
   updatedAt?: Date;
+  coverImage?: string;
+  isbn?: string;
+  googleBooksId?: string;
+  googleDescription?: string;
 }
 
 export async function GET(request: NextRequest) {

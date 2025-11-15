@@ -14,6 +14,7 @@ interface BookData {
   isbn?: string;
   coverImage?: string;
   googleBooksId?: string;
+  description?: string;
 }
 
 export function AddSuggestionForm() {
@@ -25,16 +26,20 @@ export function AddSuggestionForm() {
   const [isbn, setIsbn] = useState('');
   const [coverImage, setCoverImage] = useState('');
   const [googleBooksId, setGoogleBooksId] = useState('');
+  const [googleDescription, setGoogleDescription] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
 
   const handleBookSelect = (book: BookData) => {
+    console.log('[AddSuggestionForm] Book selected:', book);
+    console.log('[AddSuggestionForm] Google description:', book.description);
     setTitle(book.title);
     setAuthor(book.author);
     setIsbn(book.isbn || '');
     setCoverImage(book.coverImage || '');
     setGoogleBooksId(book.googleBooksId || '');
+    setGoogleDescription(book.description || '');
   };
 
   const resetForm = () => {
@@ -44,6 +49,7 @@ export function AddSuggestionForm() {
     setIsbn('');
     setCoverImage('');
     setGoogleBooksId('');
+    setGoogleDescription('');
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -63,6 +69,12 @@ export function AddSuggestionForm() {
     if (isbn) formData.append('isbn', isbn);
     if (coverImage) formData.append('coverImage', coverImage);
     if (googleBooksId) formData.append('googleBooksId', googleBooksId);
+    if (googleDescription) {
+      console.log('[AddSuggestionForm] Adding googleDescription to formData:', googleDescription);
+      formData.append('googleDescription', googleDescription);
+    } else {
+      console.log('[AddSuggestionForm] No googleDescription to add');
+    }
 
     startTransition(async () => {
       const result = await createSuggestion(formData);
@@ -116,7 +128,7 @@ export function AddSuggestionForm() {
         <button
           type="button"
           onClick={() => setShowManualInput(!showManualInput)}
-          className="text-sm text-[var(--secondary-bg)] hover:underline focus:outline-2 focus:outline-offset-2"
+          className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline focus:outline-2 focus:outline-offset-2"
           style={{ outlineColor: 'var(--focus-ring)' }}
         >
           {showManualInput ? '← Tillbaka till sökning' : 'Hittar du inte boken? Skriv in den manuellt →'}
@@ -213,7 +225,8 @@ export function AddSuggestionForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="w-full px-6 py-3 text-lg font-medium rounded-lg bg-[var(--secondary-bg)] text-white hover:bg-white hover:text-[var(--secondary-bg)] border-2 border-[var(--secondary-bg)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-6 py-3 text-lg font-medium rounded-lg bg-[var(--button-secondary-hover-bg)] text-[var(--button-secondary-hover-text)] hover:bg-[var(--button-secondary-bg)] hover:text-[var(--button-secondary-text)] border-2 border-[var(--button-secondary-border)] hover:border-[var(--button-secondary-hover-bg)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2"
+          style={{ outlineColor: 'var(--focus-ring)' }}
         >
           {isPending ? 'Lägger till...' : 'Lägg till förslag'}
         </button>

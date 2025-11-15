@@ -13,6 +13,8 @@ import {
 } from '@/lib/validations/suggestions';
 import BookSuggestion from '@/models/BookSuggestion';
 
+import type { SuggestionStatus } from '@/models/BookSuggestion';
+
 /**
  * Create a new book suggestion
  */
@@ -30,6 +32,7 @@ export async function createSuggestion(formData: FormData) {
       isbn: formData.get('isbn') as string | null,
       coverImage: formData.get('coverImage') as string | null,
       googleBooksId: formData.get('googleBooksId') as string | null,
+      googleDescription: formData.get('googleDescription') as string | null,
     };
     console.log('[createSuggestion] Parsed form data');
 
@@ -45,6 +48,7 @@ export async function createSuggestion(formData: FormData) {
       isbn: validated.isbn,
       coverImage: validated.coverImage,
       googleBooksId: validated.googleBooksId,
+      googleDescription: validated.googleDescription,
     };
     console.log('[createSuggestion] Sanitized inputs');
 
@@ -103,14 +107,14 @@ export async function updateSuggestion(suggestionId: string, formData: FormData)
 
     // Parse form data
     const data = {
-      title: formData.get('title') as string | undefined,
-      author: formData.get('author') as string | undefined,
-      description: formData.get('description') as string | undefined,
+      title: formData.get('title') as string | null,
+      author: formData.get('author') as string | null,
+      description: formData.get('description') as string | null,
     };
 
-    // Remove undefined values
+    // Remove null and undefined values
     const filtered = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== undefined)
+      Object.entries(data).filter(([_, value]) => value !== undefined && value !== null)
     );
 
     // Validate with Zod
@@ -242,5 +246,44 @@ export async function toggleVote(suggestionId: string) {
       return { success: false, error: `${error.name}: ${error.message}` };
     }
     return { success: false, error: 'Kunde inte rösta' };
+  }
+}
+
+/**
+ * Update suggestion status (admin only)
+ */
+export async function updateSuggestionStatus(suggestionId: string, newStatus: string) {
+  try {
+    const session = await requireAuth();
+
+    // Only admins can change status
+    if (session.user.role !== 'admin') {
+      return { success: false, error: 'Du har inte behörighet att ändra status' };
+    }
+
+    await connectDB();
+    const suggestion = await BookSuggestion.findById(suggestionId);
+
+    if (!suggestion) {
+      return { success: false, error: 'Förslag hittades inte' };
+    }
+
+    // Validate status
+    const validStatuses = ['pending', 'approved', 'currently_reading', 'rejected', 'read'];
+    if (!validStatuses.includes(newStatus)) {
+      return { success: false, error: 'Ogiltig status' };
+    }
+
+    suggestion.status = newStatus as SuggestionStatus;
+    await suggestion.save();
+
+    revalidatePath('/suggestions');
+    return { success: true, message: 'Status uppdaterad' };
+  } catch (error) {
+    console.error('Error updating status:', error);
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Kunde inte uppdatera status' };
   }
 }

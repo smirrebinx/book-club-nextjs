@@ -57,6 +57,9 @@ export default async function SuggestionsPage() {
         name: userName,
       },
       createdAt: s.createdAt?.toISOString() || new Date().toISOString(),
+      coverImage: s.coverImage,
+      isbn: s.isbn,
+      googleDescription: s.googleDescription,
     };
   });
 

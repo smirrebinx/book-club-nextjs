@@ -23,6 +23,9 @@ export const createSuggestionSchema = z.object({
     .transform(val => val || undefined),
   googleBooksId: z.union([z.string(), z.null()])
     .optional()
+    .transform(val => val || undefined),
+  googleDescription: z.union([z.string(), z.null()])
+    .optional()
     .transform(val => val || undefined)
 });
 

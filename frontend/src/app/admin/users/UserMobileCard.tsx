@@ -69,7 +69,7 @@ export function UserMobileCard({
       <div className="mb-3">
         <div className="text-xs font-medium text-gray-500 uppercase mb-1">Status</div>
         <StatusBadge variant={user.isApproved ? 'success' : 'warning'}>
-          {user.isApproved ? 'Godkänd' : 'Väntande'}
+          {user.isApproved ? 'Godkänd' : 'Inväntar röst'}
         </StatusBadge>
       </div>
 

@@ -27,6 +27,20 @@
   --focus-ring: #568b7f;
   --focus-border: #568b7f;
 
+  /* Link Colors - WCAG AAA Compliant (7:1+ contrast on white) */
+  --link-color: #2d5a4f; /* Darker brand color - 7.2:1 contrast on white */
+  --link-hover: #1f3d36; /* Even darker for hover - 10.5:1 contrast */
+
+  /* Button Colors - WCAG Compliant */
+  --button-primary-bg: #2d5a4f; /* Darker brand - 7.8:1 with white text */
+  --button-primary-hover: #1f3d36; /* Even darker for hover - 10.5:1 */
+  --button-primary-text: #ffffff;
+  --button-secondary-bg: #ffffff;
+  --button-secondary-border: #568b7f; /* Original brand color for borders */
+  --button-secondary-text: #2d5a4f; /* Accessible text color */
+  --button-secondary-hover-bg: #2d5a4f; /* Fills on hover */
+  --button-secondary-hover-text: #ffffff;
+
   /* Action Colors - WCAG AA Compliant (4.5:1+ contrast on white) */
   --action-success: #166534; /* green-800 - 5.1:1 contrast on white */
   --action-success-hover: #14532d; /* green-900 - 7.4:1 contrast */
@@ -47,6 +61,11 @@
   /* --font-heading and --font-body are defined by Next.js font loader in layout.tsx */
   --font-sans: system-ui, -apple-system, sans-serif;
   --font-mono: 'Courier New', monospace;
+
+  
+/* StatCard colors */
+--statcard-bg: #2d5a4f;     /* Background color for StatCard */
+--statcard-text: #ffffff;   /* Text color for StatCard */
 }
 
 /* Base Styles */
@@ -82,4 +101,51 @@ small, .muted {
 button, a, [role="button"] {
   cursor: pointer;
   text-decoration: none;
+}
+
+/* Link Styles */
+a {
+  color: var(--link-color);
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--link-hover);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Button Styles */
+.btn-primary {
+  background-color: var(--button-primary-bg);
+  color: var(--button-primary-text);
+  border: 2px solid var(--button-primary-bg);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--button-primary-hover);
+  border-color: var(--button-primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--button-secondary-bg);
+  color: var(--button-secondary-text);
+  border: 2px solid var(--button-secondary-border);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--button-secondary-hover-bg);
+  color: var(--button-secondary-hover-text);
+  border-color: var(--button-secondary-hover-bg);
+}
+
+button:focus-visible, .btn-primary:focus-visible, .btn-secondary:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }

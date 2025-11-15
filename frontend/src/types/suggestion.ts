@@ -16,6 +16,9 @@ export interface SuggestionWithVotes {
   };
   createdAt: string;
   updatedAt?: string;
+  coverImage?: string;
+  isbn?: string;
+  googleDescription?: string;
 }
 
 export interface SuggestionFormData {

@@ -2,12 +2,13 @@ import mongoose, { Schema } from 'mongoose';
 
 import type { Model , Types } from 'mongoose';
 
-export type SuggestionStatus = 'pending' | 'approved' | 'currently_reading' | 'rejected';
+export type SuggestionStatus = 'pending' | 'approved' | 'currently_reading' | 'rejected' | 'read';
 
 export interface IBookSuggestion {
   title: string;
   author: string;
   description: string;
+  googleDescription?: string;
   suggestedBy: Types.ObjectId;
   votes: Types.ObjectId[];
   status: SuggestionStatus;
@@ -39,6 +40,12 @@ const BookSuggestionSchema = new Schema<IBookSuggestion>(
       maxlength: 1000,
       default: ''
     },
+    googleDescription: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 2000
+    },
     suggestedBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -50,7 +57,7 @@ const BookSuggestionSchema = new Schema<IBookSuggestion>(
     }],
     status: {
       type: String,
-      enum: ['pending', 'approved', 'currently_reading', 'rejected'],
+      enum: ['pending', 'approved', 'currently_reading', 'rejected', 'read'],
       default: 'pending',
       required: true
     },
