@@ -1,53 +1,59 @@
 import LottieAnimation from "@/components/LottieAnimation";
+import { StatCard, StatGrid } from "@/components/StatCard";
 import { APP_NAME } from "@/constants";
-import connectDB from '@/lib/mongodb';
-import BookSuggestion from '@/models/BookSuggestion';
+import connectDB from "@/lib/mongodb";
+import BookSuggestion from "@/models/BookSuggestion";
 
-import { ReadBooksList } from './ReadBooksList';
+import { ReadBooksList } from "./ReadBooksList";
 
 export const metadata = {
   title: `Lästa böcker - ${APP_NAME}`,
   description: "Se alla böcker som bokklubben har läst och diskuterat.",
 };
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+// Force dynamic rendering for live updates
+export const dynamic = "force-dynamic";
 
 export default async function BooksRead() {
   await connectDB();
 
-  const readBooks = await BookSuggestion.find({ status: 'read' })
-    .populate('suggestedBy', 'name')
+  // Fetch books marked as read
+  const readBooks = await BookSuggestion.find({ status: "read" })
+    .populate("suggestedBy", "name")
     .sort({ updatedAt: -1 })
     .lean();
 
+  // Normalize the books into frontend-friendly objects
   const booksData = readBooks.map((book) => {
     const suggestedByRaw = book.suggestedBy as unknown;
-    let userName = 'Okänd';
 
+    let userName = "Okänd";
     if (
       suggestedByRaw &&
-      typeof suggestedByRaw === 'object' &&
-      'name' in suggestedByRaw
+      typeof suggestedByRaw === "object" &&
+      "name" in suggestedByRaw
     ) {
       const populatedUser = suggestedByRaw as { name?: string };
-      userName = populatedUser.name || 'Okänd';
+      userName = populatedUser.name || "Okänd";
     }
 
     return {
       _id: book._id.toString(),
       title: book.title,
       author: book.author,
-      description: book.description || '',
+      description: book.description || "",
       googleDescription: book.googleDescription,
       coverImage: book.coverImage,
       isbn: book.isbn,
-      suggestedBy: {
-        name: userName,
-      },
+      suggestedBy: { name: userName },
       createdAt: book.createdAt?.toISOString() || new Date().toISOString(),
     };
   });
+
+  // ----------------------------------------------
+  // Stats
+  // ----------------------------------------------
+  const totalReadBooks = booksData.length;
 
   return (
     <div
@@ -62,6 +68,7 @@ export default async function BooksRead() {
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="flex w-full flex-col items-start gap-6 text-left">
+          {/* Top animation */}
           <div className="flex w-full justify-center sm:justify-start">
             <LottieAnimation
               src="/animations/booksStack.lottie"
@@ -72,7 +79,7 @@ export default async function BooksRead() {
             />
           </div>
 
-          {/* Heading */}
+          {/* Page Heading */}
           <h1
             className="px-4 text-3xl leading-10 tracking-wide sm:px-0"
             style={{
@@ -83,7 +90,19 @@ export default async function BooksRead() {
             Lästa böcker
           </h1>
 
-          {/* Content */}
+          {/* Stats Section */}
+          <div className="w-full px-4 sm:px-0" style={{ color: 'inherit' }}>
+            <StatGrid columns={3}>
+              <StatCard
+                label="Antal lästa böcker"
+                value={totalReadBooks}
+                description="Totalt antal böcker lästa av bokklubben"
+                variant="primary"
+              />
+            </StatGrid>
+          </div>
+
+          {/* Books List */}
           <div
             className="flex w-full flex-col gap-6 px-4 sm:px-0"
             style={{
