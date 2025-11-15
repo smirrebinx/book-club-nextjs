@@ -8,6 +8,7 @@ export interface IBookSuggestion {
   title: string;
   author: string;
   description: string;
+  googleDescription?: string;
   suggestedBy: Types.ObjectId;
   votes: Types.ObjectId[];
   status: SuggestionStatus;
@@ -38,6 +39,12 @@ const BookSuggestionSchema = new Schema<IBookSuggestion>(
       trim: true,
       maxlength: 1000,
       default: ''
+    },
+    googleDescription: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 2000
     },
     suggestedBy: {
       type: Schema.Types.ObjectId,

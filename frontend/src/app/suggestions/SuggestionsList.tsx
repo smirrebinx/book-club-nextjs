@@ -10,6 +10,28 @@ import { useToast } from '@/components/Toast';
 
 import { deleteSuggestion } from './actions';
 
+function ExpandableDescription({ description, bookTitle }: { description: string; bookTitle: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const shouldTruncate = description.length > 200;
+
+  return (
+    <div>
+      <p className={`text-sm text-gray-700 ${!isExpanded && shouldTruncate ? 'line-clamp-3' : ''}`}>
+        {description}
+      </p>
+      {shouldTruncate && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline mt-1 focus:outline-2 focus:outline-offset-2"
+          style={{ outlineColor: 'var(--focus-ring)' }}
+        >
+          {isExpanded ? 'Visa mindre' : `Läs mer om ${bookTitle}`}
+        </button>
+      )}
+    </div>
+  );
+}
+
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
 import type { UserRole } from '@/models/User';
@@ -19,6 +41,7 @@ interface Suggestion {
   title: string;
   author: string;
   description: string;
+  googleDescription?: string;
   status: SuggestionStatus;
   votes: string[];
   voteCount: number;
@@ -81,28 +104,70 @@ export function SuggestionsList({
     <div className="space-y-4">
       {suggestions.map((suggestion) => (
         <div key={suggestion._id} className="bg-white rounded-lg shadow p-6">
-          <div className="flex gap-4 mb-4">
-            {suggestion.coverImage && (
-              <div className="relative w-24 h-32 flex-shrink-0">
-                <Image
-                  src={suggestion.coverImage}
-                  alt={`Omslag för ${suggestion.title}`}
-                  fill
-                  sizes="96px"
-                  className="object-cover rounded shadow-sm"
+          {/* Desktop: side-by-side, Mobile: stacked */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            {/* Cover and basic info wrapper - side by side on all screens */}
+            <div className="flex gap-4 sm:flex-1">
+              {suggestion.coverImage && (
+                <div className="relative w-24 h-32 flex-shrink-0">
+                  <Image
+                    src={suggestion.coverImage}
+                    alt={`Omslag för ${suggestion.title}`}
+                    fill
+                    sizes="96px"
+                    className="object-cover rounded shadow-sm"
+                  />
+                </div>
+              )}
+              <div className="flex-1 sm:flex-initial">
+                <h3 className="text-xl font-bold text-gray-900 mb-1">
+                  {suggestion.title}
+                </h3>
+                <p className="text-gray-600 mb-2">av {suggestion.author}</p>
+                {suggestion.isbn && (
+                  <p className="text-xs text-gray-500 mb-2">ISBN: {suggestion.isbn}</p>
+                )}
+                {/* On larger screens, show descriptions here */}
+                <div className="hidden sm:block">
+                  {suggestion.googleDescription && (
+                    <div className="mb-3">
+                      <p className="text-sm font-semibold text-gray-800 mb-1">Om boken:</p>
+                      <ExpandableDescription
+                        description={suggestion.googleDescription}
+                        bookTitle={suggestion.title}
+                      />
+                    </div>
+                  )}
+
+                  {suggestion.description && (
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800 mb-1">Motivation:</p>
+                      <p className="text-gray-700">{suggestion.description}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile only: descriptions below the cover/title section */}
+          <div className="sm:hidden">
+            {suggestion.googleDescription && (
+              <div className="mb-3">
+                <p className="text-sm font-semibold text-gray-800 mb-1">Om boken:</p>
+                <ExpandableDescription
+                  description={suggestion.googleDescription}
+                  bookTitle={suggestion.title}
                 />
               </div>
             )}
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-1">
-                {suggestion.title}
-              </h3>
-              <p className="text-gray-600 mb-2">av {suggestion.author}</p>
-              {suggestion.isbn && (
-                <p className="text-xs text-gray-500 mb-2">ISBN: {suggestion.isbn}</p>
-              )}
-              <p className="text-gray-700">{suggestion.description}</p>
-            </div>
+
+            {suggestion.description && (
+              <div className="mb-3">
+                <p className="text-sm font-semibold text-gray-800 mb-1">Motivation:</p>
+                <p className="text-gray-700">{suggestion.description}</p>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between text-sm text-gray-500">

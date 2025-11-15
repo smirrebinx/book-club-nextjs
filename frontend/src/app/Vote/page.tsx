@@ -84,6 +84,9 @@ export default async function Vote() {
           name: userName,
         },
         createdAt: s.createdAt?.toISOString() || new Date().toISOString(),
+        coverImage: s.coverImage,
+        isbn: s.isbn,
+        googleDescription: s.googleDescription,
       };
     });
 

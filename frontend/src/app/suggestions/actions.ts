@@ -30,6 +30,7 @@ export async function createSuggestion(formData: FormData) {
       isbn: formData.get('isbn') as string | null,
       coverImage: formData.get('coverImage') as string | null,
       googleBooksId: formData.get('googleBooksId') as string | null,
+      googleDescription: formData.get('googleDescription') as string | null,
     };
     console.log('[createSuggestion] Parsed form data');
 
@@ -45,6 +46,7 @@ export async function createSuggestion(formData: FormData) {
       isbn: validated.isbn,
       coverImage: validated.coverImage,
       googleBooksId: validated.googleBooksId,
+      googleDescription: validated.googleDescription,
     };
     console.log('[createSuggestion] Sanitized inputs');
 

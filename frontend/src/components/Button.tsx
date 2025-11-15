@@ -27,38 +27,42 @@ export function Button({
 
   const variantStyles = {
     primary: `
-      bg-[var(--primary-bg)]
-      text-white
-      hover:bg-white
-      hover:text-[var(--primary-bg)]
+      bg-[var(--button-primary-bg)]
+      text-[var(--button-primary-text)]
+      hover:bg-[var(--button-primary-hover)]
       border-2
-      border-[var(--primary-bg)]
-      disabled:hover:bg-[var(--primary-bg)]
-      disabled:hover:text-white
+      border-[var(--button-primary-bg)]
+      hover:border-[var(--button-primary-hover)]
+      disabled:hover:bg-[var(--button-primary-bg)]
+      disabled:hover:border-[var(--button-primary-bg)]
     `,
     secondary: `
-      bg-[var(--secondary-bg)]
-      text-white
-      hover:bg-white
-      hover:text-[var(--secondary-bg)]
+      bg-[var(--button-secondary-bg)]
+      text-[var(--button-secondary-text)]
+      hover:bg-[var(--button-secondary-hover-bg)]
+      hover:text-[var(--button-secondary-hover-text)]
       border-2
-      border-[var(--secondary-bg)]
-      disabled:hover:bg-[var(--secondary-bg)]
-      disabled:hover:text-white
+      border-[var(--button-secondary-border)]
+      hover:border-[var(--button-secondary-hover-bg)]
+      disabled:hover:bg-[var(--button-secondary-bg)]
+      disabled:hover:text-[var(--button-secondary-text)]
+      disabled:hover:border-[var(--button-secondary-border)]
     `,
     outline: `
       border-2
-      border-[var(--primary-border)]
+      border-[var(--button-secondary-border)]
       bg-white
-      text-[var(--primary-text)]
-      hover:bg-[var(--primary-bg)]
-      hover:text-white
+      text-[var(--button-secondary-text)]
+      hover:bg-[var(--button-secondary-hover-bg)]
+      hover:text-[var(--button-secondary-hover-text)]
+      hover:border-[var(--button-secondary-hover-bg)]
       disabled:hover:bg-white
-      disabled:hover:text-[var(--primary-text)]
+      disabled:hover:text-[var(--button-secondary-text)]
+      disabled:hover:border-[var(--button-secondary-border)]
     `,
     ghost: `
       bg-transparent
-      text-[var(--primary-text)]
+      text-[var(--button-secondary-text)]
       hover:bg-gray-100
       border-2
       border-transparent

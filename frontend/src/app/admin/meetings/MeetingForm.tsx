@@ -234,7 +234,7 @@ function FormActions({ isPending, isEditing, onCancel }: FormActionsProps) {
       <button
         type="submit"
         disabled={isPending}
-        className="px-6 py-2.5 bg-[var(--primary-bg)] text-white rounded-md hover:bg-[var(--secondary-bg)] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-colors order-1 sm:order-2"
+        className="px-6 py-2.5 bg-[var(--button-primary-bg)] text-[var(--button-primary-text)] rounded-md hover:bg-[var(--button-primary-hover)] border-2 border-[var(--button-primary-bg)] hover:border-[var(--button-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-all order-1 sm:order-2"
         style={{ outlineColor: 'var(--focus-ring)' }}
       >
         {isPending ? 'Sparar...' : isEditing ? 'Uppdatera möte' : 'Skapa möte'}
