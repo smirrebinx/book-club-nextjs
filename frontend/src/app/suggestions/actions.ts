@@ -105,14 +105,14 @@ export async function updateSuggestion(suggestionId: string, formData: FormData)
 
     // Parse form data
     const data = {
-      title: formData.get('title') as string | undefined,
-      author: formData.get('author') as string | undefined,
-      description: formData.get('description') as string | undefined,
+      title: formData.get('title') as string | null,
+      author: formData.get('author') as string | null,
+      description: formData.get('description') as string | null,
     };
 
-    // Remove undefined values
+    // Remove null and undefined values
     const filtered = Object.fromEntries(
-      Object.entries(data).filter(([_, value]) => value !== undefined)
+      Object.entries(data).filter(([_, value]) => value !== undefined && value !== null)
     );
 
     // Validate with Zod
