@@ -87,8 +87,11 @@ export function SuggestionMobileCard({
           className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
           style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
         >
-          <option value="pending">Väntande</option>
+          <option value="pending">Inväntar röst</option>
+          <option value="approved">Godkänd</option>
           <option value="currently_reading">Läser nu</option>
+          <option value="read">Läst</option>
+          <option value="rejected">Avvisad</option>
         </select>
       </div>
 

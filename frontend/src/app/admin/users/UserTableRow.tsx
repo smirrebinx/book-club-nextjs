@@ -65,7 +65,7 @@ export function UserTableRow({
       </td>
       <td className="px-2 sm:px-4 md:px-6 py-4">
         <StatusBadge variant={user.isApproved ? 'success' : 'warning'}>
-          {user.isApproved ? 'Godkänd' : 'Väntande'}
+          {user.isApproved ? 'Godkänd' : 'Inväntar röst'}
         </StatusBadge>
       </td>
       <td className="px-2 sm:px-4 md:px-6 py-4 text-sm text-gray-500">

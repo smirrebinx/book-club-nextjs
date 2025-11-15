@@ -188,7 +188,7 @@ export function UserManagementTable({
             >
               <option value="">Alla statusar</option>
               <option value="approved">Godkända</option>
-              <option value="pending">Väntande</option>
+              <option value="pending">Inväntar röst</option>
             </select>
           </div>
         </div>

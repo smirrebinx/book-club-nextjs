@@ -30,6 +30,54 @@ function ExpandableDescription({ description, bookTitle }: { description: string
   );
 }
 
+interface StatusBadgeProps {
+  status: SuggestionStatus;
+}
+
+function StatusBadge({ status }: StatusBadgeProps) {
+  const statusConfig = {
+    approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Godkänd' },
+    currently_reading: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Läser nu' },
+    read: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Läst' },
+    pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Inväntar röst' },
+    rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Avvisad' },
+  };
+
+  const config = statusConfig[status] || statusConfig.pending;
+
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+      {config.label}
+    </span>
+  );
+}
+
+interface BookDescriptionsProps {
+  googleDescription?: string;
+  description: string;
+  title: string;
+}
+
+function BookDescriptions({ googleDescription, description, title }: BookDescriptionsProps) {
+  return (
+    <>
+      {googleDescription && (
+        <div className="mb-2 sm:mb-3">
+          <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Om boken:</p>
+          <ExpandableDescription description={googleDescription} bookTitle={title} />
+        </div>
+      )}
+
+      {description && (
+        <div className="mb-2 sm:mb-3">
+          <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Motivering:</p>
+          <p className="text-sm sm:text-base text-gray-700">{description}</p>
+        </div>
+      )}
+    </>
+  );
+}
+
 interface Suggestion {
   _id: string;
   title: string;
@@ -58,7 +106,7 @@ export function VotingList({
   const [optimisticSuggestions, setOptimisticSuggestions] = useOptimistic(suggestions);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  const handleVote = async (suggestionId: string) => {
+  const handleVote = (suggestionId: string) => {
     const suggestion = suggestions.find((s) => s._id === suggestionId);
     if (!suggestion) return;
 
@@ -189,24 +237,11 @@ export function VotingList({
 
                     {/* Desktop: show descriptions here */}
                     <div className="hidden sm:block">
-                      {suggestion.googleDescription && (
-                        <div className="mb-2 sm:mb-3">
-                          <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Om boken:</p>
-                          <ExpandableDescription
-                            description={suggestion.googleDescription}
-                            bookTitle={suggestion.title}
-                          />
-                        </div>
-                      )}
-
-                      {suggestion.description && (
-                        <div className="mb-2 sm:mb-3">
-                          <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Motivering:</p>
-                          <p className="text-sm sm:text-base text-gray-700">
-                            {suggestion.description}
-                          </p>
-                        </div>
-                      )}
+                      <BookDescriptions
+                        googleDescription={suggestion.googleDescription}
+                        description={suggestion.description}
+                        title={suggestion.title}
+                      />
                     </div>
                   </div>
                 </div>
@@ -214,39 +249,18 @@ export function VotingList({
 
               {/* Mobile only: descriptions below cover/title section */}
               <div className="sm:hidden mt-3">
-                {suggestion.googleDescription && (
-                  <div className="mb-3">
-                    <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Om boken:</p>
-                    <ExpandableDescription
-                      description={suggestion.googleDescription}
-                      bookTitle={suggestion.title}
-                    />
-                  </div>
-                )}
-
-                {suggestion.description && (
-                  <div className="mb-3">
-                    <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Motivering:</p>
-                    <p className="text-sm sm:text-base text-gray-700">
-                      {suggestion.description}
-                    </p>
-                  </div>
-                )}
+                <BookDescriptions
+                  googleDescription={suggestion.googleDescription}
+                  description={suggestion.description}
+                  title={suggestion.title}
+                />
               </div>
 
               {/* Footer with metadata */}
               <div className="mt-3">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500">
                   <span>Föreslagen av {suggestion.suggestedBy.name}</span>
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    suggestion.status === 'approved' ? 'bg-green-100 text-green-800' :
-                    suggestion.status === 'currently_reading' ? 'bg-blue-100 text-blue-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {suggestion.status === 'approved' ? 'Godkänd' :
-                     suggestion.status === 'currently_reading' ? 'Läser nu' :
-                     'Väntande'}
-                  </span>
+                  <StatusBadge status={suggestion.status} />
                 </div>
               </div>
             </div>

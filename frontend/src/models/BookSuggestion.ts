@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 
 import type { Model , Types } from 'mongoose';
 
-export type SuggestionStatus = 'pending' | 'approved' | 'currently_reading' | 'rejected';
+export type SuggestionStatus = 'pending' | 'approved' | 'currently_reading' | 'rejected' | 'read';
 
 export interface IBookSuggestion {
   title: string;
@@ -57,7 +57,7 @@ const BookSuggestionSchema = new Schema<IBookSuggestion>(
     }],
     status: {
       type: String,
-      enum: ['pending', 'approved', 'currently_reading', 'rejected'],
+      enum: ['pending', 'approved', 'currently_reading', 'rejected', 'read'],
       default: 'pending',
       required: true
     },
