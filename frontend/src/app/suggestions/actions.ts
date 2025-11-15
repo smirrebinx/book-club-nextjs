@@ -13,6 +13,8 @@ import {
 } from '@/lib/validations/suggestions';
 import BookSuggestion from '@/models/BookSuggestion';
 
+import type { SuggestionStatus } from '@/models/BookSuggestion';
+
 /**
  * Create a new book suggestion
  */
@@ -244,5 +246,44 @@ export async function toggleVote(suggestionId: string) {
       return { success: false, error: `${error.name}: ${error.message}` };
     }
     return { success: false, error: 'Kunde inte rösta' };
+  }
+}
+
+/**
+ * Update suggestion status (admin only)
+ */
+export async function updateSuggestionStatus(suggestionId: string, newStatus: string) {
+  try {
+    const session = await requireAuth();
+
+    // Only admins can change status
+    if (session.user.role !== 'admin') {
+      return { success: false, error: 'Du har inte behörighet att ändra status' };
+    }
+
+    await connectDB();
+    const suggestion = await BookSuggestion.findById(suggestionId);
+
+    if (!suggestion) {
+      return { success: false, error: 'Förslag hittades inte' };
+    }
+
+    // Validate status
+    const validStatuses = ['pending', 'approved', 'currently_reading', 'rejected', 'read'];
+    if (!validStatuses.includes(newStatus)) {
+      return { success: false, error: 'Ogiltig status' };
+    }
+
+    suggestion.status = newStatus as SuggestionStatus;
+    await suggestion.save();
+
+    revalidatePath('/suggestions');
+    return { success: true, message: 'Status uppdaterad' };
+  } catch (error) {
+    console.error('Error updating status:', error);
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Kunde inte uppdatera status' };
   }
 }

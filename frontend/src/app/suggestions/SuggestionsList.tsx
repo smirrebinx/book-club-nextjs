@@ -32,6 +32,28 @@ function ExpandableDescription({ description, bookTitle }: { description: string
   );
 }
 
+interface StatusBadgeProps {
+  status: SuggestionStatus;
+}
+
+function StatusBadge({ status }: StatusBadgeProps) {
+  const statusConfig = {
+    approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Godkänd' },
+    currently_reading: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Läser nu' },
+    read: { bg: 'bg-purple-100', text: 'text-purple-800', label: 'Läst' },
+    pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Inväntar röst' },
+    rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Avvisad' },
+  };
+
+  const config = statusConfig[status] || statusConfig.pending;
+
+  return (
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+      {config.label}
+    </span>
+  );
+}
+
 interface MotivationSectionProps {
   description: string;
   isEditing: boolean;
@@ -280,15 +302,7 @@ export function SuggestionsList({
           <div className="flex items-center justify-between text-sm text-gray-500">
             <div className="flex items-center gap-4">
               <span>Föreslagen av {suggestion.suggestedBy.name}</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                suggestion.status === 'approved' ? 'bg-green-100 text-green-800' :
-                suggestion.status === 'currently_reading' ? 'bg-blue-100 text-blue-800' :
-                'bg-yellow-100 text-yellow-800'
-              }`}>
-                {suggestion.status === 'approved' ? 'Godkänd' :
-                 suggestion.status === 'currently_reading' ? 'Läser nu' :
-                 'Väntande'}
-              </span>
+              <StatusBadge status={suggestion.status} />
             </div>
 
             <div className="flex items-center gap-3">
