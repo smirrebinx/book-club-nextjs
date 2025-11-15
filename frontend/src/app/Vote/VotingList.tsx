@@ -201,7 +201,7 @@ export function VotingList({
 
                       {suggestion.description && (
                         <div className="mb-2 sm:mb-3">
-                          <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Motivation:</p>
+                          <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Motivering:</p>
                           <p className="text-sm sm:text-base text-gray-700">
                             {suggestion.description}
                           </p>
@@ -226,7 +226,7 @@ export function VotingList({
 
                 {suggestion.description && (
                   <div className="mb-3">
-                    <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Motivation:</p>
+                    <p className="text-xs sm:text-sm font-semibold text-gray-800 mb-1">Motivering:</p>
                     <p className="text-sm sm:text-base text-gray-700">
                       {suggestion.description}
                     </p>
