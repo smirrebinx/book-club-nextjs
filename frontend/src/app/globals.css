@@ -61,6 +61,11 @@
   /* --font-heading and --font-body are defined by Next.js font loader in layout.tsx */
   --font-sans: system-ui, -apple-system, sans-serif;
   --font-mono: 'Courier New', monospace;
+
+  
+/* StatCard colors */
+--statcard-bg: #2d5a4f;     /* Background color for StatCard */
+--statcard-text: #ffffff;   /* Text color for StatCard */
 }
 
 /* Base Styles */
