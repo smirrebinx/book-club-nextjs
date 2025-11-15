@@ -13,8 +13,8 @@ export const changeRoleSchema = z.object({
 
 export const updateSuggestionStatusSchema = z.object({
   suggestionId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Ogiltigt förslags-ID'),
-  status: z.enum(['pending', 'approved', 'currently_reading', 'rejected'], {
-    message: 'Status måste vara pending, approved, currently_reading eller rejected'
+  status: z.enum(['pending', 'approved', 'currently_reading', 'read', 'rejected'], {
+    message: 'Status måste vara pending, approved, currently_reading, read eller rejected'
   })
 });
 

@@ -1,12 +1,54 @@
 import LottieAnimation from "@/components/LottieAnimation";
 import { APP_NAME } from "@/constants";
+import connectDB from '@/lib/mongodb';
+import BookSuggestion from '@/models/BookSuggestion';
+
+import { ReadBooksList } from './ReadBooksList';
 
 export const metadata = {
   title: `Lästa böcker - ${APP_NAME}`,
   description: "Se alla böcker som bokklubben har läst och diskuterat.",
 };
 
-export default function BooksRead() {
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
+export default async function BooksRead() {
+  await connectDB();
+
+  const readBooks = await BookSuggestion.find({ status: 'read' })
+    .populate('suggestedBy', 'name')
+    .sort({ updatedAt: -1 })
+    .lean();
+
+  const booksData = readBooks.map((book) => {
+    const suggestedByRaw = book.suggestedBy as unknown;
+    let userName = 'Okänd';
+
+    if (
+      suggestedByRaw &&
+      typeof suggestedByRaw === 'object' &&
+      'name' in suggestedByRaw
+    ) {
+      const populatedUser = suggestedByRaw as { name?: string };
+      userName = populatedUser.name || 'Okänd';
+    }
+
+    return {
+      _id: book._id.toString(),
+      title: book.title,
+      author: book.author,
+      description: book.description || '',
+      googleDescription: book.googleDescription,
+      coverImage: book.coverImage,
+      isbn: book.isbn,
+      suggestedBy: {
+        name: userName,
+      },
+      createdAt: book.createdAt?.toISOString() || new Date().toISOString(),
+    };
+  });
+
   return (
     <div
       className="flex min-h-screen items-start justify-center"
@@ -49,9 +91,7 @@ export default function BooksRead() {
               color: "var(--secondary-text)",
             }}
           >
-            <p className="text-lg leading-7">
-              Här kommer alla böcker som bokklubben har läst och diskuterat att visas.
-            </p>
+            <ReadBooksList books={booksData} />
           </div>
         </div>
       </main>
