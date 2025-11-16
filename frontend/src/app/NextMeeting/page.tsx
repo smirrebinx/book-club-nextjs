@@ -1,3 +1,4 @@
+import { MeetingCard } from "@/components/MeetingCard";
 import { APP_NAME } from "@/constants";
 import connectDB from "@/lib/mongodb";
 import Meeting from "@/models/Meeting";
@@ -104,7 +105,7 @@ export default async function NextMeeting() {
             Bokträffar
           </h1>
 
-        {/* Next Meeting Details */}
+        {/* Next Meeting Card */}
         <div className="w-full px-4 sm:px-0">
           <h2
             className="text-2xl font-semibold mb-4"
@@ -115,75 +116,10 @@ export default async function NextMeeting() {
           >
             Nästa bokträff
           </h2>
-          <div
-            className="flex w-full flex-col gap-6"
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--secondary-text)",
-            }}
-          >
-            {/* Date & Time Section */}
-            <section className="flex flex-col gap-2">
-              <h3
-                className="text-xl font-semibold"
-                style={{ color: "var(--primary-text)" }}
-              >
-                Datum och tid
-              </h3>
-              <p className="text-lg leading-7">
-                {nextMeeting.date}, klockan {nextMeeting.time}
-              </p>
-            </section>
-
-            {/* Location Section */}
-            <section className="flex flex-col gap-2">
-              <h3
-                className="text-xl font-semibold"
-                style={{ color: "var(--primary-text)" }}
-              >
-                Plats
-              </h3>
-              <p className="text-lg leading-7">
-                {nextMeeting.location}
-              </p>
-            </section>
-
-            {/* Book Section */}
-            <section className="flex flex-col gap-2">
-              <h3
-                className="text-xl font-semibold"
-                style={{ color: "var(--primary-text)" }}
-              >
-                Bok
-              </h3>
-              <div className="flex flex-col gap-1">
-                <p className="text-lg leading-7">
-                  <span className="font-semibold">Titel:</span> {nextMeeting.book?.title || 'Ingen bok vald'}
-                </p>
-                <p className="text-lg leading-7">
-                  <span className="font-semibold">Författare:</span> {nextMeeting.book?.author || '-'}
-                </p>
-              </div>
-            </section>
-
-            {/* Additional Info Section */}
-            {nextMeeting.additionalInfo && (
-              <section className="flex flex-col gap-2">
-                <h3
-                  className="text-xl font-semibold"
-                  style={{ color: "var(--primary-text)" }}
-                >
-                  Övrigt
-                </h3>
-                <p className="text-lg leading-7">
-                  {nextMeeting.additionalInfo}
-                </p>
-              </section>
-            )}
-          </div>
+          <MeetingCard meeting={nextMeeting} variant="primary" showFullDetails={true} />
         </div>
 
-        {/* Future Meetings */}
+        {/* Future Meetings Cards */}
         {futureMeetings.length > 0 && (
           <div className="w-full px-4 sm:px-0 mt-8">
             <h2
@@ -195,34 +131,14 @@ export default async function NextMeeting() {
             >
               Kommande bokträffar
             </h2>
-            <div className="space-y-6">
+            <div className="space-y-4">
               {futureMeetings.map((meeting, index) => (
-                <div
+                <MeetingCard
                   key={meeting.id || index}
-                  className="border-l-4 pl-4 py-2"
-                  style={{
-                    borderColor: "var(--primary-border)",
-                    fontFamily: "var(--font-body)",
-                    color: "var(--secondary-text)",
-                  }}
-                >
-                  <p className="text-lg font-semibold" style={{ color: "var(--primary-text)" }}>
-                    {meeting.date}, klockan {meeting.time}
-                  </p>
-                  <p className="text-base mt-1">
-                    <span className="font-semibold">Plats:</span> {meeting.location}
-                  </p>
-                  {meeting.book && (
-                    <p className="text-base mt-1">
-                      <span className="font-semibold">Bok:</span> {meeting.book.title} av {meeting.book.author}
-                    </p>
-                  )}
-                  {meeting.additionalInfo && (
-                    <p className="text-sm mt-2 text-gray-600">
-                      {meeting.additionalInfo}
-                    </p>
-                  )}
-                </div>
+                  meeting={meeting}
+                  variant="secondary"
+                  showFullDetails={false}
+                />
               ))}
             </div>
           </div>
