@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
 
+import { AutoRefresh } from '@/components/AutoRefresh';
 import { auth } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
 import BookSuggestion from '@/models/BookSuggestion';
@@ -65,6 +66,7 @@ export default async function SuggestionsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      <AutoRefresh interval={30} />
       <div className="max-w-7xl mx-auto px-4">
         {/* Hero Section with SVG */}
         <div className="mb-8 flex flex-col items-center text-center">

@@ -1,3 +1,4 @@
+import { AutoRefresh } from "@/components/AutoRefresh";
 import LottieAnimation from "@/components/LottieAnimation";
 import { StatCard, StatGrid } from "@/components/StatCard";
 import { APP_NAME } from "@/constants";
@@ -73,6 +74,7 @@ export default async function BooksRead() {
         color: "var(--secondary-text)",
       }}
     >
+      <AutoRefresh interval={30} />
       <main
         className="flex w-full max-w-3xl flex-col items-start gap-8 px-4 py-4 sm:px-16 sm:py-8"
         style={{ backgroundColor: "var(--background)" }}
@@ -99,7 +101,7 @@ export default async function BooksRead() {
           >
             Lästa böcker
           </h1>
-          <p className="text-gray-600">Här kan du se vilka böcker bokklubben har läst.</p>
+          <p className="text-gray-600">Här kan du se vilken bok bokklubben läser just nu och vilka böcker vi har läst tidigare.</p>
 
           {/* Stats Section */}
           <div className="w-full px-4 sm:px-0" style={{ color: 'inherit' }}>

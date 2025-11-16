@@ -1,3 +1,4 @@
+import { AutoRefresh } from '@/components/AutoRefresh';
 import connectDB from '@/lib/mongodb';
 import BookSuggestion from '@/models/BookSuggestion';
 
@@ -55,6 +56,7 @@ export default async function AdminSuggestionsPage() {
 
   return (
     <div>
+      <AutoRefresh interval={10} />
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Bokförslag</h1>

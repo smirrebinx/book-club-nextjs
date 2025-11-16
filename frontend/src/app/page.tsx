@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { AutoRefresh } from '@/components/AutoRefresh';
 import LottieAnimation from "@/components/LottieAnimation";
 import NextMeetingCard from "@/components/NextMeetingCard";
 import { APP_NAME } from "@/constants";
@@ -68,6 +69,7 @@ export default async function Home() {
       className="flex min-h-screen items-start justify-center"
       style={{ backgroundColor: "var(--background)", color: "var(--secondary-text)" }}
     >
+      <AutoRefresh interval={30} />
       <main
         className="flex w-full max-w-3xl flex-col items-start pt-4 pb-8 px-4 sm:pt-8 sm:pb-16 sm:px-16"
         style={{ backgroundColor: "var(--background)" }}

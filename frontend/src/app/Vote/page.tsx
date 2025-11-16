@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
 
+import { AutoRefresh } from '@/components/AutoRefresh';
 import { APP_NAME } from "@/constants";
 import { auth } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
@@ -141,6 +142,7 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
 }) {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
+      <AutoRefresh interval={30} />
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-6 w-full max-w-[200px]">
