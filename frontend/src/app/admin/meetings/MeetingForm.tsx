@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 
-import type { Meeting } from '@/types/meeting';
+import type { BookInfo, Meeting } from '@/types/meeting';
 
 interface MeetingFormProps {
   meeting?: Meeting;
+  currentBook?: BookInfo;
   onSubmit: (formData: FormData) => Promise<void>;
   isPending: boolean;
   onCancel: () => void;
@@ -146,12 +147,21 @@ interface BookFieldsProps {
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   isPending: boolean;
+  isEditing: boolean;
+  hasCurrentBook: boolean;
 }
 
-function BookFields({ formData, handleChange, isPending }: BookFieldsProps) {
+function BookFields({ formData, handleChange, isPending, isEditing, hasCurrentBook }: BookFieldsProps) {
   return (
     <div className="border-t border-[var(--primary-border)] pt-6">
-      <h3 className="text-base font-medium text-[var(--primary-text)] mb-4">Bokinformation</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-base font-medium text-[var(--primary-text)]">Bokinformation</h3>
+        {!isEditing && hasCurrentBook && (
+          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+            Auto-ifylld från &quot;Läser nu&quot;
+          </span>
+        )}
+      </div>
 
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -256,30 +266,37 @@ const EMPTY_FORM_DATA = {
   additionalInfo: '',
 };
 
-function getInitialFormData(meeting?: Meeting) {
-  if (!meeting) {
-    return EMPTY_FORM_DATA;
-  }
+function getBookFormData(book?: BookInfo) {
+  return {
+    bookId: book?.id || '',
+    bookTitle: book?.title || '',
+    bookAuthor: book?.author || '',
+    bookCoverImage: book?.coverImage || '',
+    bookIsbn: book?.isbn || '',
+  };
+}
 
-  const book = meeting.book || {};
-
+function getMeetingFormData(meeting: Meeting) {
   return {
     id: meeting.id || '',
     date: meeting.date || '',
     time: meeting.time || '',
     location: meeting.location || '',
-    bookId: book.id || '',
-    bookTitle: book.title || '',
-    bookAuthor: book.author || '',
-    bookCoverImage: book.coverImage || '',
-    bookIsbn: book.isbn || '',
     additionalInfo: meeting.additionalInfo || '',
   };
 }
 
-export function MeetingForm({ meeting, onSubmit, isPending, onCancel }: MeetingFormProps) {
+function getInitialFormData(meeting?: Meeting, currentBook?: BookInfo) {
+  if (!meeting) {
+    return { ...EMPTY_FORM_DATA, ...getBookFormData(currentBook) };
+  }
+
+  return { ...getMeetingFormData(meeting), ...getBookFormData(meeting.book) };
+}
+
+export function MeetingForm({ meeting, currentBook, onSubmit, isPending, onCancel }: MeetingFormProps) {
   const isEditing = !!meeting;
-  const [formData, setFormData] = useState(getInitialFormData(meeting));
+  const [formData, setFormData] = useState(getInitialFormData(meeting, currentBook));
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -306,6 +323,8 @@ export function MeetingForm({ meeting, onSubmit, isPending, onCancel }: MeetingF
         formData={formData}
         handleChange={handleChange}
         isPending={isPending}
+        isEditing={isEditing}
+        hasCurrentBook={!!currentBook}
       />
 
       <div>

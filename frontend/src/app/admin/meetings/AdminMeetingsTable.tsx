@@ -12,13 +12,14 @@ import { MeetingForm } from './MeetingForm';
 import { MeetingMobileCard } from './MeetingMobileCard';
 import { MeetingTableRow } from './MeetingTableRow';
 
-import type { Meeting } from '@/types/meeting';
+import type { BookInfo, Meeting } from '@/types/meeting';
 
 interface AdminMeetingsTableProps {
   meetings: Meeting[];
+  currentBook?: BookInfo;
 }
 
-export function AdminMeetingsTable({ meetings }: AdminMeetingsTableProps) {
+export function AdminMeetingsTable({ meetings, currentBook }: AdminMeetingsTableProps) {
   const router = useRouter();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -119,6 +120,7 @@ export function AdminMeetingsTable({ meetings }: AdminMeetingsTableProps) {
           </h2>
           <MeetingForm
             meeting={editingMeeting}
+            currentBook={currentBook}
             onSubmit={handleSubmit}
             isPending={isPending}
             onCancel={handleCancelForm}
