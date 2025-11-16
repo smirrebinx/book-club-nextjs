@@ -27,7 +27,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
             color: "var(--primary-text)",
           }}
         >
-          Bokträffar
+          Nästa bokträff
         </h2>
 
         {/* Meeting Summary */}
