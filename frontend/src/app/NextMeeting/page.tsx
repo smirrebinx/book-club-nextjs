@@ -104,6 +104,9 @@ export default async function NextMeeting() {
           >
             Bokträffar
           </h1>
+            <p className="text-gray-600">
+            Här hittar du information om nästa bokträff och de kommande träffarna.
+          </p>
 
         {/* Next Meeting Card */}
         <div className="w-full px-4 sm:px-0">
