@@ -89,6 +89,7 @@ export default async function BooksRead() {
           >
             Lästa böcker
           </h1>
+          <p className="text-gray-600">Här kan du se vilka böcker bokklubben har läst.</p>
 
           {/* Stats Section */}
           <div className="w-full px-4 sm:px-0" style={{ color: 'inherit' }}>

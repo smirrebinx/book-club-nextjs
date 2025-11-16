@@ -1,3 +1,4 @@
+import { MeetingCard } from "@/components/MeetingCard";
 import { APP_NAME } from "@/constants";
 import connectDB from "@/lib/mongodb";
 import Meeting from "@/models/Meeting";
@@ -10,40 +11,54 @@ import type { MeetingData } from "@/types/meeting";
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: `Nästa bokträff - ${APP_NAME}`,
+  title: `Bokträffar - ${APP_NAME}`,
   description: "Information om nästa bokträff: datum, tid, plats och vilken bok vi ska läsa.",
 };
 
-async function getNextMeeting(): Promise<MeetingData | null> {
+async function getUpcomingMeetings(): Promise<MeetingData[]> {
   try {
     await connectDB();
 
-    // Get the most recently created meeting
-    const meeting = await Meeting.findOne({}).sort({ createdAt: -1 }).lean();
+    // Get all meetings
+    const allMeetings = await Meeting.find({}).lean();
 
-    if (!meeting) {
-      return null;
-    }
+    // Get today's date at midnight for comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    // Convert MongoDB document to plain object and transform _id to id
-    return {
+    // Filter and sort future meetings
+    const futureMeetings = allMeetings
+      .filter(m => {
+        if (!m.date) return false;
+        const meetingDate = new Date(m.date);
+        return meetingDate >= today;
+      })
+      .sort((a, b) => {
+        if (!a.date || !b.date) return 0;
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return dateA - dateB;
+      });
+
+    // Convert to plain objects
+    return futureMeetings.map(meeting => ({
       id: meeting.id,
       date: meeting.date,
       time: meeting.time,
       location: meeting.location,
       book: meeting.book,
       additionalInfo: meeting.additionalInfo,
-    } as MeetingData;
+    } as MeetingData));
   } catch (error) {
-    console.error('Error fetching next meeting:', error);
-    return null;
+    console.error('Error fetching upcoming meetings:', error);
+    return [];
   }
 }
 
 export default async function NextMeeting() {
-  const meetingData = await getNextMeeting();
+  const upcomingMeetings = await getUpcomingMeetings();
 
-  if (!meetingData) {
+  if (upcomingMeetings.length === 0) {
     return (
       <div
         className="flex min-h-screen items-center justify-center"
@@ -53,11 +68,15 @@ export default async function NextMeeting() {
         }}
       >
         <main className="flex w-full max-w-3xl flex-col items-center gap-8 px-4 py-8">
-          <p className="text-lg">Ingen bokträff hittades. Kontrollera att databasen är konfigurerad korrekt.</p>
+          <p className="text-lg">Inga kommande bokträffar planerade.</p>
         </main>
       </div>
     );
   }
+
+  // Get the next (soonest) meeting
+  const nextMeeting = upcomingMeetings[0];
+  const futureMeetings = upcomingMeetings.slice(1);
   return (
     <div
       className="flex min-h-screen items-start justify-center"
@@ -83,74 +102,50 @@ export default async function NextMeeting() {
               color: "var(--primary-text)",
             }}
           >
-            Nästa bokträff
+            Bokträffar
           </h1>
+            <p className="text-gray-600">
+            Här hittar du information om nästa bokträff och de kommande träffarna.
+          </p>
 
-        {/* Meeting Details */}
-        <div
-          className="flex w-full flex-col gap-6 px-4 sm:px-0"
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--secondary-text)",
-          }}
-        >
-          {/* Date & Time Section */}
-          <section className="flex flex-col gap-2">
-            <h2
-              className="text-xl font-semibold"
-              style={{ color: "var(--primary-text)" }}
-            >
-              Datum och tid
-            </h2>
-            <p className="text-lg leading-7">
-              {meetingData.date}, klockan {meetingData.time}
-            </p>
-          </section>
-
-          {/* Location Section */}
-          <section className="flex flex-col gap-2">
-            <h2
-              className="text-xl font-semibold"
-              style={{ color: "var(--primary-text)" }}
-            >
-              Plats
-            </h2>
-            <p className="text-lg leading-7">
-              {meetingData.location}
-            </p>
-          </section>
-
-          {/* Book Section */}
-          <section className="flex flex-col gap-2">
-            <h2
-              className="text-xl font-semibold"
-              style={{ color: "var(--primary-text)" }}
-            >
-              Bok
-            </h2>
-            <div className="flex flex-col gap-1">
-              <p className="text-lg leading-7">
-                <span className="font-semibold">Titel:</span> {meetingData.book?.title || 'Ingen bok vald'}
-              </p>
-              <p className="text-lg leading-7">
-                <span className="font-semibold">Författare:</span> {meetingData.book?.author || '-'}
-              </p>
-            </div>
-          </section>
-
-          {/* Additional Info Section */}
-          <section className="flex flex-col gap-2">
-            <h2
-              className="text-xl font-semibold"
-              style={{ color: "var(--primary-text)" }}
-            >
-              Övrigt
-            </h2>
-            <p className="text-lg leading-7">
-              {meetingData.additionalInfo}
-            </p>
-          </section>
+        {/* Next Meeting Card */}
+        <div className="w-full px-4 sm:px-0">
+          <h2
+            className="text-2xl font-semibold mb-4"
+            style={{
+              fontFamily: "var(--font-heading)",
+              color: "var(--primary-text)",
+            }}
+          >
+            Nästa bokträff
+          </h2>
+          <MeetingCard meeting={nextMeeting} variant="primary" showFullDetails={true} />
         </div>
+
+        {/* Future Meetings Cards */}
+        {futureMeetings.length > 0 && (
+          <div className="w-full px-4 sm:px-0 mt-8">
+            <h2
+              className="text-2xl font-semibold mb-4"
+              style={{
+                fontFamily: "var(--font-heading)",
+                color: "var(--primary-text)",
+              }}
+            >
+              Kommande bokträffar
+            </h2>
+            <div className="space-y-4">
+              {futureMeetings.map((meeting, index) => (
+                <MeetingCard
+                  key={meeting.id || index}
+                  meeting={meeting}
+                  variant="secondary"
+                  showFullDetails={false}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         </div>
       </main>
     </div>

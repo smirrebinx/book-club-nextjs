@@ -25,7 +25,7 @@ const getNavLinks = (role?: string, isApproved?: boolean, pendingCount?: number)
   // Only show navigation links to approved users
   if (isApproved) {
     links.push(
-      { href: "/NextMeeting", label: "Nästa bokträff" },
+      { href: "/NextMeeting", label: "Bokträffar" },
       { href: "/BooksRead", label: "Lästa böcker" },
       { href: "/suggestions", label: "Bokförslag" },
       { href: "/Vote", label: "Rösta" }

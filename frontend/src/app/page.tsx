@@ -3,12 +3,16 @@ import { redirect } from 'next/navigation';
 import LottieAnimation from "@/components/LottieAnimation";
 import NextMeetingCard from "@/components/NextMeetingCard";
 import { APP_NAME } from "@/constants";
-import { nextMeetingData } from "@/data/nextMeeting";
 import { auth } from '@/lib/auth';
+import connectDB from '@/lib/mongodb';
+import Meeting from '@/models/Meeting';
 
 export const metadata = {
   title: APP_NAME,
 };
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const session = await auth();
@@ -17,6 +21,48 @@ export default async function Home() {
   if (session?.user && !session.user.isApproved) {
     redirect('/auth/pending');
   }
+
+  // Fetch all meetings from database
+  await connectDB();
+  const allMeetings = await Meeting.find({}).lean();
+
+  // Get today's date at midnight for comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Filter and sort future meetings
+  const futureMeetings = allMeetings
+    .filter(m => {
+      if (!m.date) return false;
+      const meetingDate = new Date(m.date);
+      return meetingDate >= today;
+    })
+    .sort((a, b) => {
+      if (!a.date || !b.date) return 0;
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateA - dateB;
+    });
+
+  // Get the next (soonest) meeting
+  const nextMeeting = futureMeetings[0] || null;
+
+  // Format meeting data for the card
+  const meetingData = nextMeeting ? {
+    id: nextMeeting.id || nextMeeting._id.toString(),
+    date: nextMeeting.date || '',
+    time: nextMeeting.time || '',
+    location: nextMeeting.location || '',
+    book: nextMeeting.book,
+    additionalInfo: nextMeeting.additionalInfo,
+  } : {
+    id: '',
+    date: 'Inget möte planerat',
+    time: '',
+    location: '',
+    book: undefined,
+    additionalInfo: '',
+  };
   return (
     <div
       className="flex min-h-screen items-start justify-center"
@@ -61,7 +107,7 @@ export default async function Home() {
 
           {/* Next Meeting Card */}
           <div className="w-full px-4 sm:px-0">
-            <NextMeetingCard meetingData={nextMeetingData} />
+            <NextMeetingCard meetingData={meetingData} />
           </div>
         </div>
       </main>
