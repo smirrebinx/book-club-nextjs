@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import { useState } from 'react';
 
+import { BookPlaceholder } from '@/components/BookPlaceholder';
+
 interface ReadBook {
   _id: string;
   title: string;
@@ -83,8 +85,8 @@ export function ReadBooksList({ books }: { books: ReadBook[] }) {
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             {/* Cover and basic info wrapper - side by side on all screens */}
             <div className="flex gap-4 sm:flex-1">
-              {book.coverImage && (
-                <div className="relative w-24 h-32 flex-shrink-0">
+              <div className="relative w-24 h-32 flex-shrink-0">
+                {book.coverImage ? (
                   <Image
                     src={book.coverImage}
                     alt={`Omslag för ${book.title}`}
@@ -92,8 +94,10 @@ export function ReadBooksList({ books }: { books: ReadBook[] }) {
                     sizes="96px"
                     className="object-cover rounded shadow-sm"
                   />
-                </div>
-              )}
+                ) : (
+                  <BookPlaceholder />
+                )}
+              </div>
               <div className="flex-1 sm:flex-initial">
                 <h2 className="text-xl font-bold text-gray-900 mb-1">
                   {book.title}
