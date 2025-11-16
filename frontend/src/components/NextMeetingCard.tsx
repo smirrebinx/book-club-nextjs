@@ -16,7 +16,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
         backgroundColor: "var(--background)",
         outlineColor: "var(--focus-ring)",
       }}
-      aria-label="Visa information om nästa bokträff"
+      aria-label="Visa information om bokträffar"
     >
       <article className="flex flex-col gap-4">
         {/* Card Title */}
@@ -27,7 +27,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
             color: "var(--primary-text)",
           }}
         >
-          Nästa bokträff
+          Bokträffar
         </h2>
 
         {/* Meeting Summary */}
@@ -75,7 +75,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
               color: "var(--secondary-text)",
             }}
           >
-            Gå till sidan Nästa bokträff
+            Gå till sidan Bokträffar
           </span>
           <svg
             className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"

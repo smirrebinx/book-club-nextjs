@@ -10,7 +10,7 @@ import type { MeetingData } from "@/types/meeting";
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-  title: `Nästa bokträff - ${APP_NAME}`,
+  title: `Bokträffar - ${APP_NAME}`,
   description: "Information om nästa bokträff: datum, tid, plats och vilken bok vi ska läsa.",
 };
 
@@ -83,7 +83,7 @@ export default async function NextMeeting() {
               color: "var(--primary-text)",
             }}
           >
-            Nästa bokträff
+            Bokträffar
           </h1>
 
         {/* Meeting Details */}
