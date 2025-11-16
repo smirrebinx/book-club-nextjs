@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 
+import { BookPlaceholder } from './BookPlaceholder';
+
 interface BookResult {
   id: string;
   title: string;
@@ -155,8 +157,8 @@ export function BookSearchInput({ onSelectBook, disabled = false }: BookSearchIn
               aria-label={`Välj boken ${book.title} av ${book.author}`}
             >
               <div className="flex gap-3">
-                {book.coverImage && (
-                  <div className="relative w-12 h-16 flex-shrink-0">
+                <div className="relative w-12 h-16 flex-shrink-0">
+                  {book.coverImage ? (
                     <Image
                       src={book.coverImage}
                       alt=""
@@ -164,8 +166,10 @@ export function BookSearchInput({ onSelectBook, disabled = false }: BookSearchIn
                       sizes="48px"
                       className="object-cover rounded"
                     />
-                  </div>
-                )}
+                  ) : (
+                    <BookPlaceholder />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gray-900 truncate">
                     {book.title}
