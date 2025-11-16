@@ -17,14 +17,20 @@ export const dynamic = "force-dynamic";
 export default async function BooksRead() {
   await connectDB();
 
+  // Fetch the book currently being read
+  const currentlyReadingBooks = await BookSuggestion.find({ status: "currently_reading" })
+    .populate("suggestedBy", "name")
+    .sort({ updatedAt: -1 })
+    .lean();
+
   // Fetch books marked as read
   const readBooks = await BookSuggestion.find({ status: "read" })
     .populate("suggestedBy", "name")
     .sort({ updatedAt: -1 })
     .lean();
 
-  // Normalize the books into frontend-friendly objects
-  const booksData = readBooks.map((book) => {
+  // Helper function to normalize book data
+  const normalizeBook = (book: typeof readBooks[0]) => {
     const suggestedByRaw = book.suggestedBy as unknown;
 
     let userName = "Okänd";
@@ -48,7 +54,11 @@ export default async function BooksRead() {
       suggestedBy: { name: userName },
       createdAt: book.createdAt?.toISOString() || new Date().toISOString(),
     };
-  });
+  };
+
+  // Normalize the books into frontend-friendly objects
+  const currentlyReadingData = currentlyReadingBooks.map(normalizeBook);
+  const booksData = readBooks.map(normalizeBook);
 
   // ----------------------------------------------
   // Stats
@@ -103,15 +113,50 @@ export default async function BooksRead() {
             </StatGrid>
           </div>
 
-          {/* Books List */}
-          <div
-            className="flex w-full flex-col gap-6 px-4 sm:px-0"
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--secondary-text)",
-            }}
-          >
-            <ReadBooksList books={booksData} />
+          {/* Currently Reading Section */}
+          {currentlyReadingData.length > 0 && (
+            <div className="w-full px-4 sm:px-0">
+              <h2
+                className="text-2xl font-bold mb-4"
+                style={{
+                  fontFamily: "var(--font-heading)",
+                  color: "var(--primary-text)",
+                }}
+              >
+                Läser nu
+              </h2>
+              <div
+                className="flex w-full flex-col gap-6"
+                style={{
+                  fontFamily: "var(--font-body)",
+                  color: "var(--secondary-text)",
+                }}
+              >
+                <ReadBooksList books={currentlyReadingData} />
+              </div>
+            </div>
+          )}
+
+          {/* Read Books List */}
+          <div className="w-full px-4 sm:px-0">
+            <h2
+              className="text-2xl font-bold mb-4"
+              style={{
+                fontFamily: "var(--font-heading)",
+                color: "var(--primary-text)",
+              }}
+            >
+              Lästa böcker
+            </h2>
+            <div
+              className="flex w-full flex-col gap-6"
+              style={{
+                fontFamily: "var(--font-body)",
+                color: "var(--secondary-text)",
+              }}
+            >
+              <ReadBooksList books={booksData} />
+            </div>
           </div>
         </div>
       </main>

@@ -9,6 +9,8 @@ import User from '@/models/User';
 
 import { VotingList } from './VotingList';
 
+import type { SuggestionStatus } from '@/models/BookSuggestion';
+
 export const metadata = {
   title: `Rösta - ${APP_NAME}`,
   description: "Rösta på nästa bok som bokklubben ska läsa.",
@@ -17,84 +19,124 @@ export const metadata = {
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-export default async function Vote() {
-  try {
-    console.log('[Vote] Starting Vote page render');
-    const session = await auth();
-    console.log('[Vote] Session retrieved, user:', session?.user?.id);
+// Type definitions
+interface LeanUser {
+  _id: { toString: () => string };
+  name?: string;
+  email?: string;
+}
 
-    // Redirect pending users
-    if (session?.user && !session.user.isApproved) {
-      console.log('[Vote] User not approved, redirecting to pending');
-      redirect('/auth/pending');
-    }
+interface LeanSuggestion {
+  _id: { toString: () => string };
+  suggestedBy?: { toString: () => string };
+  title: string;
+  author: string;
+  description?: string;
+  status: SuggestionStatus;
+  votes?: { toString: () => string }[];
+  createdAt?: Date;
+  coverImage?: string;
+  isbn?: string;
+  googleDescription?: string;
+}
 
-    if (!session?.user) {
-      console.log('[Vote] No session, redirecting to signin');
-      redirect('/auth/signin');
-    }
+interface VoteSuggestion {
+  _id: string;
+  title: string;
+  author: string;
+  description: string;
+  status: SuggestionStatus;
+  votes: string[];
+  voteCount: number;
+  hasVoted: boolean;
+  suggestedBy: { name: string };
+  createdAt: string;
+  coverImage?: string;
+  isbn?: string;
+  googleDescription?: string;
+}
 
-    console.log('[Vote] Connecting to database...');
-    await connectDB();
-    console.log('[Vote] Database connected');
+/**
+ * Fetch users and create a map for quick lookup
+ */
+async function fetchUsersMap(userIds: unknown[]): Promise<Map<string, LeanUser>> {
+  console.log('[Vote] Fetching users...');
+  const users = await User.find({ _id: { $in: userIds } }).lean() as LeanUser[];
+  console.log('[Vote] Found', users.length, 'users');
 
-    // Get all suggestions with pending status for voting
-    console.log('[Vote] Fetching suggestions...');
-    const suggestions = await BookSuggestion.find({
-      status: { $in: ['pending', 'approved', 'currently_reading'] },
-    })
-      .sort({ createdAt: -1 })
-      .lean();
+  if (users.length === 0 && userIds.length > 0) {
+    const allUsers = await User.find({}).limit(5).lean() as LeanUser[];
+    console.log('[Vote] Total users in database:', allUsers.length);
+  }
 
-    console.log('[Vote] Found', suggestions.length, 'suggestions');
+  return new Map(users.map(u => [u._id.toString(), u]));
+}
 
-    // Manually fetch users to avoid populate issues with MongoDB adapter
-    console.log('[Vote] Fetching users...');
-    const userIds = suggestions.map(s => s.suggestedBy).filter(Boolean);
-    console.log('[Vote] User IDs to fetch:', userIds.map(id => id?.toString()));
+/**
+ * Map a single suggestion to frontend format
+ */
+function mapSuggestion(s: LeanSuggestion, userMap: Map<string, LeanUser>, userId: string): VoteSuggestion {
+  const suggestedById = s.suggestedBy?.toString();
+  const user = suggestedById ? userMap.get(suggestedById) : null;
+  const userName = user?.name || 'Okänd';
 
-    const users = await User.find({ _id: { $in: userIds } }).lean();
-    console.log('[Vote] Found', users.length, 'users out of', userIds.length, 'requested');
+  return {
+    _id: s._id.toString(),
+    title: s.title,
+    author: s.author,
+    description: s.description || '',
+    status: s.status,
+    votes: s.votes?.map((v) => v.toString()) || [],
+    voteCount: s.votes?.length || 0,
+    hasVoted: s.votes?.some((v) => v.toString() === userId) || false,
+    suggestedBy: { name: userName },
+    createdAt: s.createdAt?.toISOString() || new Date().toISOString(),
+    coverImage: s.coverImage,
+    isbn: s.isbn,
+    googleDescription: s.googleDescription,
+  };
+}
 
-    // If no users found, check if ANY users exist in database
-    if (users.length === 0 && userIds.length > 0) {
-      const allUsers = await User.find({}).limit(5).lean();
-      console.log('[Vote] Total users in database:', allUsers.length);
-      console.log('[Vote] Sample users:', allUsers.map(u => ({ id: u._id.toString(), email: u.email })));
-    }
+/**
+ * Separate suggestions by status
+ */
+function categorizeBooks(suggestionsData: VoteSuggestion[]) {
+  return {
+    approvedBook: suggestionsData.find(s => s.status === 'approved'),
+    currentlyReadingBook: suggestionsData.find(s => s.status === 'currently_reading'),
+    pendingBooks: suggestionsData.filter(s => s.status === 'pending'),
+  };
+}
 
-    const userMap = new Map(users.map(u => [u._id.toString(), u]));
+/**
+ * Fetch and prepare suggestion data
+ */
+async function fetchSuggestionData(userId: string) {
+  await connectDB();
 
-    console.log('[Vote] Mapping suggestions data...');
-    const suggestionsData = suggestions.map((s) => {
-      const userId = s.suggestedBy?.toString();
-      const user = userId ? userMap.get(userId) : null;
-      const userName = user?.name || 'Okänd';
+  const suggestions = await BookSuggestion.find({
+    status: { $in: ['pending', 'approved', 'currently_reading'] },
+  })
+    .sort({ createdAt: -1 })
+    .lean() as LeanSuggestion[];
 
-      return {
-        _id: s._id.toString(),
-        title: s.title,
-        author: s.author,
-        description: s.description || '',
-        status: s.status,
-        votes: s.votes?.map((v) => v.toString()) || [],
-        voteCount: s.votes?.length || 0,
-        hasVoted: s.votes?.some((v) => v.toString() === session.user.id) || false,
-        suggestedBy: {
-          name: userName,
-        },
-        createdAt: s.createdAt?.toISOString() || new Date().toISOString(),
-        coverImage: s.coverImage,
-        isbn: s.isbn,
-        googleDescription: s.googleDescription,
-      };
-    });
+  const userIds = suggestions.map(s => s.suggestedBy).filter(Boolean);
+  const userMap = await fetchUsersMap(userIds);
 
-    console.log('[Vote] Rendering page with', suggestionsData.length, 'suggestions');
-    return (
+  return suggestions.map(s => mapSuggestion(s, userMap, userId));
+}
+
+/**
+ * Render the voting page content
+ */
+function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
+  approvedBook?: VoteSuggestion;
+  currentlyReadingBook?: VoteSuggestion;
+  pendingBooks: VoteSuggestion[];
+}) {
+  return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Hero Section with SVG */}
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-6 w-full max-w-[200px]">
             <Image
@@ -112,9 +154,58 @@ export default async function Vote() {
           </p>
         </div>
 
-        <VotingList suggestions={suggestionsData} />
+        {approvedBook && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Vinnare</h2>
+            <VotingList suggestions={[approvedBook]} />
+          </div>
+        )}
+
+        {currentlyReadingBook && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Läser nu</h2>
+            <VotingList suggestions={[currentlyReadingBook]} />
+          </div>
+        )}
+
+        {pendingBooks.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Rösta på böcker</h2>
+            <VotingList suggestions={pendingBooks} />
+          </div>
+        )}
+
+        {pendingBooks.length === 0 && !approvedBook && !currentlyReadingBook && (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Inga bokförslag finns ännu. Lägg till ett förslag!</p>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+export default async function Vote() {
+  try {
+    const session = await auth();
+
+    if (session?.user && !session.user.isApproved) {
+      redirect('/auth/pending');
+    }
+
+    if (!session?.user) {
+      redirect('/auth/signin');
+    }
+
+    const suggestionsData = await fetchSuggestionData(session.user.id);
+    const { approvedBook, currentlyReadingBook, pendingBooks } = categorizeBooks(suggestionsData);
+
+    return (
+      <VotePageContent
+        approvedBook={approvedBook}
+        currentlyReadingBook={currentlyReadingBook}
+        pendingBooks={pendingBooks}
+      />
     );
   } catch (error) {
     console.error('[Vote] ERROR:', error);
