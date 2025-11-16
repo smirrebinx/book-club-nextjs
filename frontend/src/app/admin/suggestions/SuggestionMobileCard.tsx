@@ -3,6 +3,7 @@
 import Image from 'next/image';
 
 import { ActionButton } from '@/components/ActionButton';
+import { BookPlaceholder } from '@/components/BookPlaceholder';
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
 
@@ -41,8 +42,8 @@ export function SuggestionMobileCard({
       <div className="mb-3">
         <div className="text-xs font-medium text-gray-500 uppercase mb-2">Bok</div>
         <div className="flex gap-3">
-          {suggestion.coverImage && (
-            <div className="relative w-16 h-20 flex-shrink-0">
+          <div className="relative w-16 h-20 flex-shrink-0">
+            {suggestion.coverImage ? (
               <Image
                 src={suggestion.coverImage}
                 alt={`Omslag för ${suggestion.title}`}
@@ -50,8 +51,10 @@ export function SuggestionMobileCard({
                 sizes="64px"
                 className="object-cover rounded shadow-sm"
               />
-            </div>
-          )}
+            ) : (
+              <BookPlaceholder />
+            )}
+          </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-medium text-gray-900">{suggestion.title}</div>
             <div className="text-sm text-gray-500">{suggestion.author}</div>

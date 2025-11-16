@@ -3,6 +3,7 @@
 import Image from 'next/image';
 
 import { ActionButton } from '@/components/ActionButton';
+import { BookPlaceholder } from '@/components/BookPlaceholder';
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
 
@@ -39,8 +40,8 @@ export function SuggestionTableRow({
     <tr>
       <td className="px-2 md:px-6 py-4">
         <div className="flex gap-3 items-center">
-          {suggestion.coverImage && (
-            <div className="relative w-10 h-14 flex-shrink-0">
+          <div className="relative w-10 h-14 flex-shrink-0">
+            {suggestion.coverImage ? (
               <Image
                 src={suggestion.coverImage}
                 alt=""
@@ -48,8 +49,10 @@ export function SuggestionTableRow({
                 sizes="40px"
                 className="object-cover rounded"
               />
-            </div>
-          )}
+            ) : (
+              <BookPlaceholder />
+            )}
+          </div>
           <div>
             <div className="text-sm font-medium text-gray-900">{suggestion.title}</div>
             <div className="text-sm text-gray-500">{suggestion.author}</div>
