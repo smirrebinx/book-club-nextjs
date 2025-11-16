@@ -37,13 +37,22 @@ async function connectDB(): Promise<typeof mongoose> {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 10000, // 10 seconds timeout
+      socketTimeoutMS: 45000, // 45 seconds socket timeout
     };
 
     console.log('[MongoDB] Creating new connection to:', MONGODB_URI?.substring(0, 30) + '...');
-    cached.promise = mongoose.connect(MONGODB_URI as string, opts).then((mongoose) => {
-      console.log('[MongoDB] Connection established successfully');
-      return mongoose;
-    });
+    cached.promise = mongoose.connect(MONGODB_URI as string, opts)
+      .then((mongoose) => {
+        console.log('[MongoDB] Connection established successfully');
+        return mongoose;
+      })
+      .catch((err) => {
+        console.error('[MongoDB] Failed to connect:', err);
+        cached.promise = null; // Reset promise on error
+        throw err;
+      });
   }
 
   try {
