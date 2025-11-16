@@ -255,3 +255,52 @@ export async function forceLogoutUser(userId: string) {
     return { success: false, error: 'Kunde inte logga ut användare' };
   }
 }
+
+/**
+ * Reset voting cycle (admin only)
+ * Moves currently_reading book to read and approved to pending
+ * Clears all votes to start fresh voting
+ */
+export async function resetVotingCycle() {
+  try {
+    await requireAdmin();
+
+    await connectDB();
+
+    // Move currently_reading book to read (if exists)
+    const currentlyReading = await BookSuggestion.findOne({ status: 'currently_reading' });
+    if (currentlyReading) {
+      currentlyReading.status = 'read';
+      await currentlyReading.save();
+    }
+
+    // Move approved book back to pending (if exists)
+    const approved = await BookSuggestion.findOne({ status: 'approved' });
+    if (approved) {
+      approved.status = 'pending';
+      await approved.save();
+    }
+
+    // Clear all votes from all pending books to start fresh
+    await BookSuggestion.updateMany(
+      { status: 'pending' },
+      { $set: { votes: [] } }
+    );
+
+    revalidatePath('/admin/suggestions');
+    revalidatePath('/suggestions');
+    revalidatePath('/Vote');
+    revalidatePath('/BooksRead');
+
+    return {
+      success: true,
+      message: 'Röstningsomgång återställd. Alla röster har rensats och böcker har flyttats.'
+    };
+  } catch (error) {
+    console.error('Error resetting voting cycle:', error);
+    if (error instanceof Error) {
+      return { success: false, error: error.message };
+    }
+    return { success: false, error: 'Kunde inte återställa röstningsomgång' };
+  }
+}

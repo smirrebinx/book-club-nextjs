@@ -2,6 +2,7 @@ import connectDB from '@/lib/mongodb';
 import BookSuggestion from '@/models/BookSuggestion';
 
 import { AdminSuggestionsTable } from './AdminSuggestionsTable';
+import { ResetVotingButton } from './ResetVotingButton';
 
 // Force dynamic rendering - don't pre-render at build time
 export const dynamic = 'force-dynamic';
@@ -47,11 +48,19 @@ export default async function AdminSuggestionsPage() {
     };
   });
 
+  // Check if there's a currently_reading or approved book
+  const hasActiveVotingCycle = suggestions.some(
+    s => s.status === 'currently_reading' || s.status === 'approved'
+  );
+
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Bokförslag</h1>
-        <p className="text-sm md:text-base text-gray-600 mt-2">Hantera och godkänn bokförslag</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Bokförslag</h1>
+          <p className="text-sm md:text-base text-gray-600 mt-2">Hantera och godkänn bokförslag</p>
+        </div>
+        <ResetVotingButton hasActiveVotingCycle={hasActiveVotingCycle} />
       </div>
 
       <AdminSuggestionsTable suggestions={suggestionsData} />

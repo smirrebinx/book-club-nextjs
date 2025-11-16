@@ -99,11 +99,16 @@ function mapSuggestion(s: LeanSuggestion, userMap: Map<string, LeanUser>, userId
 
 /**
  * Separate suggestions by status
+ * Note: We prioritize currently_reading as the winner if it exists
  */
 function categorizeBooks(suggestionsData: VoteSuggestion[]) {
+  const currentlyReading = suggestionsData.find(s => s.status === 'currently_reading');
+  const approved = suggestionsData.find(s => s.status === 'approved');
+
   return {
-    approvedBook: suggestionsData.find(s => s.status === 'approved'),
-    currentlyReadingBook: suggestionsData.find(s => s.status === 'currently_reading'),
+    // Show currently_reading as winner if it exists, otherwise show approved
+    approvedBook: currentlyReading || approved,
+    currentlyReadingBook: currentlyReading,
     pendingBooks: suggestionsData.filter(s => s.status === 'pending'),
   };
 }
@@ -154,17 +159,11 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
           </p>
         </div>
 
+        {/* Winner Section */}
         {approvedBook && (
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Vinnare</h2>
             <VotingList suggestions={[approvedBook]} />
-          </div>
-        )}
-
-        {currentlyReadingBook && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Läser nu</h2>
-            <VotingList suggestions={[currentlyReadingBook]} />
           </div>
         )}
 
