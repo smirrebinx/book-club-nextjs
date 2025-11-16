@@ -30,7 +30,8 @@ type PartialMeetingUpdate = Partial<{
  */
 function getFormField(formData: FormData, fieldName: string): string | undefined {
   const value = formData.get(fieldName);
-  return value ? (value as string) : undefined;
+  // Return the value if it exists (including empty strings), otherwise undefined
+  return value !== null ? (value as string) : undefined;
 }
 
 /**
@@ -239,7 +240,8 @@ export async function updateMeeting(meetingId: string, formData: FormData) {
     const validated = updateMeetingSchema.parse(data);
     const sanitized = sanitizeMeetingData(validated);
 
-    Object.assign(meeting, sanitized);
+    // Use Mongoose set() to properly handle all updates including empty strings
+    meeting.set(sanitized);
     await meeting.save();
 
     revalidatePath('/admin/meetings');
