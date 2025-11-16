@@ -35,43 +35,41 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt", // Temporarily use JWT to test if login works
   },
   callbacks: {
-    async jwt({ token, user, trigger }) {
-      // On signin or update, fetch the latest user data from database
-      if (user || trigger === 'update') {
-        await dbConnect();
+    async jwt({ token, user }) {
+      // Always fetch the latest user data from database to ensure approval status is current
+      await dbConnect();
 
-        const email = user?.email || token.email;
-        const dbUser = await User.findOne({ email }).lean();
+      const email = user?.email || token.email;
+      const dbUser = await User.findOne({ email }).lean();
 
-        if (dbUser) {
-          token.id = dbUser._id.toString();
-          token.email = dbUser.email;
-          token.role = dbUser.role;
-          token.isApproved = dbUser.isApproved;
+      if (dbUser) {
+        token.id = dbUser._id.toString();
+        token.email = dbUser.email;
+        token.role = dbUser.role;
+        token.isApproved = dbUser.isApproved;
 
-          // Check if admin has forced this user to logout
-          if (dbUser.forcedLogoutAt) {
-            const tokenIssuedAt = token.iat ? new Date(token.iat * 1000) : new Date(0);
-            const forcedLogoutAt = new Date(dbUser.forcedLogoutAt);
+        // Check if admin has forced this user to logout
+        if (dbUser.forcedLogoutAt) {
+          const tokenIssuedAt = token.iat ? new Date(token.iat * 1000) : new Date(0);
+          const forcedLogoutAt = new Date(dbUser.forcedLogoutAt);
 
-            // If token was issued before forced logout, invalidate it by returning empty token
-            if (tokenIssuedAt < forcedLogoutAt) {
-              return {}; // This will invalidate the session
-            }
+          // If token was issued before forced logout, invalidate it by returning empty token
+          if (tokenIssuedAt < forcedLogoutAt) {
+            return {}; // This will invalidate the session
           }
-        } else if (user) {
-          // New user - set defaults
-          token.id = user.id;
-          token.email = user.email;
+        }
+      } else if (user) {
+        // New user - set defaults
+        token.id = user.id;
+        token.email = user.email;
 
-          // Check if this is the admin email
-          if (user.email === process.env.ADMIN_EMAIL) {
-            token.role = 'admin';
-            token.isApproved = true;
-          } else {
-            token.role = 'pending';
-            token.isApproved = false;
-          }
+        // Check if this is the admin email
+        if (user.email === process.env.ADMIN_EMAIL) {
+          token.role = 'admin';
+          token.isApproved = true;
+        } else {
+          token.role = 'pending';
+          token.isApproved = false;
         }
       }
 
