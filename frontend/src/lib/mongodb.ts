@@ -29,35 +29,45 @@ if (!global.mongoose) {
 }
 
 async function connectDB(): Promise<typeof mongoose> {
-  if (cached.conn) {
+  // Check if we have a valid cached connection
+  if (cached.conn && cached.conn.connection.readyState === 1) {
     console.log('[MongoDB] Using cached connection');
     return cached.conn;
+  }
+
+  // If connection is disconnected, reset cache
+  if (cached.conn && cached.conn.connection.readyState !== 1) {
+    console.log('[MongoDB] Cached connection is stale, resetting');
+    cached.conn = null;
+    cached.promise = null;
   }
 
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 10000, // 10 seconds timeout
-      socketTimeoutMS: 45000, // 45 seconds socket timeout
+      minPoolSize: 2,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4, // Use IPv4, skip trying IPv6
     };
 
     console.log('[MongoDB] Creating new connection to:', MONGODB_URI?.substring(0, 30) + '...');
     cached.promise = mongoose.connect(MONGODB_URI as string, opts)
-      .then((mongoose) => {
+      .then((mongooseInstance) => {
         console.log('[MongoDB] Connection established successfully');
-        return mongoose;
+        return mongooseInstance;
       })
       .catch((err) => {
         console.error('[MongoDB] Failed to connect:', err);
-        cached.promise = null; // Reset promise on error
+        cached.promise = null;
         throw err;
       });
   }
 
   try {
     cached.conn = await cached.promise;
-    console.log('[MongoDB] Connection ready');
+    console.log('[MongoDB] Connection ready, state:', cached.conn.connection.readyState);
   } catch (e) {
     console.error('[MongoDB] Connection failed:', e);
     console.error('[MongoDB] Error details:', e instanceof Error ? e.message : 'Unknown error');
