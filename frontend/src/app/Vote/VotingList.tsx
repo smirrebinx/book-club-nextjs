@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useOptimistic, useTransition, useState } from 'react';
 
 import { toggleVote } from '@/app/suggestions/actions';
+import { BookPlaceholder } from '@/components/BookPlaceholder';
+
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
 
@@ -46,7 +48,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
   const config = statusConfig[status] || statusConfig.pending;
 
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+    <span className={`px-2 py-1 rounded-full text-xs font-medium text-center sm:text-left ${config.bg} ${config.text}`}>
       {config.label}
     </span>
   );
@@ -173,10 +175,10 @@ export function VotingList({
         ) : (
           sortedSuggestions.map((suggestion) => (
             <div key={suggestion._id} className="bg-white rounded-lg shadow p-4 md:p-6">
-              {/* Vote button - full width on mobile, vertical on desktop */}
-              <div className="flex sm:flex-row items-start gap-4 sm:gap-6">
+              {/* Vote button - own row on mobile, vertical on desktop */}
+              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
                 {/* Vote button */}
-                <div className="flex sm:flex-col items-center sm:items-center gap-3 sm:gap-0 w-full sm:w-auto">
+                <div className="flex sm:flex-col items-center gap-3 sm:gap-0 w-full sm:w-auto justify-center sm:justify-start">
                   <button
                     onClick={() => void handleVote(suggestion._id)}
                     disabled={isPending}
@@ -211,8 +213,8 @@ export function VotingList({
                 {/* Book cover and title section - side by side on all screens */}
                 <div className="flex gap-4 flex-1 w-full">
                   {/* Book cover */}
-                  {suggestion.coverImage && (
-                    <div className="relative w-20 h-28 sm:w-24 sm:h-32 flex-shrink-0">
+                  <div className="relative w-20 h-28 sm:w-24 sm:h-32 flex-shrink-0">
+                    {suggestion.coverImage ? (
                       <Image
                         src={suggestion.coverImage}
                         alt={`Omslag för ${suggestion.title}`}
@@ -220,8 +222,10 @@ export function VotingList({
                         sizes="(max-width: 640px) 80px, 96px"
                         className="object-cover rounded shadow-sm"
                       />
-                    </div>
-                  )}
+                    ) : (
+                      <BookPlaceholder />
+                    )}
+                  </div>
 
                   {/* Book info */}
                   <div className="flex-1 min-w-0">
