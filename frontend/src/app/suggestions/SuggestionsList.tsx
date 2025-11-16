@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { ActionLink } from '@/components/ActionButton';
+import { BookPlaceholder } from '@/components/BookPlaceholder';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
 
@@ -48,7 +49,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
   const config = statusConfig[status] || statusConfig.pending;
 
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}>
+    <span className={`px-2 py-1 rounded-full text-xs font-medium text-center sm:text-left ${config.bg} ${config.text}`}>
       {config.label}
     </span>
   );
@@ -229,8 +230,8 @@ export function SuggestionsList({
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             {/* Cover and basic info wrapper - side by side on all screens */}
             <div className="flex gap-4 sm:flex-1">
-              {suggestion.coverImage && (
-                <div className="relative w-24 h-32 flex-shrink-0">
+              <div className="relative w-24 h-32 flex-shrink-0">
+                {suggestion.coverImage ? (
                   <Image
                     src={suggestion.coverImage}
                     alt={`Omslag för ${suggestion.title}`}
@@ -238,8 +239,10 @@ export function SuggestionsList({
                     sizes="96px"
                     className="object-cover rounded shadow-sm"
                   />
-                </div>
-              )}
+                ) : (
+                  <BookPlaceholder />
+                )}
+              </div>
               <div className="flex-1 sm:flex-initial">
                 <h3 className="text-xl font-bold text-gray-900 mb-1">
                   {suggestion.title}

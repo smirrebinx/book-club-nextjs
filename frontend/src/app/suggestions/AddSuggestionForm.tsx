@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
+import { BookPlaceholder } from '@/components/BookPlaceholder';
 import { BookSearchInput } from '@/components/BookSearchInput';
 
 import { createSuggestion } from './actions';
@@ -178,16 +179,20 @@ export function AddSuggestionForm() {
         )}
 
         {/* Show cover preview if available (from search) */}
-        {!showManualInput && coverImage && (
+        {!showManualInput && (title || coverImage) && (
           <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
             <div className="relative w-16 h-20 flex-shrink-0">
-              <Image
-                src={coverImage}
-                alt={`Omslag för ${title}`}
-                fill
-                sizes="64px"
-                className="object-cover rounded"
-              />
+              {coverImage ? (
+                <Image
+                  src={coverImage}
+                  alt={`Omslag för ${title}`}
+                  fill
+                  sizes="64px"
+                  className="object-cover rounded"
+                />
+              ) : (
+                <BookPlaceholder />
+              )}
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-900">{title}</p>
