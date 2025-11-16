@@ -20,7 +20,7 @@ export function ResetVotingButton({ hasActiveVotingCycle }: ResetVotingButtonPro
     startTransition(async () => {
       const result = await resetVotingCycle();
       if (result.success) {
-        showToast(result.message, 'success');
+        showToast(result.message || 'Röstningsomgång återställd', 'success');
         setShowConfirmDialog(false);
         router.refresh();
       } else {
