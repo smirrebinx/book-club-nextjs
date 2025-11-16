@@ -22,6 +22,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Ensure serverless functions work properly on Netlify
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
 };
 
 export default nextConfig;

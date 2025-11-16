@@ -6,5 +6,19 @@
 [build.environment]
   NODE_VERSION = "22"
 
+# Configure serverless functions
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["mongoose", "mongodb", "bson"]
+  # Include necessary files in the serverless functions
+  included_files = [
+    "public/**",
+    ".next/**",
+    "src/**",
+    "node_modules/mongoose/**",
+    "node_modules/mongodb/**",
+    "node_modules/bson/**"
+  ]
+
 [[plugins]]
   package = "@netlify/plugin-nextjs"
