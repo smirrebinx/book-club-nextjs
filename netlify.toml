@@ -9,16 +9,8 @@
 # Configure serverless functions
 [functions]
   node_bundler = "esbuild"
+  # Mark these as external - Netlify will handle them separately
   external_node_modules = ["mongoose", "mongodb", "bson"]
-  # Include necessary files in the serverless functions
-  included_files = [
-    "public/**",
-    ".next/**",
-    "src/**",
-    "node_modules/mongoose/**",
-    "node_modules/mongodb/**",
-    "node_modules/bson/**"
-  ]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
