@@ -47,15 +47,30 @@ async function connectDB(): Promise<typeof mongoose> {
       bufferCommands: false,
       maxPoolSize: 10,
       minPoolSize: 2,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000, // Increased from 5000 for serverless cold starts
       socketTimeoutMS: 45000,
       family: 4, // Use IPv4, skip trying IPv6
+      connectTimeoutMS: 10000, // Add explicit connection timeout
     };
 
     console.log('[MongoDB] Creating new connection to:', MONGODB_URI?.substring(0, 30) + '...');
     cached.promise = mongoose.connect(MONGODB_URI as string, opts)
-      .then((mongooseInstance) => {
+      .then(async (mongooseInstance) => {
         console.log('[MongoDB] Connection established successfully');
+
+        // Wait for the connection to be fully ready for writes
+        // This is critical for serverless environments
+        await new Promise<void>((resolve) => {
+          if (mongooseInstance.connection.readyState === 1) {
+            resolve();
+          } else {
+            mongooseInstance.connection.once('open', () => {
+              console.log('[MongoDB] Connection is now open and ready for writes');
+              resolve();
+            });
+          }
+        });
+
         return mongooseInstance;
       })
       .catch((err) => {

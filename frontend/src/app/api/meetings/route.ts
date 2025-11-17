@@ -42,7 +42,9 @@ export async function POST(request: NextRequest) {
   try {
     await requireAdmin();
 
+    console.log('[API] POST /api/meetings - Connecting to database...');
     await connectDB();
+    console.log('[API] POST /api/meetings - Database connected');
 
     const body: MeetingData = await request.json();
 
@@ -57,7 +59,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('[API] POST /api/meetings - Creating meeting with ID:', body.id);
     const meeting = await Meeting.create(body);
+    console.log('[API] POST /api/meetings - Meeting created successfully');
 
     return NextResponse.json(
       {
@@ -67,7 +71,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: unknown) {
-    console.error('Error creating meeting:', error);
+    console.error('[API] POST /api/meetings - Error creating meeting:', error);
 
     // Handle duplicate key error
     if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
@@ -80,10 +84,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Return more detailed error information
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create meeting';
+    console.error('[API] POST /api/meetings - Error details:', errorMessage);
+
     return NextResponse.json(
       {
         success: false,
-        error: 'Failed to create meeting',
+        error: errorMessage,
       },
       { status: 500 }
     );

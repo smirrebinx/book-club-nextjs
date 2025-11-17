@@ -36,44 +36,68 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   callbacks: {
     async jwt({ token, user }) {
-      // Always fetch the latest user data from database to ensure approval status is current
-      await dbConnect();
+      try {
+        // Always fetch the latest user data from database to ensure approval status is current
+        console.log('[Auth] JWT callback - Connecting to database...');
+        await dbConnect();
+        console.log('[Auth] JWT callback - Database connected');
 
-      const email = user?.email || token.email;
-      const dbUser = await User.findOne({ email }).lean();
+        const email = user?.email || token.email;
 
-      if (dbUser) {
-        token.id = dbUser._id.toString();
-        token.email = dbUser.email;
-        token.role = dbUser.role;
-        token.isApproved = dbUser.isApproved;
+        if (!email) {
+          console.error('[Auth] JWT callback - No email found in user or token');
+          return token;
+        }
 
-        // Check if admin has forced this user to logout
-        if (dbUser.forcedLogoutAt) {
-          const tokenIssuedAt = token.iat ? new Date(token.iat * 1000) : new Date(0);
-          const forcedLogoutAt = new Date(dbUser.forcedLogoutAt);
+        console.log('[Auth] JWT callback - Fetching user data for:', email);
+        const dbUser = await User.findOne({ email }).lean();
 
-          // If token was issued before forced logout, invalidate it by returning empty token
-          if (tokenIssuedAt < forcedLogoutAt) {
-            return {}; // This will invalidate the session
+        if (dbUser) {
+          console.log('[Auth] JWT callback - User found, role:', dbUser.role, 'isApproved:', dbUser.isApproved);
+          token.id = dbUser._id.toString();
+          token.email = dbUser.email;
+          token.role = dbUser.role;
+          token.isApproved = dbUser.isApproved;
+
+          // Check if admin has forced this user to logout
+          if (dbUser.forcedLogoutAt) {
+            const tokenIssuedAt = token.iat ? new Date(token.iat * 1000) : new Date(0);
+            const forcedLogoutAt = new Date(dbUser.forcedLogoutAt);
+
+            // If token was issued before forced logout, invalidate it by returning empty token
+            if (tokenIssuedAt < forcedLogoutAt) {
+              console.log('[Auth] JWT callback - User was forced to logout');
+              return {}; // This will invalidate the session
+            }
           }
-        }
-      } else if (user) {
-        // New user - set defaults
-        token.id = user.id;
-        token.email = user.email;
+        } else if (user) {
+          // New user - set defaults
+          console.log('[Auth] JWT callback - New user, setting defaults');
+          token.id = user.id;
+          token.email = user.email;
 
-        // Check if this is the admin email
-        if (user.email === process.env.ADMIN_EMAIL) {
-          token.role = 'admin';
-          token.isApproved = true;
+          // Check if this is the admin email
+          if (user.email === process.env.ADMIN_EMAIL) {
+            console.log('[Auth] JWT callback - User is admin');
+            token.role = 'admin';
+            token.isApproved = true;
+          } else {
+            console.log('[Auth] JWT callback - User is pending approval');
+            token.role = 'pending';
+            token.isApproved = false;
+          }
         } else {
-          token.role = 'pending';
-          token.isApproved = false;
+          console.log('[Auth] JWT callback - No user found in database or session');
         }
-      }
 
-      return token;
+        return token;
+      } catch (error) {
+        console.error('[Auth] JWT callback - Error:', error);
+        console.error('[Auth] JWT callback - Error details:', error instanceof Error ? error.message : 'Unknown error');
+        // Return token as-is to prevent breaking the session completely
+        // This allows users to stay logged in even if database is temporarily unavailable
+        return token;
+      }
     },
     async session({ session, token }) {
       // Add data from JWT token to session
