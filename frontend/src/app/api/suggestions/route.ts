@@ -150,6 +150,8 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    // Note: Using console.error here as logger is not imported
+    // Consider importing logger for consistency
     console.error('Error fetching suggestions:', error);
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 403 });

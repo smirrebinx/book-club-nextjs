@@ -3,14 +3,12 @@
  * Prevents sensitive data exposure in production logs
  */
 
-type LogLevel = 'log' | 'info' | 'warn' | 'error' | 'debug';
-
 const isProduction = process.env.NODE_ENV === 'production';
 
 /**
  * Sanitize sensitive data from logs
  */
-function sanitizeForProduction(args: any[]): any[] {
+function sanitizeForProduction(args: unknown[]): unknown[] {
   if (!isProduction) {
     return args;
   }
@@ -18,11 +16,12 @@ function sanitizeForProduction(args: any[]): any[] {
   return args.map(arg => {
     if (typeof arg === 'string') {
       // Remove email patterns
-      arg = arg.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL_REDACTED]');
+      let sanitized = arg.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL_REDACTED]');
       // Remove potential MongoDB connection strings
-      arg = arg.replace(/mongodb(\+srv)?:\/\/[^\s]+/g, '[DB_URI_REDACTED]');
+      sanitized = sanitized.replace(/mongodb(\+srv)?:\/\/[^\s]+/g, '[DB_URI_REDACTED]');
       // Remove potential API keys
-      arg = arg.replace(/[A-Za-z0-9_-]{32,}/g, '[KEY_REDACTED]');
+      sanitized = sanitized.replace(/[A-Za-z0-9_-]{32,}/g, '[KEY_REDACTED]');
+      return sanitized;
     }
     return arg;
   });
@@ -32,24 +31,24 @@ function sanitizeForProduction(args: any[]): any[] {
  * Logger that respects environment and sanitizes production logs
  */
 export const logger = {
-  log: (...args: any[]) => {
+  log: (...args: unknown[]) => {
     if (!isProduction) {
       console.log(...args);
     }
   },
 
-  info: (...args: any[]) => {
+  info: (...args: unknown[]) => {
     if (!isProduction) {
       console.info(...args);
     }
   },
 
-  warn: (...args: any[]) => {
+  warn: (...args: unknown[]) => {
     const sanitized = sanitizeForProduction(args);
     console.warn(...sanitized);
   },
 
-  error: (...args: any[]) => {
+  error: (...args: unknown[]) => {
     if (isProduction) {
       // In production, only log the first argument (error message) without details
       const sanitized = sanitizeForProduction([args[0]]);
@@ -59,7 +58,7 @@ export const logger = {
     }
   },
 
-  debug: (...args: any[]) => {
+  debug: (...args: unknown[]) => {
     if (!isProduction) {
       console.debug(...args);
     }
@@ -69,22 +68,22 @@ export const logger = {
    * Always log (for critical production errors)
    * Use sparingly and ensure no sensitive data
    */
-  critical: (...args: any[]) => {
+  critical: (...args: unknown[]) => {
     const sanitized = sanitizeForProduction(args);
     console.error('[CRITICAL]', ...sanitized);
   }
 };
 
 /**
- * Type-safe logger with context
+ * Logger with context prefix
  */
 export function createContextLogger(context: string) {
   return {
-    log: (...args: any[]) => logger.log(`[${context}]`, ...args),
-    info: (...args: any[]) => logger.info(`[${context}]`, ...args),
-    warn: (...args: any[]) => logger.warn(`[${context}]`, ...args),
-    error: (...args: any[]) => logger.error(`[${context}]`, ...args),
-    debug: (...args: any[]) => logger.debug(`[${context}]`, ...args),
-    critical: (...args: any[]) => logger.critical(`[${context}]`, ...args),
+    log: (...args: unknown[]) => logger.log(`[${context}]`, ...args),
+    info: (...args: unknown[]) => logger.info(`[${context}]`, ...args),
+    warn: (...args: unknown[]) => logger.warn(`[${context}]`, ...args),
+    error: (...args: unknown[]) => logger.error(`[${context}]`, ...args),
+    debug: (...args: unknown[]) => logger.debug(`[${context}]`, ...args),
+    critical: (...args: unknown[]) => logger.critical(`[${context}]`, ...args),
   };
 }

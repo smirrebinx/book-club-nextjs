@@ -28,7 +28,7 @@ export async function GET() {
       data: meetings,
     });
   } catch (error) {
-    console.error('Error fetching meetings:', error);
+    logger.error('Error fetching meetings:', error);
     if (error instanceof Error) {
       return NextResponse.json(
         { success: false, error: error.message },
