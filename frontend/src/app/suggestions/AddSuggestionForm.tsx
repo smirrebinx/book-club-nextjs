@@ -125,16 +125,6 @@ export function AddSuggestionForm() {
           />
         )}
 
-        {/* Toggle between search and manual input */}
-        <button
-          type="button"
-          onClick={() => setShowManualInput(!showManualInput)}
-          className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline focus:outline-2 focus:outline-offset-2"
-          style={{ outlineColor: 'var(--focus-ring)' }}
-        >
-          {showManualInput ? '← Tillbaka till sökning' : 'Hittar du inte boken? Skriv in den manuellt →'}
-        </button>
-
         {/* Manual input fields - only visible when showManualInput is true */}
         {showManualInput && (
           <>
@@ -227,14 +217,26 @@ export function AddSuggestionForm() {
           </div>
         )}
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full px-6 py-3 text-lg font-medium rounded-lg bg-[var(--button-secondary-hover-bg)] text-[var(--button-secondary-hover-text)] hover:bg-[var(--button-secondary-bg)] hover:text-[var(--button-secondary-text)] border-2 border-[var(--button-secondary-border)] hover:border-[var(--button-secondary-hover-bg)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2"
-          style={{ outlineColor: 'var(--focus-ring)' }}
-        >
-          {isPending ? 'Lägger till...' : 'Lägg till förslag'}
-        </button>
+        <div className="flex flex-col items-start gap-4">
+          <button
+            type="submit"
+            disabled={isPending}
+            className="px-6 py-3 text-lg font-medium rounded-lg bg-[var(--button-secondary-hover-bg)] text-[var(--button-secondary-hover-text)] hover:bg-[var(--button-secondary-bg)] hover:text-[var(--button-secondary-text)] border-2 border-[var(--button-secondary-border)] hover:border-[var(--button-secondary-hover-bg)] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2"
+            style={{ outlineColor: 'var(--focus-ring)' }}
+          >
+            {isPending ? 'Lägger till...' : 'Lägg till förslag'}
+          </button>
+
+          {/* Toggle between search and manual input */}
+          <button
+            type="button"
+            onClick={() => setShowManualInput(!showManualInput)}
+            className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline focus:outline-2 focus:outline-offset-2"
+            style={{ outlineColor: 'var(--focus-ring)' }}
+          >
+            {showManualInput ? '← Tillbaka till sökning' : 'Hittar du inte boken? Skriv in den manuellt →'}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -141,47 +141,96 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
   pendingBooks: VoteSuggestion[];
 }) {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div
+      className="flex min-h-screen items-start justify-center"
+      style={{
+        backgroundColor: "var(--background)",
+        color: "var(--secondary-text)",
+      }}
+    >
       <AutoRefresh interval={30} />
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-6 w-full max-w-[200px]">
+      <main
+        className="flex w-full max-w-3xl flex-col items-start gap-8 px-4 py-4 sm:px-16 sm:py-8"
+        style={{ backgroundColor: "var(--background)" }}
+      >
+        <div className="flex w-full flex-col items-start gap-6 text-left">
+          <div className="flex w-full justify-center sm:justify-start">
             <Image
               src="/animations/undraw_election-day_puwv.svg"
               alt="Voting illustration"
               width={200}
               height={150}
-              className="w-full h-auto"
+              className="w-full h-auto max-w-[200px]"
               priority
             />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Rösta</h1>
-          <p className="text-gray-600">
+
+          {/* Page Heading */}
+          <h1
+            className="px-4 text-3xl leading-10 tracking-wide sm:px-0"
+            style={{
+              fontFamily: "var(--font-heading)",
+              color: "var(--primary-text)",
+            }}
+          >
+            Rösta
+          </h1>
+          <p
+            className="max-w-md px-4 text-lg leading-8 sm:px-0"
+            style={{
+              fontFamily: "var(--font-body)",
+              color: "var(--secondary-text)",
+            }}
+          >
             Rösta på vilken bok du vill att bokklubben ska läsa nästa gång.
           </p>
         </div>
 
         {/* Winner Section */}
         {approvedBook && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Vinnare</h2>
+          <div className="w-full px-4 sm:px-0">
+            <h2
+              className="text-2xl font-semibold mb-4"
+              style={{
+                fontFamily: "var(--font-heading)",
+                color: "var(--primary-text)",
+              }}
+            >
+              Vinnare
+            </h2>
             <VotingList suggestions={[approvedBook]} />
           </div>
         )}
 
         {pendingBooks.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Rösta på böcker</h2>
+          <div className="w-full px-4 sm:px-0">
+            <h2
+              className="text-2xl font-semibold mb-4"
+              style={{
+                fontFamily: "var(--font-heading)",
+                color: "var(--primary-text)",
+              }}
+            >
+              Rösta på böcker
+            </h2>
             <VotingList suggestions={pendingBooks} />
           </div>
         )}
 
         {pendingBooks.length === 0 && !approvedBook && !currentlyReadingBook && (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Inga bokförslag finns ännu. Lägg till ett förslag!</p>
+          <div className="w-full px-4 sm:px-0 py-12">
+            <p
+              className="text-lg"
+              style={{
+                fontFamily: "var(--font-body)",
+                color: "var(--secondary-text)",
+              }}
+            >
+              Inga bokförslag finns ännu. Lägg till ett förslag!
+            </p>
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

@@ -94,7 +94,7 @@ export default async function NextMeeting() {
             <StaticCalendar />
           </div>
 
-          {/* Heading */}
+          {/* Page Heading */}
           <h1
             className="px-4 text-3xl leading-10 tracking-wide sm:px-0"
             style={{
@@ -104,7 +104,13 @@ export default async function NextMeeting() {
           >
             Bokträffar
           </h1>
-            <p className="text-gray-600">
+         <p
+            className="max-w-md px-4 text-lg leading-8 sm:px-0"
+            style={{
+              fontFamily: "var(--font-body)",
+              color: "var(--secondary-text)",
+            }}
+          >
             Här hittar du information om nästa bokträff och de kommande träffarna.
           </p>
 
