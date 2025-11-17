@@ -65,12 +65,20 @@ export default async function SuggestionsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div
+      className="flex min-h-screen items-start justify-center"
+      style={{
+        backgroundColor: "var(--background)",
+        color: "var(--secondary-text)",
+      }}
+    >
       <AutoRefresh interval={30} />
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Hero Section with SVG */}
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-6 w-full max-w-[200px]">
+      <main
+        className="flex w-full max-w-3xl flex-col items-start gap-8 px-4 py-4 sm:px-16 sm:py-8"
+        style={{ backgroundColor: "var(--background)" }}
+      >
+        <div className="flex w-full flex-col items-center gap-6 text-center mb-8">
+          <div className="w-full max-w-[200px]">
             <Image
               src="/animations/undraw_book-lover_m9n3.svg"
               alt="Book lover illustration"
@@ -80,29 +88,51 @@ export default async function SuggestionsPage() {
               priority
             />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Bokförslag</h1>
-          <p className="text-gray-600">
-             Föreslå en bok och se vad andra tipsar om.
+
+          {/* Page Heading */}
+          <h1
+            className="text-3xl leading-10 tracking-wide"
+            style={{
+              fontFamily: "var(--font-heading)",
+              color: "var(--primary-text)",
+            }}
+          >
+            Bokförslag
+          </h1>
+          <p
+            className="max-w-md text-lg leading-8"
+            style={{
+              fontFamily: "var(--font-body)",
+              color: "var(--secondary-text)",
+            }}
+          >
+            Föreslå en bok och se vad andra tipsar om.
           </p>
         </div>
 
-        {/* Two-column layout on larger screens, stacked on mobile */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Form on left/top - takes 1 column on large screens */}
-          <div className="lg:col-span-1">
-            <AddSuggestionForm />
-          </div>
-
-          {/* Suggestions list on right/bottom - takes 2 columns on large screens */}
-          <div className="lg:col-span-2">
-            <SuggestionsList
-              suggestions={suggestionsData}
-              currentUserId={session.user.id}
-              userRole={session.user.role}
-            />
-          </div>
+        {/* Add Suggestion Form */}
+        <div className="w-full px-4 sm:px-0">
+          <AddSuggestionForm />
         </div>
-      </div>
+
+        {/* Suggestions list */}
+        <div className="w-full px-4 sm:px-0">
+          <h2
+            className="text-2xl font-semibold mb-4"
+            style={{
+              fontFamily: "var(--font-heading)",
+              color: "var(--primary-text)",
+            }}
+          >
+            Föreslagna böcker
+          </h2>
+          <SuggestionsList
+            suggestions={suggestionsData}
+            currentUserId={session.user.id}
+            userRole={session.user.role}
+          />
+        </div>
+      </main>
     </div>
   );
 }
