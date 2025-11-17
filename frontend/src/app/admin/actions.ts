@@ -8,6 +8,9 @@ import {
   approveUserSchema,
   changeRoleSchema,
   updateSuggestionStatusSchema,
+  deleteSuggestionSchema,
+  deleteUserSchema,
+  forceLogoutUserSchema,
 } from '@/lib/validations/admin';
 import BookSuggestion from '@/models/BookSuggestion';
 import User from '@/models/User';
@@ -168,8 +171,11 @@ export async function deleteSuggestionAsAdmin(suggestionId: string) {
   try {
     await requireAdmin();
 
+    // Validate input
+    const validated = deleteSuggestionSchema.parse({ suggestionId });
+
     await connectDB();
-    const suggestion = await BookSuggestion.findById(suggestionId);
+    const suggestion = await BookSuggestion.findById(validated.suggestionId);
 
     if (!suggestion) {
       return { success: false, error: 'Förslag hittades inte' };
@@ -196,8 +202,11 @@ export async function deleteUser(userId: string) {
   try {
     await requireAdmin();
 
+    // Validate input
+    const validated = deleteUserSchema.parse({ userId });
+
     await connectDB();
-    const user = await User.findById(userId);
+    const user = await User.findById(validated.userId);
 
     if (!user) {
       return { success: false, error: 'Användare hittades inte' };
@@ -229,8 +238,11 @@ export async function forceLogoutUser(userId: string) {
   try {
     await requireAdmin();
 
+    // Validate input
+    const validated = forceLogoutUserSchema.parse({ userId });
+
     await connectDB();
-    const user = await User.findById(userId);
+    const user = await User.findById(validated.userId);
 
     if (!user) {
       return { success: false, error: 'Användare hittades inte' };

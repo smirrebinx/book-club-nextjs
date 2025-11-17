@@ -5,13 +5,17 @@ import { Types } from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
 import { requireAuth, requireApproved } from '@/lib/auth-helpers';
+import { createContextLogger } from '@/lib/logger';
 import connectDB from '@/lib/mongodb';
+import { checkRateLimit } from '@/lib/rateLimit';
 import {
   createSuggestionSchema,
   updateSuggestionSchema,
   voteSchema,
 } from '@/lib/validations/suggestions';
 import BookSuggestion from '@/models/BookSuggestion';
+
+const logger = createContextLogger('Suggestions');
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
 
@@ -186,41 +190,49 @@ export async function deleteSuggestion(suggestionId: string) {
  */
 export async function toggleVote(suggestionId: string) {
   try {
-    console.log('[toggleVote] Starting for suggestion:', suggestionId);
+    logger.debug('Starting vote toggle for suggestion:', suggestionId);
     const session = await requireApproved();
-    console.log('[toggleVote] Session approved, user:', session.user.id);
+
+    // Rate limiting: 10 votes per minute per user
+    const rateLimit = checkRateLimit(`vote:${session.user.id}`, {
+      limit: 10,
+      windowMs: 60000 // 1 minute
+    });
+
+    if (!rateLimit.success) {
+      logger.warn('Rate limit exceeded for user:', session.user.id);
+      return {
+        success: false,
+        error: 'För många röstningsförsök. Vänligen vänta en minut.'
+      };
+    }
 
     // Validate input
     const validated = voteSchema.parse({ suggestionId });
-    console.log('[toggleVote] Input validated');
+    logger.debug('Input validated');
 
-    console.log('[toggleVote] Connecting to database...');
+    logger.debug('Connecting to database...');
     await connectDB();
-    console.log('[toggleVote] Database connected');
 
     // Check if voting is locked (if there's an approved or currently_reading book)
-    console.log('[toggleVote] Checking if voting is locked...');
     const winnerBook = await BookSuggestion.findOne({
       status: { $in: ['approved', 'currently_reading'] }
     });
 
     if (winnerBook) {
-      console.log('[toggleVote] Voting is locked - winner book exists:', winnerBook._id);
+      logger.debug('Voting is locked - winner book exists');
       return {
         success: false,
         error: 'Röstning är låst. En vinnare har redan valts. Vänta tills administratören startar en ny omgång.'
       };
     }
-    console.log('[toggleVote] Voting is not locked');
 
-    console.log('[toggleVote] Finding suggestion...');
     const suggestion = await BookSuggestion.findById(validated.suggestionId);
 
     if (!suggestion) {
-      console.error('[toggleVote] Suggestion not found:', validated.suggestionId);
+      logger.error('Suggestion not found:', validated.suggestionId);
       return { success: false, error: 'Förslag hittades inte' };
     }
-    console.log('[toggleVote] Suggestion found, current votes:', suggestion.votes.length);
 
     // Check if user already voted
     const userVoteIndex = suggestion.votes.findIndex(
