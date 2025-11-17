@@ -100,8 +100,10 @@ interface Suggestion {
 
 export function VotingList({
   suggestions,
+  isVotingLocked = false,
 }: {
   suggestions: Suggestion[];
+  isVotingLocked?: boolean;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -109,6 +111,16 @@ export function VotingList({
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
   const handleVote = (suggestionId: string) => {
+    // Prevent voting if locked
+    if (isVotingLocked) {
+      setMessage({
+        text: 'Röstning är låst. Vänta tills administratören startar en ny omgång.',
+        type: 'error'
+      });
+      setTimeout(() => setMessage(null), 5000);
+      return;
+    }
+
     const suggestion = suggestions.find((s) => s._id === suggestionId);
     if (!suggestion) return;
 
@@ -181,15 +193,29 @@ export function VotingList({
                 <div className="flex sm:flex-col items-center gap-3 sm:gap-0 w-full sm:w-auto justify-center sm:justify-start">
                   <button
                     onClick={() => void handleVote(suggestion._id)}
-                    disabled={isPending}
+                    disabled={isPending || isVotingLocked}
                     className={`p-3 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 ${
-                      suggestion.hasVoted
+                      isVotingLocked
+                        ? 'bg-gray-200 text-gray-400 border-2 border-gray-200 cursor-not-allowed'
+                        : suggestion.hasVoted
                         ? 'bg-[var(--button-primary-bg)] text-white hover:bg-[var(--button-primary-hover)] border-2 border-[var(--button-primary-bg)] hover:border-[var(--button-primary-hover)]'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-2 border-gray-100'
                     }`}
                     style={{ outlineColor: 'var(--focus-ring)' }}
-                    aria-label={suggestion.hasVoted ? 'Ta bort röst' : 'Rösta på denna bok'}
-                    title={suggestion.hasVoted ? 'Ta bort röst' : 'Rösta på denna bok'}
+                    aria-label={
+                      isVotingLocked
+                        ? 'Röstning är låst'
+                        : suggestion.hasVoted
+                        ? 'Ta bort röst'
+                        : 'Rösta på denna bok'
+                    }
+                    title={
+                      isVotingLocked
+                        ? 'Röstning är låst tills administratören startar en ny omgång'
+                        : suggestion.hasVoted
+                        ? 'Ta bort röst'
+                        : 'Rösta på denna bok'
+                    }
                   >
                     <svg
                       className="w-6 h-6 sm:w-8 sm:h-8"

@@ -140,6 +140,9 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
   currentlyReadingBook?: VoteSuggestion;
   pendingBooks: VoteSuggestion[];
 }) {
+  // Voting is locked if there's a winner (approved or currently_reading book)
+  const isVotingLocked = !!approvedBook;
+
   return (
     <div
       className="flex min-h-screen items-start justify-center"
@@ -198,7 +201,39 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
             >
               Vinnare
             </h2>
-            <VotingList suggestions={[approvedBook]} />
+            <VotingList suggestions={[approvedBook]} isVotingLocked={true} />
+          </div>
+        )}
+
+        {/* Voting Locked Message */}
+        {isVotingLocked && pendingBooks.length > 0 && (
+          <div className="w-full px-4 sm:px-0">
+            <div
+              className="mb-6 p-4 rounded-lg border-2"
+              style={{
+                backgroundColor: "var(--background)",
+                borderColor: "var(--link-color)",
+              }}
+            >
+              <p
+                className="text-base font-medium"
+                style={{
+                  fontFamily: "var(--font-body)",
+                  color: "var(--primary-text)",
+                }}
+              >
+                📚 Röstning är låst tills administratören startar en ny omgång
+              </p>
+              <p
+                className="text-sm mt-2"
+                style={{
+                  fontFamily: "var(--font-body)",
+                  color: "var(--secondary-text)",
+                }}
+              >
+                En vinnare har valts. Du kan inte rösta förrän administratören återställer röstningen.
+              </p>
+            </div>
           </div>
         )}
 
@@ -211,9 +246,9 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
                 color: "var(--primary-text)",
               }}
             >
-              Rösta på böcker
+              {isVotingLocked ? "Böcker i omgången" : "Rösta på böcker"}
             </h2>
-            <VotingList suggestions={pendingBooks} />
+            <VotingList suggestions={pendingBooks} isVotingLocked={isVotingLocked} />
           </div>
         )}
 

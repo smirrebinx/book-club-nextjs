@@ -198,6 +198,21 @@ export async function toggleVote(suggestionId: string) {
     await connectDB();
     console.log('[toggleVote] Database connected');
 
+    // Check if voting is locked (if there's an approved or currently_reading book)
+    console.log('[toggleVote] Checking if voting is locked...');
+    const winnerBook = await BookSuggestion.findOne({
+      status: { $in: ['approved', 'currently_reading'] }
+    });
+
+    if (winnerBook) {
+      console.log('[toggleVote] Voting is locked - winner book exists:', winnerBook._id);
+      return {
+        success: false,
+        error: 'Röstning är låst. En vinnare har redan valts. Vänta tills administratören startar en ny omgång.'
+      };
+    }
+    console.log('[toggleVote] Voting is not locked');
+
     console.log('[toggleVote] Finding suggestion...');
     const suggestion = await BookSuggestion.findById(validated.suggestionId);
 
