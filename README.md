@@ -262,9 +262,36 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### 7. First-Time Admin Setup
 
-1. Sign in with the Google account matching `ADMIN_EMAIL`
-2. You'll be automatically approved and assigned the admin role
-3. Other users will be pending and require your approval
+**IMPORTANT - Security Note**: The `ADMIN_EMAIL` environment variable is only used for initial setup when NO admins exist in the database. After the first admin is created, this environment variable is ignored for security reasons.
+
+#### Initial Setup (First Admin):
+
+1. Set `ADMIN_EMAIL` in your `.env.local` to your Google account email
+2. Sign in with the Google account matching `ADMIN_EMAIL`
+3. **You'll be automatically promoted to admin** (first-time setup only)
+4. Other users will be pending and require your approval
+
+#### After Initial Setup:
+
+- **ADMIN_EMAIL is ignored** once an admin exists in the database
+- New admins must be promoted through the admin panel by existing admins
+- To add more admins: Admin Panel → Users → Change Role to "admin"
+- Even if someone gets access to your `.env` file, they cannot auto-promote to admin
+
+#### Promoting Additional Admins:
+
+1. Log in as an existing admin
+2. Go to Admin Panel → Users
+3. Find the user you want to promote
+4. Click "Change Role" → Select "admin"
+5. Confirm the change
+
+#### Security Best Practices:
+
+- ✅ Remove `ADMIN_EMAIL` from `.env.local` after initial setup (optional but recommended)
+- ✅ Use strong passwords and 2FA on your Google account
+- ✅ Only promote trusted users to admin
+- ✅ Regularly review admin users in the admin panel
 
 ## Available Scripts
 

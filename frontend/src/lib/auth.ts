@@ -4,11 +4,14 @@ import Google from "next-auth/providers/google";
 import Nodemailer from "next-auth/providers/nodemailer";
 
 import { authConfig } from "@/lib/auth.config";
+import { createContextLogger } from "@/lib/logger";
 import dbConnect from "@/lib/mongodb";
 import clientPromise from "@/lib/mongodb-client";
 import User from "@/models/User";
 
 import type { UserRole } from "@/models/User";
+
+const logger = createContextLogger('Auth');
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
@@ -38,22 +41,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       try {
         // Always fetch the latest user data from database to ensure approval status is current
-        console.log('[Auth] JWT callback - Connecting to database...');
+        logger.debug('JWT callback - Connecting to database...');
         await dbConnect();
-        console.log('[Auth] JWT callback - Database connected');
+        logger.debug('JWT callback - Database connected');
 
         const email = user?.email || token.email;
 
         if (!email) {
-          console.error('[Auth] JWT callback - No email found in user or token');
+          logger.error('JWT callback - No email found in user or token');
           return token;
         }
 
-        console.log('[Auth] JWT callback - Fetching user data for:', email);
+        logger.debug('JWT callback - Fetching user data');
         const dbUser = await User.findOne({ email }).lean();
 
         if (dbUser) {
-          console.log('[Auth] JWT callback - User found, role:', dbUser.role, 'isApproved:', dbUser.isApproved);
+          logger.debug('JWT callback - User found, role:', dbUser.role);
           token.id = dbUser._id.toString();
           token.email = dbUser.email;
           token.role = dbUser.role;
@@ -66,34 +69,45 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             // If token was issued before forced logout, invalidate it by returning empty token
             if (tokenIssuedAt < forcedLogoutAt) {
-              console.log('[Auth] JWT callback - User was forced to logout');
+              logger.info('JWT callback - User was forced to logout');
               return {}; // This will invalidate the session
             }
           }
         } else if (user) {
           // New user - set defaults
-          console.log('[Auth] JWT callback - New user, setting defaults');
+          logger.debug('JWT callback - New user, setting defaults');
           token.id = user.id;
           token.email = user.email;
 
-          // Check if this is the admin email
+          // SECURITY: ADMIN_EMAIL should only be used for initial setup
+          // Check if this is the admin email AND there are no existing admins
           if (user.email === process.env.ADMIN_EMAIL) {
-            console.log('[Auth] JWT callback - User is admin');
-            token.role = 'admin';
-            token.isApproved = true;
+            // Check if any admin already exists in the database
+            const existingAdmin = await User.findOne({ role: 'admin' }).lean();
+
+            if (!existingAdmin) {
+              // First-time setup: Auto-promote to admin
+              logger.info('JWT callback - First admin setup');
+              token.role = 'admin';
+              token.isApproved = true;
+            } else {
+              // Admin already exists: ADMIN_EMAIL no longer auto-promotes
+              logger.warn('JWT callback - ADMIN_EMAIL ignored (admin already exists)');
+              token.role = 'pending';
+              token.isApproved = false;
+            }
           } else {
-            console.log('[Auth] JWT callback - User is pending approval');
+            logger.debug('JWT callback - User is pending approval');
             token.role = 'pending';
             token.isApproved = false;
           }
         } else {
-          console.log('[Auth] JWT callback - No user found in database or session');
+          logger.debug('JWT callback - No user found in database or session');
         }
 
         return token;
       } catch (error) {
-        console.error('[Auth] JWT callback - Error:', error);
-        console.error('[Auth] JWT callback - Error details:', error instanceof Error ? error.message : 'Unknown error');
+        logger.error('JWT callback - Error:', error);
         // Return token as-is to prevent breaking the session completely
         // This allows users to stay logged in even if database is temporarily unavailable
         return token;
