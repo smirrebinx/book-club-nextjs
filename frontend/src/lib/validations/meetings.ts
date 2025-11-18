@@ -17,9 +17,9 @@ export const bookInfoSchema = z.object({
 
 export const createMeetingSchema = z.object({
   id: z.string().min(1).max(100).optional(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ogiltigt datumformat (YYYY-MM-DD)').or(z.literal('')).optional(),
-  time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Ogiltigt tidsformat (HH:MM)').or(z.literal('')).optional(),
-  location: z.string().max(200).optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ogiltigt datumformat (YYYY-MM-DD)').min(1, 'Datum är obligatoriskt'),
+  time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Ogiltigt tidsformat (HH:MM)').min(1, 'Tid är obligatoriskt'),
+  location: z.string().min(1, 'Plats är obligatoriskt').max(200, 'Plats får vara max 200 tecken'),
   book: bookInfoSchema.optional(),
   additionalInfo: z.string().max(2000).optional().default('')
 });

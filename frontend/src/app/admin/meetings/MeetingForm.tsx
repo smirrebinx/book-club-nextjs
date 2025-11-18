@@ -108,6 +108,7 @@ function MeetingBasicFields({ formData, handleChange, isEditing, isPending, toda
           onChange={handleChange}
           disabled={isPending}
           min={today}
+          required={true}
           helpText="Datum för mötet"
         />
 
@@ -119,6 +120,7 @@ function MeetingBasicFields({ formData, handleChange, isEditing, isPending, toda
           value={formData.time}
           onChange={handleChange}
           disabled={isPending}
+          required={true}
           placeholder="18:00"
           helpText="Ange tid i 24-timmarsformat, t.ex. 18:00"
         />
@@ -131,6 +133,7 @@ function MeetingBasicFields({ formData, handleChange, isEditing, isPending, toda
         value={formData.location}
         onChange={handleChange}
         disabled={isPending}
+        required={true}
         placeholder="Biblioteket, Stockholm"
       />
     </>
