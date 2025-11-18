@@ -76,7 +76,7 @@ const nextConfig: NextConfig = {
     return [
       // Apply security headers to all routes except Next.js internals
       {
-        source: '/((?!_next/static|_next/image|favicon.ico).*)',
+        source: '/:path((?!_next).*)*',
         headers: securityHeaders,
       },
     ];
