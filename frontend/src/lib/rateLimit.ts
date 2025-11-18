@@ -9,17 +9,9 @@ interface RateLimitRecord {
 }
 
 // In-memory store (will reset on serverless function cold starts)
+// Note: In serverless environments, this Map is reset on each cold start
+// No cleanup interval needed as function instances are short-lived
 const rateLimits = new Map<string, RateLimitRecord>();
-
-// Cleanup old entries every 10 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, record] of rateLimits.entries()) {
-    if (now > record.resetAt) {
-      rateLimits.delete(key);
-    }
-  }
-}, 10 * 60 * 1000);
 
 export interface RateLimitOptions {
   /**
