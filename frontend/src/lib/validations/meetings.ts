@@ -17,18 +17,18 @@ export const bookInfoSchema = z.object({
 
 export const createMeetingSchema = z.object({
   id: z.string().min(1).max(100).optional(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ogiltigt datumformat (YYYY-MM-DD)'),
-  time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Ogiltigt tidsformat (HH:MM)'),
-  location: z.string().min(1).max(200),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ogiltigt datumformat (YYYY-MM-DD)').or(z.literal('')).optional(),
+  time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Ogiltigt tidsformat (HH:MM)').or(z.literal('')).optional(),
+  location: z.string().max(200).optional(),
   book: bookInfoSchema.optional(),
   additionalInfo: z.string().max(2000).optional().default('')
 });
 
 export const updateMeetingSchema = z.object({
   id: z.string().max(100).optional(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ogiltigt datumformat (YYYY-MM-DD)').optional(),
-  time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Ogiltigt tidsformat (HH:MM)').optional(),
-  location: z.string().min(1).max(200).optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ogiltigt datumformat (YYYY-MM-DD)').or(z.literal('')).optional(),
+  time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Ogiltigt tidsformat (HH:MM)').or(z.literal('')).optional(),
+  location: z.string().max(200).optional(),
   book: bookInfoSchema.optional(),
   additionalInfo: z.string().max(2000).optional()
 });
