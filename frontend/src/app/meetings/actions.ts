@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 
 import { requireAdmin } from '@/lib/auth-helpers';
 import connectDB from '@/lib/mongodb';
-import { createMeetingSchema, updateMeetingSchema } from '@/lib/validations/meetings';
+import { createMeetingSchema, updateMeetingSchema, meetingIdSchema } from '@/lib/validations/meetings';
 import Meeting from '@/models/Meeting';
 
 import type { MeetingData } from '@/types/meeting';
@@ -229,8 +229,11 @@ export async function updateMeeting(meetingId: string, formData: FormData) {
   try {
     await requireAdmin();
 
+    // Validate meetingId
+    const validatedId = meetingIdSchema.parse({ meetingId });
+
     await connectDB();
-    const meeting = await Meeting.findById(meetingId);
+    const meeting = await Meeting.findById(validatedId.meetingId);
 
     if (!meeting) {
       return { success: false, error: 'Möte hittades inte' };
@@ -264,8 +267,11 @@ export async function deleteMeeting(meetingId: string) {
   try {
     await requireAdmin();
 
+    // Validate meetingId
+    const validatedId = meetingIdSchema.parse({ meetingId });
+
     await connectDB();
-    const meeting = await Meeting.findById(meetingId);
+    const meeting = await Meeting.findById(validatedId.meetingId);
 
     if (!meeting) {
       return { success: false, error: 'Möte hittades inte' };

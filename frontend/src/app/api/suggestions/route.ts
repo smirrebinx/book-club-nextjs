@@ -2,10 +2,16 @@ import { NextResponse } from 'next/server';
 
 import { requireApproved } from '@/lib/auth-helpers';
 import connectDB from '@/lib/mongodb';
+import { createRateLimitMiddleware } from '@/lib/rateLimit';
 import BookSuggestion from '@/models/BookSuggestion';
 
 import type { Types } from 'mongoose';
 import type { NextRequest} from 'next/server';
+
+const rateLimitMiddleware = createRateLimitMiddleware({
+  limit: 60,
+  windowMs: 60000 // 60 requests per minute
+});
 
 interface SuggestionQuery {
   status?: string | { $in: string[] };
@@ -34,13 +40,29 @@ interface PopulatedLeanSuggestion {
 
 export async function GET(request: NextRequest) {
   try {
+    // Apply rate limiting
+    const rateLimit = rateLimitMiddleware(request.headers);
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { error: 'För många förfrågningar. Försök igen senare.' },
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': rateLimit.limit.toString(),
+            'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+            'X-RateLimit-Reset': new Date(rateLimit.resetAt).toISOString(),
+          }
+        }
+      );
+    }
+
     const session = await requireApproved();
 
     const { searchParams } = new URL(request.url);
     const statusFilter = searchParams.get('status') || '';
     const sortBy = searchParams.get('sortBy') || 'date';
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const page = Math.min(parseInt(searchParams.get('page') || '1'), 1000);
+    const limit = Math.min(parseInt(searchParams.get('limit') || '20'), 100);
 
     await connectDB();
 
@@ -128,6 +150,8 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    // Note: Using console.error here as logger is not imported
+    // Consider importing logger for consistency
     console.error('Error fetching suggestions:', error);
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 403 });

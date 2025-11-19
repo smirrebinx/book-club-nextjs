@@ -18,9 +18,9 @@ const MeetingSchema = new Schema<MeetingData>(
       required: false,
       index: true
     },
-    date: { type: String, required: false },
-    time: { type: String, required: false },
-    location: { type: String, required: false },
+    date: { type: String, required: true },
+    time: { type: String, required: true },
+    location: { type: String, required: true },
     book: { type: BookInfoSchema, required: false },
     additionalInfo: { type: String, required: false },
   },
