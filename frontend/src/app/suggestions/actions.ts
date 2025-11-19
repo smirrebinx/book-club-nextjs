@@ -1,6 +1,5 @@
 'use server';
 
-import DOMPurify from 'isomorphic-dompurify';
 import { Types } from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
@@ -15,9 +14,20 @@ import {
 } from '@/lib/validations/suggestions';
 import BookSuggestion from '@/models/BookSuggestion';
 
+import type { SuggestionStatus } from '@/models/BookSuggestion';
+
 const logger = createContextLogger('Suggestions');
 
-import type { SuggestionStatus } from '@/models/BookSuggestion';
+/**
+ * Simple sanitization function to remove HTML tags and dangerous characters
+ * Replaces DOMPurify which doesn't work in Vercel serverless environments
+ */
+function sanitizeText(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/[<>]/g, '') // Remove < and > characters
+    .trim();
+}
 
 /**
  * Create a new book suggestion
@@ -44,11 +54,11 @@ export async function createSuggestion(formData: FormData) {
     const validated = createSuggestionSchema.parse(data);
     console.log('[createSuggestion] Validated with Zod');
 
-    // Sanitize inputs server-side with DOMPurify
+    // Sanitize inputs server-side
     const sanitized = {
-      title: DOMPurify.sanitize(validated.title, { ALLOWED_TAGS: [] }),
-      author: DOMPurify.sanitize(validated.author, { ALLOWED_TAGS: [] }),
-      description: DOMPurify.sanitize(validated.description, { ALLOWED_TAGS: [] }),
+      title: sanitizeText(validated.title),
+      author: sanitizeText(validated.author),
+      description: sanitizeText(validated.description),
       isbn: validated.isbn,
       coverImage: validated.coverImage,
       googleBooksId: validated.googleBooksId,
@@ -127,13 +137,13 @@ export async function updateSuggestion(suggestionId: string, formData: FormData)
     // Sanitize inputs
     const sanitized: Partial<{ title: string; author: string; description: string }> = {};
     if (validated.title) {
-      sanitized.title = DOMPurify.sanitize(validated.title, { ALLOWED_TAGS: [] });
+      sanitized.title = sanitizeText(validated.title);
     }
     if (validated.author) {
-      sanitized.author = DOMPurify.sanitize(validated.author, { ALLOWED_TAGS: [] });
+      sanitized.author = sanitizeText(validated.author);
     }
     if (validated.description) {
-      sanitized.description = DOMPurify.sanitize(validated.description, { ALLOWED_TAGS: [] });
+      sanitized.description = sanitizeText(validated.description);
     }
 
     Object.assign(suggestion, sanitized);

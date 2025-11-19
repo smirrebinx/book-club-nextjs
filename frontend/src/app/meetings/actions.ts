@@ -1,6 +1,5 @@
 'use server';
 
-import DOMPurify from 'isomorphic-dompurify';
 import { revalidatePath } from 'next/cache';
 
 import { requireAdmin } from '@/lib/auth-helpers';
@@ -9,6 +8,17 @@ import { createMeetingSchema, updateMeetingSchema, meetingIdSchema } from '@/lib
 import Meeting from '@/models/Meeting';
 
 import type { MeetingData } from '@/types/meeting';
+
+/**
+ * Simple sanitization function to remove HTML tags and dangerous characters
+ * Replaces DOMPurify which doesn't work in Vercel serverless environments
+ */
+function sanitizeText(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, '') // Remove HTML tags
+    .replace(/[<>]/g, '') // Remove < and > characters
+    .trim();
+}
 
 type PartialMeetingUpdate = Partial<{
   id: string;
@@ -97,15 +107,11 @@ function sanitizeBookData(book: { id?: string; title?: string; author?: string; 
   isbn?: string;
 } {
   return {
-    id: book.id ? DOMPurify.sanitize(book.id, { ALLOWED_TAGS: [] }) : undefined,
-    title: book.title ? DOMPurify.sanitize(book.title, { ALLOWED_TAGS: [] }) : undefined,
-    author: book.author ? DOMPurify.sanitize(book.author, { ALLOWED_TAGS: [] }) : undefined,
-    coverImage: book.coverImage
-      ? DOMPurify.sanitize(book.coverImage, { ALLOWED_TAGS: [] })
-      : undefined,
-    isbn: book.isbn
-      ? DOMPurify.sanitize(book.isbn, { ALLOWED_TAGS: [] })
-      : undefined,
+    id: book.id ? sanitizeText(book.id) : undefined,
+    title: book.title ? sanitizeText(book.title) : undefined,
+    author: book.author ? sanitizeText(book.author) : undefined,
+    coverImage: book.coverImage ? sanitizeText(book.coverImage) : undefined,
+    isbn: book.isbn ? sanitizeText(book.isbn) : undefined,
   };
 }
 
@@ -116,19 +122,19 @@ function sanitizeMeetingData(validated: PartialMeetingUpdate): PartialMeetingUpd
   const sanitized: PartialMeetingUpdate = {};
 
   if (validated.id) {
-    sanitized.id = DOMPurify.sanitize(validated.id, { ALLOWED_TAGS: [] });
+    sanitized.id = sanitizeText(validated.id);
   }
   if (validated.date) {
-    sanitized.date = DOMPurify.sanitize(validated.date, { ALLOWED_TAGS: [] });
+    sanitized.date = sanitizeText(validated.date);
   }
   if (validated.time) {
-    sanitized.time = DOMPurify.sanitize(validated.time, { ALLOWED_TAGS: [] });
+    sanitized.time = sanitizeText(validated.time);
   }
   if (validated.location) {
-    sanitized.location = DOMPurify.sanitize(validated.location, { ALLOWED_TAGS: [] });
+    sanitized.location = sanitizeText(validated.location);
   }
   if (validated.additionalInfo !== undefined) {
-    sanitized.additionalInfo = DOMPurify.sanitize(validated.additionalInfo, { ALLOWED_TAGS: [] });
+    sanitized.additionalInfo = sanitizeText(validated.additionalInfo);
   }
   if (validated.book) {
     sanitized.book = sanitizeBookData(validated.book);
@@ -165,22 +171,18 @@ export async function createMeeting(formData: FormData) {
 
     // Sanitize inputs
     const sanitized = {
-      id: validated.id ? DOMPurify.sanitize(validated.id, { ALLOWED_TAGS: [] }) : undefined,
-      date: validated.date ? DOMPurify.sanitize(validated.date, { ALLOWED_TAGS: [] }) : undefined,
-      time: validated.time ? DOMPurify.sanitize(validated.time, { ALLOWED_TAGS: [] }) : undefined,
-      location: validated.location ? DOMPurify.sanitize(validated.location, { ALLOWED_TAGS: [] }) : undefined,
+      id: validated.id ? sanitizeText(validated.id) : undefined,
+      date: validated.date ? sanitizeText(validated.date) : undefined,
+      time: validated.time ? sanitizeText(validated.time) : undefined,
+      location: validated.location ? sanitizeText(validated.location) : undefined,
       book: validated.book ? {
-        id: validated.book.id ? DOMPurify.sanitize(validated.book.id, { ALLOWED_TAGS: [] }) : undefined,
-        title: validated.book.title ? DOMPurify.sanitize(validated.book.title, { ALLOWED_TAGS: [] }) : undefined,
-        author: validated.book.author ? DOMPurify.sanitize(validated.book.author, { ALLOWED_TAGS: [] }) : undefined,
-        coverImage: validated.book.coverImage
-          ? DOMPurify.sanitize(validated.book.coverImage, { ALLOWED_TAGS: [] })
-          : undefined,
-        isbn: validated.book.isbn
-          ? DOMPurify.sanitize(validated.book.isbn, { ALLOWED_TAGS: [] })
-          : undefined,
+        id: validated.book.id ? sanitizeText(validated.book.id) : undefined,
+        title: validated.book.title ? sanitizeText(validated.book.title) : undefined,
+        author: validated.book.author ? sanitizeText(validated.book.author) : undefined,
+        coverImage: validated.book.coverImage ? sanitizeText(validated.book.coverImage) : undefined,
+        isbn: validated.book.isbn ? sanitizeText(validated.book.isbn) : undefined,
       } : undefined,
-      additionalInfo: validated.additionalInfo ? DOMPurify.sanitize(validated.additionalInfo, { ALLOWED_TAGS: [] }) : undefined,
+      additionalInfo: validated.additionalInfo ? sanitizeText(validated.additionalInfo) : undefined,
     };
 
     await connectDB();
