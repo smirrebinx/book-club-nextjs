@@ -1,17 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/mongodb';
+import { NextResponse } from 'next/server';
+
 import { auth } from '@/lib/auth';
+import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
+
+import type { NextRequest } from 'next/server';
 
 /**
  * Test endpoint to verify database connectivity and write operations
  * DELETE THIS FILE after testing is complete
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   const startTime = Date.now();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const diagnostics: Record<string, any> = {
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
+    environment: process.env.NODE_ENV || 'unknown',
     steps: [],
   };
 
