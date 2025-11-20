@@ -4,6 +4,7 @@ export interface BookInfo {
   author?: string;
   coverImage?: string; // Optional: URL to book cover image
   isbn?: string; // Optional: For future integrations
+  googleDescription?: string; // Google Books API description
 }
 
 export interface MeetingData {

@@ -66,7 +66,7 @@ export default async function AdminMeetingsPage() {
     const currentlyReadingBook = await BookSuggestion.findOne({
       status: 'currently_reading'
     })
-      .select('_id title author coverImage isbn')
+      .select('_id title author coverImage isbn googleDescription')
       .lean()
       .exec();
 
@@ -78,6 +78,7 @@ export default async function AdminMeetingsPage() {
           author: String(currentlyReadingBook.author),
           coverImage: currentlyReadingBook.coverImage || undefined,
           isbn: currentlyReadingBook.isbn || undefined,
+          googleDescription: currentlyReadingBook.googleDescription || undefined,
         }))
       : undefined;
 

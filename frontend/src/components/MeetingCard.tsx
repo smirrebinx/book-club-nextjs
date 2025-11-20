@@ -1,3 +1,8 @@
+import Image from 'next/image';
+
+import { BookPlaceholder } from '@/components/BookPlaceholder';
+import { formatSwedishDate } from '@/lib/dateUtils';
+
 import type { MeetingData } from '@/types/meeting';
 
 interface MeetingCardProps {
@@ -16,21 +21,56 @@ function MeetingDetail({ label, value }: { label: string; value?: string }) {
   );
 }
 
-function BookInfo({ title, author }: { title?: string; author?: string }) {
+interface BookInfoProps {
+  title?: string;
+  author?: string;
+  coverImage?: string;
+  googleDescription?: string;
+  isPrimary: boolean;
+}
+
+function BookInfo({ title, author, coverImage, googleDescription, isPrimary }: BookInfoProps) {
   if (!title && !author) return null;
 
+  const textSize = isPrimary ? 'text-lg' : 'text-base';
+
   return (
-    <div className="flex flex-col gap-1">
-      {title && (
-        <p className="text-lg leading-7">
-          <span className="font-semibold">Titel:</span> {title}
-        </p>
+    <div className="flex gap-4">
+      {/* Book Cover */}
+      {coverImage && (
+        <div className={`relative flex-shrink-0 ${isPrimary ? 'w-24 h-36' : 'w-20 h-30'}`}>
+          <Image
+            src={coverImage}
+            alt={`Omslag för ${title}`}
+            fill
+            sizes={isPrimary ? '96px' : '80px'}
+            className="object-cover rounded shadow-sm"
+          />
+        </div>
       )}
-      {author && (
-        <p className="text-lg leading-7">
-          <span className="font-semibold">Författare:</span> {author}
-        </p>
+      {!coverImage && (
+        <div className={`flex-shrink-0 ${isPrimary ? 'w-24' : 'w-20'}`}>
+          <BookPlaceholder />
+        </div>
       )}
+      {/* Book Details */}
+      <div className="flex flex-col gap-2 flex-1">
+        {title && (
+          <p className={`${textSize} leading-7`}>
+            <span className="font-semibold">Titel:</span> {title}
+          </p>
+        )}
+        {author && (
+          <p className={`${textSize} leading-7`}>
+            <span className="font-semibold">Författare:</span> {author}
+          </p>
+        )}
+        {googleDescription && (
+          <p className={`${isPrimary ? 'text-base' : 'text-sm'} mt-1 line-clamp-4`}>
+            {googleDescription}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -59,12 +99,13 @@ function MeetingSection({
 
 function FullMeetingDetails({ meeting, isPrimary }: { meeting: MeetingData; isPrimary: boolean }) {
   const textSize = isPrimary ? 'text-lg' : 'text-base';
+  const formattedDate = meeting.date ? formatSwedishDate(meeting.date) : meeting.date;
 
   return (
     <div className="flex flex-col gap-6">
       <MeetingSection title="Datum och tid" isPrimary={isPrimary}>
         <p className={`${textSize} leading-7`}>
-          {meeting.date}, klockan {meeting.time}
+          {formattedDate}, klockan {meeting.time}
         </p>
       </MeetingSection>
 
@@ -73,7 +114,13 @@ function FullMeetingDetails({ meeting, isPrimary }: { meeting: MeetingData; isPr
       </MeetingSection>
 
       <MeetingSection title="Bok" isPrimary={isPrimary}>
-        <BookInfo title={meeting.book?.title || 'Ingen bok vald'} author={meeting.book?.author || '-'} />
+        <BookInfo
+          title={meeting.book?.title || 'Ingen bok vald'}
+          author={meeting.book?.author || '-'}
+          coverImage={meeting.book?.coverImage}
+          googleDescription={meeting.book?.googleDescription}
+          isPrimary={isPrimary}
+        />
       </MeetingSection>
 
       {meeting.additionalInfo && (
@@ -86,17 +133,27 @@ function FullMeetingDetails({ meeting, isPrimary }: { meeting: MeetingData; isPr
 }
 
 function CompactMeetingDetails({ meeting }: { meeting: MeetingData }) {
+  const formattedDate = meeting.date ? formatSwedishDate(meeting.date) : meeting.date;
+
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <p className="text-lg font-semibold" style={{ color: 'var(--primary-text)' }}>
-        {meeting.date}, klockan {meeting.time}
+        {formattedDate}, klockan {meeting.time}
       </p>
       <MeetingDetail label="Plats" value={meeting.location} />
       {meeting.book && (
-        <MeetingDetail
-          label="Bok"
-          value={`${meeting.book.title} av ${meeting.book.author}`}
-        />
+        <div className="mt-2">
+          <p className="text-base font-semibold mb-2" style={{ color: 'var(--primary-text)' }}>
+            Bok
+          </p>
+          <BookInfo
+            title={meeting.book.title}
+            author={meeting.book.author}
+            coverImage={meeting.book.coverImage}
+            googleDescription={meeting.book.googleDescription}
+            isPrimary={false}
+          />
+        </div>
       )}
       {meeting.additionalInfo && (
         <p className="text-sm mt-2 text-gray-600">
