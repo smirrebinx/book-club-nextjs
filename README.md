@@ -1,9 +1,8 @@
-# Barnfria Bokklubben
+# Bokklubben
 
 A full-stack book club application built with Next.js 15, featuring user authentication, role-based access control, book suggestions with voting, and an admin dashboard.
 
 ## Live
-https://bbokklubb.netlify.app
 https://book-club-nextjs-mocha.vercel.app
 
 ## Features
