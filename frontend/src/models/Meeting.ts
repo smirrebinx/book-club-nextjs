@@ -9,6 +9,7 @@ const BookInfoSchema = new Schema<BookInfo>({
   author: { type: String, required: false },
   coverImage: { type: String },
   isbn: { type: String },
+  googleDescription: { type: String },
 }, { _id: false });
 
 const MeetingSchema = new Schema<MeetingData>(

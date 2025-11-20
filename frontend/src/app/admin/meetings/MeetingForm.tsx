@@ -147,6 +147,7 @@ interface BookFieldsProps {
     bookId: string;
     bookIsbn: string;
     bookCoverImage: string;
+    googleDescription: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   isPending: boolean;
@@ -221,6 +222,26 @@ function BookFields({ formData, handleChange, isPending, isEditing, hasCurrentBo
           placeholder="https://example.com/image.jpg"
           helpText="URL till bokens omslagsbild"
         />
+
+        <div>
+          <label htmlFor="google-description" className="block text-sm font-medium text-[var(--primary-text)] mb-1">
+            Beskrivning (Google Books)
+          </label>
+          <textarea
+            id="google-description"
+            name="googleDescription"
+            value={formData.googleDescription}
+            onChange={handleChange}
+            disabled={isPending}
+            rows={4}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ "--tw-ring-color": "var(--focus-ring)" } as React.CSSProperties}
+            placeholder="Beskrivning av boken från Google Books API"
+          />
+          <p className="text-xs text-[var(--color-muted)] mt-1">
+            Bokens beskrivning från Google Books (visas på bokkorten)
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -266,6 +287,7 @@ const EMPTY_FORM_DATA = {
   bookAuthor: '',
   bookCoverImage: '',
   bookIsbn: '',
+  googleDescription: '',
   additionalInfo: '',
 };
 
@@ -276,6 +298,7 @@ function getBookFormData(book?: BookInfo) {
     bookAuthor: book?.author || '',
     bookCoverImage: book?.coverImage || '',
     bookIsbn: book?.isbn || '',
+    googleDescription: book?.googleDescription || '',
   };
 }
 

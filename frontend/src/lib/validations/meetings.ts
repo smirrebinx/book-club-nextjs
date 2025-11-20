@@ -12,7 +12,8 @@ export const bookInfoSchema = z.object({
     z.literal(''),
     z.null()
   ]).optional().transform(val => val || undefined),
-  isbn: z.string().max(20).optional()
+  isbn: z.string().max(20).optional(),
+  googleDescription: z.string().max(5000).optional()
 });
 
 export const createMeetingSchema = z.object({

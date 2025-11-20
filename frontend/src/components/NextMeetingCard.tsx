@@ -1,4 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
+
+import { BookPlaceholder } from "@/components/BookPlaceholder";
+import { formatSwedishDate } from "@/lib/dateUtils";
 
 import type { MeetingData } from "@/data/nextMeeting";
 
@@ -7,6 +11,8 @@ interface NextMeetingCardProps {
 }
 
 export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
+  const formattedDate = meetingData.date ? formatSwedishDate(meetingData.date) : meetingData.date;
+
   return (
     <Link
       href="/NextMeeting"
@@ -32,7 +38,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
 
         {/* Meeting Summary */}
         <div
-          className="flex flex-col gap-2 text-base"
+          className="flex flex-col gap-4 text-base"
           style={{
             fontFamily: "var(--font-body)",
             color: "var(--secondary-text)",
@@ -43,7 +49,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
             <span className="font-semibold" style={{ color: "var(--primary-text)" }}>
               Datum och tid
             </span>
-            <span>{meetingData.date}, klockan {meetingData.time}</span>
+            <span>{formattedDate}, klockan {meetingData.time}</span>
           </div>
 
           {/* Location */}
@@ -55,15 +61,43 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
           </div>
 
           {/* Book */}
-          <div className="flex flex-col gap-1">
-            <span className="font-semibold" style={{ color: "var(--primary-text)" }}>
-              Bok
-            </span>
-            <span>
-              {meetingData.book?.title || 'Ingen bok vald'}
-              {meetingData.book?.author && ` av ${meetingData.book.author}`}
-            </span>
-          </div>
+          {meetingData.book && (
+            <div className="flex flex-col gap-2">
+              <span className="font-semibold" style={{ color: "var(--primary-text)" }}>
+                Bok
+              </span>
+              <div className="flex gap-4">
+                {/* Book Cover */}
+                <div className="relative w-16 h-24 flex-shrink-0">
+                  {meetingData.book.coverImage ? (
+                    <Image
+                      src={meetingData.book.coverImage}
+                      alt={`Omslag för ${meetingData.book.title}`}
+                      fill
+                      sizes="64px"
+                      className="object-cover rounded shadow-sm"
+                    />
+                  ) : (
+                    <BookPlaceholder />
+                  )}
+                </div>
+                {/* Book Info */}
+                <div className="flex flex-col gap-1 flex-1">
+                  <span className="font-medium">
+                    {meetingData.book.title || 'Ingen bok vald'}
+                  </span>
+                  {meetingData.book.author && (
+                    <span className="text-sm">av {meetingData.book.author}</span>
+                  )}
+                  {meetingData.book.googleDescription && (
+                    <p className="text-sm mt-1 line-clamp-3">
+                      {meetingData.book.googleDescription}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Call to Action */}

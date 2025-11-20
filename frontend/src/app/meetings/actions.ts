@@ -54,7 +54,7 @@ function getFieldWithFallback(formValue: string | undefined, currentValue: strin
 /**
  * Helper: Parse book data from form
  */
-function parseBookData(formData: FormData, currentBook?: { id?: string; title?: string; author?: string; coverImage?: string; isbn?: string }) {
+function parseBookData(formData: FormData, currentBook?: { id?: string; title?: string; author?: string; coverImage?: string; isbn?: string; googleDescription?: string }) {
   const bookId = getFormField(formData, 'bookId');
   const bookTitle = getFormField(formData, 'bookTitle');
   const bookAuthor = getFormField(formData, 'bookAuthor');
@@ -69,6 +69,7 @@ function parseBookData(formData: FormData, currentBook?: { id?: string; title?: 
     author: getFieldWithFallback(bookAuthor, currentBook?.author),
     coverImage: getFieldWithFallback(getFormField(formData, 'bookCoverImage'), currentBook?.coverImage),
     isbn: getFieldWithFallback(getFormField(formData, 'bookIsbn'), currentBook?.isbn),
+    googleDescription: getFieldWithFallback(getFormField(formData, 'googleDescription'), currentBook?.googleDescription),
   };
 }
 
@@ -99,12 +100,13 @@ function parseFormDataToMeetingUpdate(formData: FormData, currentMeeting: Meetin
 /**
  * Helper: Sanitize book data
  */
-function sanitizeBookData(book: { id?: string; title?: string; author?: string; coverImage?: string; isbn?: string }): {
+function sanitizeBookData(book: { id?: string; title?: string; author?: string; coverImage?: string; isbn?: string; googleDescription?: string }): {
   id?: string;
   title?: string;
   author?: string;
   coverImage?: string;
   isbn?: string;
+  googleDescription?: string;
 } {
   return {
     id: book.id ? sanitizeText(book.id) : undefined,
@@ -112,6 +114,7 @@ function sanitizeBookData(book: { id?: string; title?: string; author?: string; 
     author: book.author ? sanitizeText(book.author) : undefined,
     coverImage: book.coverImage ? sanitizeText(book.coverImage) : undefined,
     isbn: book.isbn ? sanitizeText(book.isbn) : undefined,
+    googleDescription: book.googleDescription ? sanitizeText(book.googleDescription) : undefined,
   };
 }
 
@@ -144,72 +147,79 @@ function sanitizeMeetingData(validated: PartialMeetingUpdate): PartialMeetingUpd
 }
 
 /**
+ * Helper: Clean data by removing undefined values for Mongoose
+ */
+function filterUndefined(obj: Record<string, unknown>): Record<string, unknown> | undefined {
+  if (obj === null || obj === undefined) return undefined;
+  if (typeof obj !== 'object') return obj as Record<string, unknown>;
+  if (Array.isArray(obj)) return obj as unknown as Record<string, unknown>;
+
+  const filtered: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined) {
+      if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
+        filtered[key] = filterUndefined(value as Record<string, unknown>);
+      } else {
+        filtered[key] = value;
+      }
+    }
+  }
+  return Object.keys(filtered).length > 0 ? filtered : undefined;
+}
+
+/**
+ * Helper: Parse and sanitize form data for new meeting
+ */
+function parseCreateMeetingData(formData: FormData) {
+  const data = {
+    id: formData.get('id') as string,
+    date: formData.get('date') as string,
+    time: formData.get('time') as string,
+    location: formData.get('location') as string,
+    book: {
+      id: formData.get('bookId') as string,
+      title: formData.get('bookTitle') as string,
+      author: formData.get('bookAuthor') as string,
+      coverImage: formData.get('bookCoverImage') as string | undefined,
+      isbn: formData.get('bookIsbn') as string | undefined,
+      googleDescription: formData.get('googleDescription') as string | undefined,
+    },
+    additionalInfo: formData.get('additionalInfo') as string || '',
+  };
+
+  // Validate with Zod
+  const validated = createMeetingSchema.parse(data);
+
+  // Sanitize inputs
+  return {
+    id: validated.id ? sanitizeText(validated.id) : undefined,
+    date: validated.date ? sanitizeText(validated.date) : undefined,
+    time: validated.time ? sanitizeText(validated.time) : undefined,
+    location: validated.location ? sanitizeText(validated.location) : undefined,
+    book: validated.book ? {
+      id: validated.book.id ? sanitizeText(validated.book.id) : undefined,
+      title: validated.book.title ? sanitizeText(validated.book.title) : undefined,
+      author: validated.book.author ? sanitizeText(validated.book.author) : undefined,
+      coverImage: validated.book.coverImage ? sanitizeText(validated.book.coverImage) : undefined,
+      isbn: validated.book.isbn ? sanitizeText(validated.book.isbn) : undefined,
+      googleDescription: validated.book.googleDescription ? sanitizeText(validated.book.googleDescription) : undefined,
+    } : undefined,
+    additionalInfo: validated.additionalInfo ? sanitizeText(validated.additionalInfo) : undefined,
+  };
+}
+
+/**
  * Create a new meeting (admin only)
  */
 export async function createMeeting(formData: FormData) {
   try {
     await requireAdmin();
 
-    // Parse form data
-    const data = {
-      id: formData.get('id') as string,
-      date: formData.get('date') as string,
-      time: formData.get('time') as string,
-      location: formData.get('location') as string,
-      book: {
-        id: formData.get('bookId') as string,
-        title: formData.get('bookTitle') as string,
-        author: formData.get('bookAuthor') as string,
-        coverImage: formData.get('bookCoverImage') as string | undefined,
-        isbn: formData.get('bookIsbn') as string | undefined,
-      },
-      additionalInfo: formData.get('additionalInfo') as string || '',
-    };
-
-    // Validate with Zod
-    const validated = createMeetingSchema.parse(data);
-
-    // Sanitize inputs
-    const sanitized = {
-      id: validated.id ? sanitizeText(validated.id) : undefined,
-      date: validated.date ? sanitizeText(validated.date) : undefined,
-      time: validated.time ? sanitizeText(validated.time) : undefined,
-      location: validated.location ? sanitizeText(validated.location) : undefined,
-      book: validated.book ? {
-        id: validated.book.id ? sanitizeText(validated.book.id) : undefined,
-        title: validated.book.title ? sanitizeText(validated.book.title) : undefined,
-        author: validated.book.author ? sanitizeText(validated.book.author) : undefined,
-        coverImage: validated.book.coverImage ? sanitizeText(validated.book.coverImage) : undefined,
-        isbn: validated.book.isbn ? sanitizeText(validated.book.isbn) : undefined,
-      } : undefined,
-      additionalInfo: validated.additionalInfo ? sanitizeText(validated.additionalInfo) : undefined,
-    };
+    const sanitized = parseCreateMeetingData(formData);
+    const cleanedData = filterUndefined(sanitized as Record<string, unknown>);
 
     await connectDB();
-
-    // Filter out undefined values to avoid Mongoose issues in serverless
-    const filterUndefined = (obj: Record<string, unknown>): Record<string, unknown> | undefined => {
-      if (obj === null || obj === undefined) return undefined;
-      if (typeof obj !== 'object') return obj as Record<string, unknown>;
-      if (Array.isArray(obj)) return obj as unknown as Record<string, unknown>;
-
-      const filtered: Record<string, unknown> = {};
-      for (const [key, value] of Object.entries(obj)) {
-        if (value !== undefined) {
-          if (typeof value === 'object' && !Array.isArray(value) && value !== null) {
-            filtered[key] = filterUndefined(value as Record<string, unknown>);
-          } else {
-            filtered[key] = value;
-          }
-        }
-      }
-      return Object.keys(filtered).length > 0 ? filtered : undefined;
-    };
-
-    const cleanedData = filterUndefined(sanitized as Record<string, unknown>);
-    
-    // Keep variable meeting for debugging
-    const _meeting = await Meeting.create(cleanedData); 
+    await Meeting.create(cleanedData);
 
     revalidatePath('/admin/meetings');
     revalidatePath('/NextMeeting');
