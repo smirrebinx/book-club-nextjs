@@ -30,25 +30,27 @@ https://book-club-nextjs-mocha.vercel.app
 - **Meeting Management**: Full CRUD operations for book club meetings
 - **Swedish Language UI**: All interface text in Swedish
 
-### Security
+### Security & Error Handling
 - **Multi-layered Validation**: Zod for API validation, Mongoose for database schemas
-- **XSS Prevention**: Server-side DOMPurify sanitization
-- **Database Sessions**: Prevents JWT tampering and allows immediate revocation
-- **Authorization Checks**: Server-side validation in all mutations
+- **XSS Prevention**: Server-side HTML sanitization (removes tags and dangerous characters)
+- **JWT Sessions**: Secure session management with database verification
+- **Authorization Checks**: Server-side validation in all mutations and API routes
+- **Error Pages**: Custom 404 and error boundary pages with user-friendly messages
+- **Rate Limiting**: API endpoint protection against abuse
 - **WCAG Compliant**: Accessibility features throughout
 
 ## Technology Stack
 
-- **Framework**: Next.js 15.0.0 (App Router)
+- **Framework**: Next.js 15.5.6 (App Router)
 - **Language**: TypeScript 5
 - **Runtime**: Node.js 22
 - **Database**: MongoDB Atlas with Mongoose 8.19 ODM + native MongoDB driver 6.20
 - **Authentication**: NextAuth v5 (beta.30) with MongoDBAdapter and JWT strategy
 - **Validation**: Zod 4.1 (API) + Mongoose (Database)
-- **Security**: isomorphic-dompurify
-- **Styling**: Tailwind CSS v4.1
+- **Security**: Server-side input sanitization (HTML/XSS prevention)
+- **Styling**: Tailwind CSS v4.1 with CSS Variables
 - **UI Components**: React 19 with custom components
-- **Email**: Nodemailer for magic link authentication (not set up yet)
+- **Email**: Nodemailer for magic link authentication (optional)
 - **Animation**: Lottie animations via @lottiefiles/dotlottie-react
 - **Fonts**: Playfair Display, Merriweather, custom NewYorker
 
@@ -111,9 +113,12 @@ book-club-nextjs/
     │   │   │   ├── meetings/
     │   │   │   │   ├── route.ts                 # GET all, POST new
     │   │   │   │   ├── [id]/route.ts            # GET, PUT, DELETE by ID
-    │   │   │   │   └── next/route.ts            # GET next meeting
+    │   │   │   │   ├── next/route.ts            # GET next meeting
+    │   │   │   │   └── test-db/route.ts         # Database connectivity test
     │   │   │   └── books/route.ts               # Google Books API proxy
     │   │   ├── page.tsx        # Home page
+    │   │   ├── error.tsx       # Global error boundary
+    │   │   ├── not-found.tsx   # 404 page
     │   │   └── layout.tsx      # Root layout
     │   ├── components/         # React components
     │   │   ├── navbar/         # Navigation components
@@ -144,8 +149,10 @@ book-club-nextjs/
     │   │   ├── auth.ts         # NextAuth configuration
     │   │   ├── auth.config.ts  # NextAuth config (edge-compatible)
     │   │   ├── auth-helpers.ts # Auth helper functions
-    │   │   ├── mongodb.ts      # Mongoose connection (with serverless fixes)
-    │   │   ├── mongodb-client.ts # MongoDB native client
+    │   │   ├── mongodb.ts      # Mongoose connection (serverless optimized)
+    │   │   ├── mongodb-client.ts # MongoDB native client (serverless optimized)
+    │   │   ├── logger.ts       # Server-side logging utility
+    │   │   ├── rateLimit.ts    # Rate limiting middleware
     │   │   └── validations/    # Zod schemas
     │   │       ├── admin.ts
     │   │       ├── suggestions.ts
@@ -161,10 +168,17 @@ book-club-nextjs/
     │   │   ├── suggestion.ts
     │   │   └── next-auth.d.ts  # NextAuth type extensions
     │   ├── hooks/              # Custom React hooks
+    │   │   └── usePendingCount.ts # Hook for pending user count
     │   ├── data/               # Static data files
-    │   └── scripts/            # Utility scripts
-    │       └── seedMeetings.ts # Database seeding script
+    │   ├── scripts/            # Utility scripts
+    │   │   └── seedMeetings.ts # Database seeding script
+    │   ├── middleware.ts       # Next.js middleware (auth, redirects)
+    │   └── constants.ts        # Application constants
     ├── public/                 # Static assets
+    │   └── animations/         # Lottie animation files
+    │       ├── animationBooks.lottie
+    │       ├── booksStack.lottie
+    │       └── Error.lottie    # Error page animation
     ├── .env.local              # Environment variables (not in git)
     ├── .env.example            # Environment variables template
     ├── next.config.ts          # Next.js configuration
@@ -288,10 +302,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 #### Security Best Practices:
 
-- ✅ Remove `ADMIN_EMAIL` from `.env.local` after initial setup (optional but recommended)
-- ✅ Use strong passwords and 2FA on your Google account
-- ✅ Only promote trusted users to admin
-- ✅ Regularly review admin users in the admin panel
+- Remove `ADMIN_EMAIL` from `.env.local` after initial setup (optional but recommended)
+- Use strong passwords and 2FA on your Google account
+- Only promote trusted users to admin
+- Regularly review admin users in the admin panel
 
 ## Available Scripts
 
@@ -319,9 +333,10 @@ Unlike JWT tokens, database sessions allow immediate access revocation. When an 
 ### Server Actions
 All mutations (create, update, delete) use Next.js Server Actions with:
 - Zod validation for user-friendly error messages
-- DOMPurify sanitization to prevent XSS attacks
+- Server-side HTML sanitization to prevent XSS attacks
 - Authorization checks (requireAuth, requireAdmin, requireApproved)
 - `revalidatePath()` for cache updates
+- Error handling with detailed logging
 
 ### API Routes
 The application uses a hybrid approach with both API Routes and Server Actions:
@@ -362,21 +377,26 @@ All UI text is in Swedish:
 - Extended NextAuth types for custom session fields
 
 ### Security Best Practices
-- Server-side input sanitization with DOMPurify
-- Separate validation layers (Zod + Mongoose)
-- JWT sessions with database user verification on every request
-- Authorization checks in all protected routes and API endpoints
-- XSS prevention via isomorphic-dompurify
-- CSRF protection via NextAuth
-- Environment variable validation
+- **Input Sanitization**: Server-side HTML tag removal and character escaping
+- **Multi-layer Validation**: Zod schemas for API validation + Mongoose schemas for database
+- **Session Security**: JWT sessions with database user verification on every request
+- **Authorization**: Comprehensive checks in all protected routes, API endpoints, and Server Actions
+- **XSS Prevention**: Server-side sanitization removes HTML tags and dangerous characters
+- **CSRF Protection**: Built-in via NextAuth
+- **Rate Limiting**: API endpoint protection against abuse
+- **Environment Validation**: Required environment variables checked on startup
 
 ### Serverless Optimization
 The application is optimized for serverless deployment (Netlify/Vercel):
-- **Connection Pooling**: MongoDB connection caching with proper state management
+- **Connection Pooling**: Optimized MongoDB connection settings (maxPoolSize: 10, minPoolSize: 1)
+- **Connection Caching**: Global variable caching prevents connection exhaustion
 - **Cold Start Handling**: Extended timeouts (10s) for serverless cold starts
+- **Buffer Commands Disabled**: Critical for serverless (`bufferCommands: false`)
+- **Model Registration**: Proper Mongoose model imports ensure schema availability in serverless functions
 - **Write Operation Safety**: Connection 'open' event verification before writes
 - **External Dependencies**: Mongoose, MongoDB, and BSON marked as external in Netlify config
 - **Detailed Logging**: Comprehensive logging for debugging in serverless environments
+- **Error Boundaries**: Custom error pages (404 and general errors) with user-friendly messages
 
 ### Accessibility
 - WCAG 2.1 Level AA compliance
@@ -443,7 +463,7 @@ The application includes a `netlify.toml` configuration file optimized for serve
    NODE_ENV=production
    ```
 
-5. **Deploy!**
+5. **Deploy**
 
 **Important Notes:**
 - The `netlify.toml` marks `mongoose`, `mongodb`, and `bson` as external dependencies for proper serverless function bundling

@@ -1,6 +1,8 @@
 import { AutoRefresh } from '@/components/AutoRefresh';
 import connectDB from '@/lib/mongodb';
 import BookSuggestion from '@/models/BookSuggestion';
+// Import User model to ensure schema is registered for populate
+import '@/models/User';
 
 import { AdminSuggestionsTable } from './AdminSuggestionsTable';
 import { ResetVotingButton } from './ResetVotingButton';

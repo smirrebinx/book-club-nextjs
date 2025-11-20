@@ -4,6 +4,8 @@ import { StatCard, StatGrid } from "@/components/StatCard";
 import { APP_NAME } from "@/constants";
 import connectDB from "@/lib/mongodb";
 import BookSuggestion from "@/models/BookSuggestion";
+// Import User model to ensure schema is registered for populate
+import "@/models/User";
 
 import { ReadBooksList } from "./ReadBooksList";
 

@@ -4,6 +4,8 @@ import { requireApproved } from '@/lib/auth-helpers';
 import connectDB from '@/lib/mongodb';
 import { createRateLimitMiddleware } from '@/lib/rateLimit';
 import BookSuggestion from '@/models/BookSuggestion';
+// Import User model to ensure schema is registered for populate
+import '@/models/User';
 
 import type { Types } from 'mongoose';
 import type { NextRequest} from 'next/server';

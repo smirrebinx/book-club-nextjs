@@ -46,7 +46,7 @@ async function connectDB(): Promise<typeof mongoose> {
     const opts = {
       bufferCommands: false,
       maxPoolSize: 10,
-      minPoolSize: 2,
+      minPoolSize: 1, // Reduced for serverless to avoid maintaining idle connections
       serverSelectionTimeoutMS: 10000, // Increased from 5000 for serverless cold starts
       socketTimeoutMS: 45000,
       family: 4, // Use IPv4, skip trying IPv6
