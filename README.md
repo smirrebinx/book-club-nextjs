@@ -30,16 +30,15 @@ https://book-club-nextjs-mocha.vercel.app
 - **Swedish Language UI**: All interface text in Swedish
 
 ### Security & Error Handling
-- **Multi-layered Validation**: Zod for API validation, Mongoose for database schemas
-- **XSS Prevention**: Server-side HTML sanitization (removes tags and dangerous characters)
-- **JWT Sessions**: Secure session management with database verification
-- **Authorization Checks**: Server-side validation in all mutations and API routes
-- **Error Pages**: Custom 404 and error boundary pages with user-friendly messages
-- **Rate Limiting**: API endpoint protection against abuse
-- **WCAG Compliant**: Accessibility features throughout
+-**Layered Validation**: Zod for API request validation, and Mongoose for strict schema enforcement
+-**XSS Protection**: Server-side sanitization of incoming HTML content
+-**Secure JWT Sessions**: Session tokens validated against the database on each request
+-**Authorization Enforcement**: Server-side permission checks across all mutations and API routes
+-**Rate Limiting**: Endpoint protection against request flooding and abuse
+-**Custom Error Handling**: User-friendly 404 pages and error boundaries
+-**WCAG Compliant**: Accessibility features throughout
 
 ## Technology Stack
-
 - **Framework**: Next.js 15.5.6 (App Router)
 - **Language**: TypeScript 5
 - **Runtime**: Node.js 22
