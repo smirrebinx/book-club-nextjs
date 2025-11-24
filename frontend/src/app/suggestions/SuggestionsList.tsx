@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { ActionLink } from '@/components/ActionButton';
@@ -148,18 +148,22 @@ export function SuggestionsList({
   suggestions,
   currentUserId,
   userRole,
+  currentSearch,
 }: {
   suggestions: Suggestion[];
   currentUserId: string;
   userRole: UserRole;
+  currentSearch: string;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [suggestionToDelete, setSuggestionToDelete] = useState<{ id: string; title: string } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDescription, setEditDescription] = useState('');
+  const [searchInput, setSearchInput] = useState(currentSearch);
 
   const handleDeleteClick = (suggestionId: string, title: string) => {
     setSuggestionToDelete({ id: suggestionId, title });
@@ -222,8 +226,82 @@ export function SuggestionsList({
     return userRole === 'admin' || suggestion.suggestedBy._id === currentUserId;
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams(searchParams.toString());
+    if (searchInput) {
+      params.set('search', searchInput);
+    } else {
+      params.delete('search');
+    }
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('search');
+    router.push(`?${params.toString()}`, { scroll: false });
+  };
+
   return (
     <div className="space-y-4">
+      {/* Search Input */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
+          <div className="flex-1">
+            <label htmlFor="book-search" className="sr-only">
+              Sök efter titel, författare eller beskrivning
+            </label>
+            <input
+              id="book-search"
+              type="text"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Sök efter titel, författare eller beskrivning..."
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
+              style={{ '--tw-ring-color': 'var(--focus-ring)' } as React.CSSProperties}
+            />
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              className="px-4 py-2 bg-[var(--button-primary-bg)] text-[var(--button-primary-text)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-2 focus:outline-offset-2 transition-colors"
+              style={{ outlineColor: 'var(--focus-ring)' }}
+            >
+              Sök
+            </button>
+            {currentSearch && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:outline-2 focus:outline-offset-2 transition-colors"
+                style={{ outlineColor: 'var(--focus-ring)' }}
+              >
+                Rensa
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* No results message */}
+      {suggestions.length === 0 && currentSearch && (
+        <div className="bg-white rounded-lg shadow p-6 text-center">
+          <p className="text-gray-600">
+            Inga bokförslag hittades för <span className="font-semibold">&quot;{currentSearch}&quot;</span>
+          </p>
+          <button
+            onClick={handleClearSearch}
+            className="mt-3 text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline focus:outline-2 focus:outline-offset-2"
+            style={{ outlineColor: 'var(--focus-ring)' }}
+          >
+            Visa alla förslag
+          </button>
+        </div>
+      )}
+
+      {/* Suggestions cards */}
       {suggestions.map((suggestion) => (
         <div key={suggestion._id} className="bg-white rounded-lg shadow p-6">
           {/* Desktop: side-by-side, Mobile: stacked */}

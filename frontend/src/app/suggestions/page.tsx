@@ -13,7 +13,11 @@ import { SuggestionsList } from './SuggestionsList';
 // Force dynamic rendering - don't pre-render at build time
 export const dynamic = 'force-dynamic';
 
-export default async function SuggestionsPage() {
+export default async function SuggestionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const session = await auth();
 
   // Redirect pending users
@@ -27,10 +31,36 @@ export default async function SuggestionsPage() {
 
   await connectDB();
 
-  // Get all suggestions
-  const suggestions = await BookSuggestion.find({
+  const params = await searchParams;
+  const search = (params.search as string) || '';
+
+  // Build query with search
+  interface SuggestionQuery {
+    status: { $in: string[] };
+    $or?: Array<{
+      title?: { $regex: string; $options: string };
+      author?: { $regex: string; $options: string };
+      description?: { $regex: string; $options: string };
+    }>;
+  }
+
+  const query: SuggestionQuery = {
     status: { $in: ['pending', 'approved', 'currently_reading'] },
-  })
+  };
+
+  // Add search filter
+  if (search) {
+    // Escape special regex characters for security
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    query.$or = [
+      { title: { $regex: escapedSearch, $options: 'i' } },
+      { author: { $regex: escapedSearch, $options: 'i' } },
+      { description: { $regex: escapedSearch, $options: 'i' } },
+    ];
+  }
+
+  // Get all suggestions with search filter
+  const suggestions = await BookSuggestion.find(query)
     .sort({ createdAt: -1 })
     .lean();
 
@@ -130,6 +160,7 @@ export default async function SuggestionsPage() {
             suggestions={suggestionsData}
             currentUserId={session.user.id}
             userRole={session.user.role}
+            currentSearch={search}
           />
         </div>
       </main>
