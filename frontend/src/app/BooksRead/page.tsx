@@ -17,17 +17,47 @@ export const metadata = {
 // Force dynamic rendering for live updates
 export const dynamic = "force-dynamic";
 
-export default async function BooksRead() {
+export default async function BooksRead({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   await connectDB();
 
-  // Fetch the book currently being read
+  const params = await searchParams;
+  const search = (params.search as string) || '';
+
+  // Fetch the book currently being read (no search filter)
   const currentlyReadingBooks = await BookSuggestion.find({ status: "currently_reading" })
     .populate("suggestedBy", "name")
     .sort({ updatedAt: -1 })
     .lean();
 
-  // Fetch books marked as read
-  const readBooks = await BookSuggestion.find({ status: "read" })
+  // Build query for read books with search
+  interface ReadBooksQuery {
+    status: string;
+    $or?: Array<{
+      title?: { $regex: string; $options: string };
+      author?: { $regex: string; $options: string };
+      description?: { $regex: string; $options: string };
+    }>;
+  }
+
+  const readBooksQuery: ReadBooksQuery = { status: "read" };
+
+  // Add search filter
+  if (search) {
+    // Escape special regex characters for security
+    const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    readBooksQuery.$or = [
+      { title: { $regex: escapedSearch, $options: 'i' } },
+      { author: { $regex: escapedSearch, $options: 'i' } },
+      { description: { $regex: escapedSearch, $options: 'i' } },
+    ];
+  }
+
+  // Fetch books marked as read with search filter
+  const readBooks = await BookSuggestion.find(readBooksQuery)
     .populate("suggestedBy", "name")
     .sort({ updatedAt: -1 })
     .lean();
@@ -144,7 +174,7 @@ export default async function BooksRead() {
                   color: "var(--secondary-text)",
                 }}
               >
-                <ReadBooksList books={currentlyReadingData} />
+                <ReadBooksList books={currentlyReadingData} currentSearch="" showSearch={false} />
               </div>
             </div>
           )}
@@ -167,7 +197,7 @@ export default async function BooksRead() {
                 color: "var(--secondary-text)",
               }}
             >
-              <ReadBooksList books={booksData} />
+              <ReadBooksList books={booksData} currentSearch={search} />
             </div>
           </div>
         </div>

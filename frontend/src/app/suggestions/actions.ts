@@ -7,6 +7,7 @@ import { requireAuth, requireApproved } from '@/lib/auth-helpers';
 import { createContextLogger } from '@/lib/logger';
 import connectDB from '@/lib/mongodb';
 import { checkRateLimit } from '@/lib/rateLimit';
+import { checkDuplicateSuggestion, formatStatus } from '@/lib/suggestions-helpers';
 import {
   createSuggestionSchema,
   updateSuggestionSchema,
@@ -69,6 +70,40 @@ export async function createSuggestion(formData: FormData) {
     console.log('[createSuggestion] Connecting to database...');
     await connectDB();
     console.log('[createSuggestion] Database connected');
+
+    // Check for duplicate suggestions
+    console.log('[createSuggestion] Checking for duplicates...');
+    const duplicateCheck = await checkDuplicateSuggestion(
+      sanitized.title,
+      sanitized.author,
+      sanitized.isbn,
+      sanitized.googleBooksId
+    );
+
+    if (duplicateCheck.isDuplicate && duplicateCheck.existingSuggestion) {
+      const existing = duplicateCheck.existingSuggestion;
+      console.log('[createSuggestion] Duplicate found:', existing.title, 'Status:', existing.status);
+
+      // Format error message based on status
+      let errorMessage: string;
+      if (existing.status === 'read') {
+        // Book has already been read by the club
+        const readDate = existing.createdAt
+          ? new Date(existing.createdAt).toLocaleDateString('sv-SE')
+          : '';
+        errorMessage = `Den här boken har redan lästs av bokklubben${readDate ? ` (${readDate})` : ''}. Föreslå en annan bok!`;
+      } else {
+        // Book is pending, approved, or currently_reading
+        const statusText = formatStatus(existing.status);
+        errorMessage = `Den här boken har redan föreslagits av ${existing.suggestedBy.name} och har status: ${statusText}`;
+      }
+
+      return {
+        success: false,
+        error: errorMessage
+      };
+    }
+    console.log('[createSuggestion] No duplicates found');
 
     // Filter out undefined values to avoid Mongoose issues in serverless
     const dataToCreate = Object.fromEntries(

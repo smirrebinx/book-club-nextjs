@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useState } from 'react';
 
 import { BookPlaceholder } from '@/components/BookPlaceholder';
 import { formatSwedishDate } from '@/lib/dateUtils';
@@ -9,6 +12,30 @@ interface MeetingCardProps {
   meeting: MeetingData;
   variant?: 'primary' | 'secondary';
   showFullDetails?: boolean;
+}
+
+function ExpandableDescription({ description, bookTitle, isPrimary }: { description: string; bookTitle: string; isPrimary: boolean }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const shouldTruncate = description.length > 200;
+  const textSize = isPrimary ? 'text-base' : 'text-sm';
+
+  return (
+    <div>
+      <p className={`${textSize} ${!isExpanded && shouldTruncate ? 'line-clamp-3' : ''}`}>
+        {description}
+      </p>
+      {shouldTruncate && (
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline mt-1 focus:outline-2 focus:outline-offset-2"
+          style={{ outlineColor: 'var(--focus-ring)' }}
+          aria-expanded={isExpanded}
+        >
+          {isExpanded ? 'Visa mindre' : `Läs mer om ${bookTitle}`}
+        </button>
+      )}
+    </div>
+  );
 }
 
 function MeetingDetail({ label, value }: { label: string; value?: string }) {
@@ -35,42 +62,52 @@ function BookInfo({ title, author, coverImage, googleDescription, isPrimary }: B
   const textSize = isPrimary ? 'text-lg' : 'text-base';
 
   return (
-    <div className="flex gap-4">
-      {/* Book Cover */}
-      {coverImage && (
-        <div className={`relative flex-shrink-0 ${isPrimary ? 'w-24 h-36' : 'w-20 h-30'}`}>
-          <Image
-            src={coverImage}
-            alt={`Omslag för ${title}`}
-            fill
-            sizes={isPrimary ? '96px' : '80px'}
-            className="object-cover rounded shadow-sm"
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-4">
+        {/* Book Cover */}
+        {coverImage && (
+          <div className={`relative flex-shrink-0 ${isPrimary ? 'w-24 h-36' : 'w-20 h-30'}`}>
+            <Image
+              src={coverImage}
+              alt={`Omslag för ${title}`}
+              fill
+              sizes={isPrimary ? '96px' : '80px'}
+              className="object-cover rounded shadow-sm"
+            />
+          </div>
+        )}
+        {!coverImage && (
+          <div className={`flex-shrink-0 ${isPrimary ? 'w-24' : 'w-20'}`}>
+            <BookPlaceholder />
+          </div>
+        )}
+        {/* Book Details */}
+        <div className="flex flex-col gap-2 flex-1">
+          {title && (
+            <p className={`${textSize} leading-7`}>
+              <span className="font-semibold">Titel:</span> {title}
+            </p>
+          )}
+          {author && (
+            <p className={`${textSize} leading-7`}>
+              <span className="font-semibold">Författare:</span> {author}
+            </p>
+          )}
+        </div>
+      </div>
+      {/* Book Description - below image and title */}
+      {googleDescription && (
+        <div>
+          <p className={`${textSize} font-semibold mb-1`} style={{ color: 'var(--primary-text)' }}>
+            Om boken:
+          </p>
+          <ExpandableDescription
+            description={googleDescription}
+            bookTitle={title || 'boken'}
+            isPrimary={isPrimary}
           />
         </div>
       )}
-      {!coverImage && (
-        <div className={`flex-shrink-0 ${isPrimary ? 'w-24' : 'w-20'}`}>
-          <BookPlaceholder />
-        </div>
-      )}
-      {/* Book Details */}
-      <div className="flex flex-col gap-2 flex-1">
-        {title && (
-          <p className={`${textSize} leading-7`}>
-            <span className="font-semibold">Titel:</span> {title}
-          </p>
-        )}
-        {author && (
-          <p className={`${textSize} leading-7`}>
-            <span className="font-semibold">Författare:</span> {author}
-          </p>
-        )}
-        {googleDescription && (
-          <p className={`${isPrimary ? 'text-base' : 'text-sm'} mt-1 line-clamp-4`}>
-            {googleDescription}
-          </p>
-        )}
-      </div>
     </div>
   );
 }

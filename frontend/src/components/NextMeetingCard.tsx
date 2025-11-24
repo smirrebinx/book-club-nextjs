@@ -1,5 +1,8 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 
 import { BookPlaceholder } from "@/components/BookPlaceholder";
 import { formatSwedishDate } from "@/lib/dateUtils";
@@ -8,6 +11,32 @@ import type { MeetingData } from "@/data/nextMeeting";
 
 interface NextMeetingCardProps {
   meetingData: MeetingData;
+}
+
+function ExpandableDescription({ description, bookTitle }: { description: string; bookTitle: string }) {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const shouldTruncate = description.length > 200;
+
+  return (
+    <div>
+      <p className={`text-sm mt-1 ${!isExpanded && shouldTruncate ? 'line-clamp-3' : ''}`}>
+        {description}
+      </p>
+      {shouldTruncate && (
+        <button
+          onClick={(e) => {
+            e.preventDefault(); // Prevent Link navigation when clicking the button
+            setIsExpanded(!isExpanded);
+          }}
+          className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline mt-1 focus:outline-2 focus:outline-offset-2"
+          style={{ outlineColor: 'var(--focus-ring)' }}
+          aria-expanded={isExpanded}
+        >
+          {isExpanded ? 'Visa mindre' : `Läs mer om ${bookTitle}`}
+        </button>
+      )}
+    </div>
+  );
 }
 
 export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
@@ -66,7 +95,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
               <span className="font-semibold" style={{ color: "var(--primary-text)" }}>
                 Bok
               </span>
-              <div className="flex gap-4">
+              <div className="flex gap-4 mb-2">
                 {/* Book Cover */}
                 <div className="relative w-16 h-24 flex-shrink-0">
                   {meetingData.book.coverImage ? (
@@ -89,13 +118,20 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
                   {meetingData.book.author && (
                     <span className="text-sm">av {meetingData.book.author}</span>
                   )}
-                  {meetingData.book.googleDescription && (
-                    <p className="text-sm mt-1 line-clamp-3">
-                      {meetingData.book.googleDescription}
-                    </p>
-                  )}
                 </div>
               </div>
+              {/* Book Description - below image and title */}
+              {meetingData.book.googleDescription && (
+                <div>
+                  <p className="text-sm font-semibold mb-1" style={{ color: "var(--primary-text)" }}>
+                    Om boken:
+                  </p>
+                  <ExpandableDescription
+                    description={meetingData.book.googleDescription}
+                    bookTitle={meetingData.book.title || 'boken'}
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
