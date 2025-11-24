@@ -91,7 +91,7 @@ export function AddSuggestionForm() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 sticky top-8">
+    <div className="bg-white rounded-lg shadow p-6 sticky top-8 z-20">
       <h2 className="text-2xl font-bold text-gray-900 mb-4">Lägg till bokförslag</h2>
 
       {/* Success message - WCAG AA compliant with green-800 */}
