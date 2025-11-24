@@ -28,18 +28,26 @@ interface BookItem {
 
 // Extract book formatting logic to reduce complexity
 function formatBooks(items: BookItem[] | undefined) {
-  return items?.map((item: BookItem) => ({
-    id: item.id,
-    title: item.volumeInfo?.title || 'Unknown Title',
-    authors: item.volumeInfo?.authors || [],
-    author: item.volumeInfo?.authors?.[0] || 'Unknown Author',
-    publishedDate: item.volumeInfo?.publishedDate,
-    description: item.volumeInfo?.description,
-    coverImage: item.volumeInfo?.imageLinks?.thumbnail,
-    isbn: item.volumeInfo?.industryIdentifiers?.find(
-      (id: IndustryIdentifier) => id.type === 'ISBN_13' || id.type === 'ISBN_10'
-    )?.identifier,
-  })) || [];
+  return items?.map((item: BookItem) => {
+    // Truncate description to 2000 characters if needed
+    const rawDescription = item.volumeInfo?.description;
+    const description = rawDescription && rawDescription.length > 2000
+      ? rawDescription.substring(0, 1997) + '...'
+      : rawDescription;
+
+    return {
+      id: item.id,
+      title: item.volumeInfo?.title || 'Unknown Title',
+      authors: item.volumeInfo?.authors || [],
+      author: item.volumeInfo?.authors?.[0] || 'Unknown Author',
+      publishedDate: item.volumeInfo?.publishedDate,
+      description,
+      coverImage: item.volumeInfo?.imageLinks?.thumbnail,
+      isbn: item.volumeInfo?.industryIdentifiers?.find(
+        (id: IndustryIdentifier) => id.type === 'ISBN_13' || id.type === 'ISBN_10'
+      )?.identifier,
+    };
+  }) || [];
 }
 
 export async function GET(request: NextRequest) {
