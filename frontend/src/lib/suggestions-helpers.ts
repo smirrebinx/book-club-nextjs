@@ -1,7 +1,9 @@
-import connectDB from './mongodb';
 import BookSuggestion from '@/models/BookSuggestion';
 
+import connectDB from './mongodb';
+
 import type { SuggestionStatus } from '@/models/BookSuggestion';
+import type { Types } from 'mongoose';
 
 export interface DuplicateCheckResult {
   isDuplicate: boolean;
@@ -16,6 +18,20 @@ export interface DuplicateCheckResult {
     createdAt?: Date;
   };
   matchType?: 'isbn' | 'googleBooksId' | 'title-author';
+}
+
+// Add interface for the populated suggestion
+interface PopulatedSuggestion {
+  _id: Types.ObjectId;
+  title: string;
+  author: string;
+  status: SuggestionStatus;
+  isbn?: string;
+  googleBooksId?: string;
+  suggestedBy: {
+    name: string;
+  };
+  createdAt?: Date;
 }
 
 /**
@@ -70,7 +86,7 @@ export async function checkDuplicateSuggestion(
       status: { $in: ['pending', 'approved', 'currently_reading', 'read'] },
       $or: orConditions
     })
-      .populate('suggestedBy', 'name')
+      .populate<{ suggestedBy: { name: string } }>('suggestedBy', 'name')
       .sort({ createdAt: -1 }) // Get the most recent match
       .lean();
 
@@ -78,26 +94,29 @@ export async function checkDuplicateSuggestion(
       return { isDuplicate: false };
     }
 
+    // Cast to PopulatedSuggestion for type safety
+    const populated = existingSuggestion as unknown as PopulatedSuggestion;
+
     // Determine match type for logging/debugging
     let matchType: 'isbn' | 'googleBooksId' | 'title-author' = 'title-author';
 
-    if (isbn && existingSuggestion.isbn === isbn.trim()) {
+    if (isbn && populated.isbn === isbn.trim()) {
       matchType = 'isbn';
-    } else if (googleBooksId && existingSuggestion.googleBooksId === googleBooksId.trim()) {
+    } else if (googleBooksId && populated.googleBooksId === googleBooksId.trim()) {
       matchType = 'googleBooksId';
     }
 
     return {
       isDuplicate: true,
       existingSuggestion: {
-        _id: existingSuggestion._id.toString(),
-        title: existingSuggestion.title,
-        author: existingSuggestion.author,
-        status: existingSuggestion.status,
+        _id: populated._id.toString(),
+        title: populated.title,
+        author: populated.author,
+        status: populated.status,
         suggestedBy: {
-          name: (existingSuggestion.suggestedBy as { name: string })?.name || 'Okänd'
+          name: populated.suggestedBy?.name || 'Okänd'
         },
-        createdAt: existingSuggestion.createdAt
+        createdAt: populated.createdAt
       },
       matchType
     };
