@@ -128,13 +128,13 @@ export function BookSearchInput({ onSelectBook, disabled = false }: BookSearchIn
       />
 
       {isSearching && (
-        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white border border-gray-300 rounded-md shadow-lg z-50">
           <p className="text-sm text-gray-600">Söker...</p>
         </div>
       )}
 
       {error && (
-        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white border border-red-300 rounded-md shadow-lg z-10">
+        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white border border-red-300 rounded-md shadow-lg z-50">
           <p className="text-sm text-red-600">{error}</p>
         </div>
       )}
@@ -143,7 +143,7 @@ export function BookSearchInput({ onSelectBook, disabled = false }: BookSearchIn
         <div
           id="search-results"
           role="listbox"
-          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto z-10"
+          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-96 overflow-y-auto z-50"
         >
           {results.map((book) => (
             <button
@@ -190,7 +190,7 @@ export function BookSearchInput({ onSelectBook, disabled = false }: BookSearchIn
       )}
 
       {showResults && results.length === 0 && !isSearching && query.trim().length >= 2 && (
-        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+        <div className="absolute top-full left-0 right-0 mt-1 p-3 bg-white border border-gray-300 rounded-md shadow-lg z-50">
           <p className="text-sm text-gray-600">Inga böcker hittades</p>
         </div>
       )}
