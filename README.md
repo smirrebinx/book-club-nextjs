@@ -16,6 +16,9 @@ https://book-club-nextjs-mocha.vercel.app
 
 ### Book Suggestions
 - **Google Books Integration**: Search and add books with auto-populated metadata
+- **Duplicate Detection**: Prevents suggesting books already in the system (checks ISBN, Google Books ID, + and title + author)
+- **Search Functionality**: Search suggestions and read books by title, author, or description with partial + matching
+- **Expandable Descriptions**: "Läs mer" (Read more) buttons for long book descriptions
 - **Collaborative Suggestions**: Approved users can suggest books
 - **Voting System**: One vote per user per suggestion with reset functionality
 - **Optimistic UI**: Instant feedback when voting
