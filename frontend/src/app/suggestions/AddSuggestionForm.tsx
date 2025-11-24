@@ -112,7 +112,31 @@ export function AddSuggestionForm() {
           aria-live="assertive"
           className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"
         >
-          <p className="text-red-800 text-sm font-medium">{errorMessage}</p>
+          <div className="flex items-start justify-between gap-3">
+            <p className="text-red-800 text-sm font-medium flex-1">{errorMessage}</p>
+            <button
+              type="button"
+              onClick={() => {
+                setErrorMessage('');
+                resetForm();
+              }}
+              className="text-red-800/80 hover:text-red-800 focus:outline-2 focus:outline-offset-2"
+              style={{ outlineColor: 'var(--focus-ring)' }}
+              aria-label="Stäng och rensa formulär"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
