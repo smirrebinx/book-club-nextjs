@@ -76,6 +76,9 @@ export function ReadBooksList({
   books: ReadBook[];
   showSearch?: boolean;
 }) {
+  // Separate input state from search query
+  const [searchInput, setSearchInput] = useState('');
+
   // Use fuzzy search hook for client-side search with typo tolerance
   const { results: filteredBooks, query, setQuery, isSearching } = useFuzzySearch({
     data: books,
@@ -85,10 +88,12 @@ export function ReadBooksList({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Search is handled automatically by the fuzzy search hook
+    // Update search query only when form is submitted
+    setQuery(searchInput);
   };
 
   const handleClearSearch = () => {
+    setSearchInput('');
     setQuery('');
   };
 
@@ -105,8 +110,8 @@ export function ReadBooksList({
             <input
               id="read-books-search"
               type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Sök titel, författare eller beskrivning..."
               maxLength={100}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
@@ -118,7 +123,14 @@ export function ReadBooksList({
             </p>
           </div>
           <div className="flex gap-2">
-            {query && (
+            <button
+              type="submit"
+              className="px-4 py-2 bg-[var(--button-primary-bg)] text-[var(--button-primary-text)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-2 focus:outline-offset-2 transition-colors"
+              style={{ outlineColor: 'var(--focus-ring)' }}
+            >
+              Sök
+            </button>
+            {(query || searchInput) && (
               <button
                 type="button"
                 onClick={handleClearSearch}
