@@ -71,7 +71,7 @@ export function useFuzzySearch<T>({
       threshold,
       // Include score for potential debugging
       includeScore: false,
-      // Search in all locations of the string
+      // Search in all locations of the string (not just at the beginning)
       ignoreLocation: true,
       // Use extended search for better matching
       useExtendedSearch: false,
@@ -79,6 +79,11 @@ export function useFuzzySearch<T>({
       findAllMatches: true,
       // Minimum character length for matching
       minMatchCharLength: 1,
+      // Distance: Maximum distance a match can be from the expected location
+      // Higher value = more lenient with position of typos
+      distance: 100,
+      // Use case-insensitive matching
+      isCaseSensitive: false,
     });
   }, [data, keys, threshold]);
 

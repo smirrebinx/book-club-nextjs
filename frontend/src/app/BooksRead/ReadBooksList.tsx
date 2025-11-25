@@ -83,7 +83,7 @@ export function ReadBooksList({
   const { results: filteredBooks, query, setQuery, isSearching } = useFuzzySearch({
     data: books,
     keys: ['title', 'author', 'description'],
-    threshold: 0.3, // Balanced typo tolerance
+    threshold: 0.4, // More lenient typo tolerance (0.0 = exact, 1.0 = match anything)
   });
 
   const handleSearch = (e: React.FormEvent) => {
@@ -105,14 +105,14 @@ export function ReadBooksList({
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
             <label htmlFor="read-books-search" className="sr-only">
-              Sök titel, författare eller beskrivning (max 100 tecken)
+              Sök titel eller författare (max 100 tecken)
             </label>
             <input
               id="read-books-search"
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Sök titel, författare eller beskrivning..."
+              placeholder="Sök titel eller författare..."
               maxLength={100}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
               style={{ '--tw-ring-color': 'var(--focus-ring)' } as React.CSSProperties}
