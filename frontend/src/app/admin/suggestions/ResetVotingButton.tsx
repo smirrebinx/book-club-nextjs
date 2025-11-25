@@ -38,7 +38,7 @@ export function ResetVotingButton({ hasActiveVotingCycle }: ResetVotingButtonPro
       <button
         onClick={() => setShowConfirmDialog(true)}
         disabled={isPending}
-        className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-colors whitespace-nowrap"
+        className="px-4 py-2 bg-[var(--action-warning-bg)] text-white rounded-md hover:bg-[var(--action-warning-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-colors whitespace-nowrap"
         style={{ outlineColor: 'var(--focus-ring)' }}
       >
         Återställ röstning
@@ -58,7 +58,7 @@ export function ResetVotingButton({ hasActiveVotingCycle }: ResetVotingButtonPro
                 <li>Flytta &quot;Godkänd&quot; boken tillbaka till &quot;Inväntar röst&quot;</li>
                 <li>Rensa alla röster från alla böcker</li>
               </ul>
-              <p className="mt-4 font-semibold text-orange-600">
+              <p className="mt-4 font-semibold" style={{ color: 'var(--action-warning)' }}>
                 Detta kan inte ångras!
               </p>
             </div>
@@ -74,7 +74,7 @@ export function ResetVotingButton({ hasActiveVotingCycle }: ResetVotingButtonPro
               <button
                 onClick={handleReset}
                 disabled={isPending}
-                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-colors"
+                className="flex-1 px-4 py-2 bg-[var(--action-warning-bg)] text-white rounded-md hover:bg-[var(--action-warning-bg-hover)] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-colors"
                 style={{ outlineColor: 'var(--focus-ring)' }}
               >
                 {isPending ? 'Återställer...' : 'Återställ'}

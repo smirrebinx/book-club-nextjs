@@ -17,7 +17,11 @@ https://book-club-nextjs-mocha.vercel.app
 ### Book Suggestions
 - **Google Books Integration**: Search and add books with auto-populated metadata
 - **Duplicate Detection**: Prevents suggesting books already in the system (checks ISBN, Google Books ID, + and title + author)
-- **Search Functionality**: Search suggestions and read books by title, author, or description with partial + matching
+- **Fuzzy Search**: Client-side typo-tolerant search for read books using fuse.js (threshold: 0.4)
+  - Searches across title, author, and description fields
+  - Handles typos and partial matches (e.g., "Hary Poter" finds "Harry Potter")
+  - Secure input validation (max 100 chars, trimmed, sanitized)
+  - Search triggered on form submit (not real-time)
 - **Expandable Descriptions**: "Läs mer" (Read more) buttons for long book descriptions
 - **Collaborative Suggestions**: Approved users can suggest books
 - **Voting System**: One vote per user per suggestion with reset functionality
@@ -49,6 +53,7 @@ https://book-club-nextjs-mocha.vercel.app
 - **Authentication**: NextAuth v5 (beta.30) with MongoDBAdapter and JWT strategy
 - **Validation**: Zod 4.1 (API) + Mongoose (Database)
 - **Security**: Server-side input sanitization (HTML/XSS prevention)
+- **Search**: Fuse.js 7.1 for client-side fuzzy search
 - **Styling**: Tailwind CSS v4.1 with CSS Variables
 - **UI Components**: React 19 with custom components
 - **Email**: Nodemailer for magic link authentication (optional)
@@ -169,7 +174,10 @@ book-club-nextjs/
     │   │   ├── suggestion.ts
     │   │   └── next-auth.d.ts  # NextAuth type extensions
     │   ├── hooks/              # Custom React hooks
-    │   │   └── usePendingCount.ts # Hook for pending user count
+    │   │   ├── usePendingCount.ts # Hook for pending user count
+    │   │   ├── useFuzzySearch.ts  # Fuzzy search hook with validation
+    │   │   └── __tests__/
+    │   │       └── useFuzzySearch.test.ts # Fuzzy search tests
     │   ├── data/               # Static data files
     │   ├── scripts/            # Utility scripts
     │   │   └── seedMeetings.ts # Database seeding script
@@ -327,6 +335,39 @@ npm run seed     # Seed database with sample meetings (uses tsx)
 | **Admin** | Full access. Can approve/reject users, manage all suggestions, manage meetings. |
 
 ## Key Features Explained
+
+### Fuzzy Search
+The application uses **Fuse.js** for client-side fuzzy search on the Books Read page:
+
+**How It Works:**
+- Users type their search query in the input field
+- Click "Sök" (Search) button or press Enter to trigger the search
+- Fuzzy matching finds books even with typos (threshold: 0.4 for better tolerance)
+- Searches across **title**, **author**, and **description** fields simultaneously
+
+**Example Searches:**
+- `Hary Poter` → finds "Harry Potter"
+- `Stieg Larrson` → finds "Stieg Larsson"
+- `tolkin` → finds "Tolkien" books
+- `Män som hatar` → finds "Män som hatar kvinnor"
+
+**Security Features:**
+- Input validation: max 100 characters, trimmed
+- Client-side only (no database injection risk)
+- XSS-safe through React's automatic escaping
+- No regex injection vulnerabilities
+
+**Implementation:**
+- Custom React hook: `useFuzzySearch` (`frontend/src/hooks/useFuzzySearch.ts`)
+- Memoized for performance (doesn't re-run on every render)
+- TypeScript typed for type safety
+- Configurable threshold and search keys
+
+**User Experience:**
+- Search only triggers on form submit (not real-time while typing)
+- Shows result count when filtering (e.g., "Visar 5 av 12 böcker")
+- Clear button resets both input and results
+- Maintains input field value until cleared or resubmitted
 
 ### Database Sessions
 Unlike JWT tokens, database sessions allow immediate access revocation. When an admin rejects a user, they lose access instantly without waiting for token expiration.

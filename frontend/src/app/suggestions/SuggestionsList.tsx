@@ -1,13 +1,14 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
 import { ActionLink } from '@/components/ActionButton';
 import { BookPlaceholder } from '@/components/BookPlaceholder';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
+import { useFuzzySearch } from '@/hooks/useFuzzySearch';
 
 import { deleteSuggestion, updateSuggestion } from './actions';
 
@@ -23,8 +24,9 @@ function ExpandableDescription({ description, bookTitle }: { description: string
       {shouldTruncate && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline mt-1 focus:outline-2 focus:outline-offset-2"
+          className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline mt-1 py-2 focus:outline-2 focus:outline-offset-2 inline-block min-h-[44px] min-w-[44px]"
           style={{ outlineColor: 'var(--focus-ring)' }}
+          aria-expanded={isExpanded}
         >
           {isExpanded ? 'Visa mindre' : `Läs mer om ${bookTitle}`}
         </button>
@@ -148,22 +150,26 @@ export function SuggestionsList({
   suggestions,
   currentUserId,
   userRole,
-  currentSearch,
 }: {
   suggestions: Suggestion[];
   currentUserId: string;
   userRole: UserRole;
-  currentSearch: string;
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [suggestionToDelete, setSuggestionToDelete] = useState<{ id: string; title: string } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDescription, setEditDescription] = useState('');
-  const [searchInput, setSearchInput] = useState(currentSearch);
+  const [searchInput, setSearchInput] = useState('');
+
+  // Use fuzzy search hook for client-side search with typo tolerance
+  const { results: filteredSuggestions, query, setQuery, isSearching } = useFuzzySearch({
+    data: suggestions,
+    keys: ['title', 'author', 'description'],
+    threshold: 0.4, // More lenient typo tolerance
+  });
 
   const handleDeleteClick = (suggestionId: string, title: string) => {
     setSuggestionToDelete({ id: suggestionId, title });
@@ -228,20 +234,13 @@ export function SuggestionsList({
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
-    if (searchInput) {
-      params.set('search', searchInput);
-    } else {
-      params.delete('search');
-    }
-    router.push(`?${params.toString()}`, { scroll: false });
+    // Update search query only when form is submitted
+    setQuery(searchInput);
   };
 
   const handleClearSearch = () => {
     setSearchInput('');
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete('search');
-    router.push(`?${params.toString()}`, { scroll: false });
+    setQuery('');
   };
 
   return (
@@ -251,17 +250,22 @@ export function SuggestionsList({
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
             <label htmlFor="book-search" className="sr-only">
-              Sök efter titel, författare eller beskrivning
+              Sök titel eller författare (max 100 tecken)
             </label>
             <input
               id="book-search"
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Sök efter titel, författare eller beskrivning..."
+              placeholder="Sök titel eller författare..."
+              maxLength={100}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
               style={{ '--tw-ring-color': 'var(--focus-ring)' } as React.CSSProperties}
+              aria-describedby="search-info"
             />
+            <p id="search-info" className="sr-only">
+              Fuzzy search aktiverad - sökningen tolererar stavfel
+            </p>
           </div>
           <div className="flex gap-2">
             <button
@@ -271,7 +275,7 @@ export function SuggestionsList({
             >
               Sök
             </button>
-            {currentSearch && (
+            {(query || searchInput) && (
               <button
                 type="button"
                 onClick={handleClearSearch}
@@ -286,10 +290,10 @@ export function SuggestionsList({
       </div>
 
       {/* No results message */}
-      {suggestions.length === 0 && currentSearch && (
+      {filteredSuggestions.length === 0 && isSearching && (
         <div className="bg-white rounded-lg shadow p-6 text-center">
           <p className="text-gray-600">
-            Inga bokförslag hittades för <span className="font-semibold">&quot;{currentSearch}&quot;</span>
+            Inga bokförslag hittades för <span className="font-semibold">&quot;{query}&quot;</span>
           </p>
           <button
             onClick={handleClearSearch}
@@ -301,8 +305,15 @@ export function SuggestionsList({
         </div>
       )}
 
+      {/* Search info badge */}
+      {isSearching && filteredSuggestions.length > 0 && (
+        <div className="text-sm text-gray-600">
+          Visar {filteredSuggestions.length} av {suggestions.length} förslag
+        </div>
+      )}
+
       {/* Suggestions cards */}
-      {suggestions.map((suggestion) => (
+      {filteredSuggestions.map((suggestion) => (
         <div key={suggestion._id} className="bg-white rounded-lg shadow p-6">
           {/* Desktop: side-by-side, Mobile: stacked */}
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
