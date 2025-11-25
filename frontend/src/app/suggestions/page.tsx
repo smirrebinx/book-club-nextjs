@@ -86,6 +86,7 @@ export default async function SuggestionsPage() {
               width={200}
               height={150}
               className="w-full h-auto max-w-[200px]"
+              style={{ width: "auto", height: "auto" }}
               priority
             />
           </div>
