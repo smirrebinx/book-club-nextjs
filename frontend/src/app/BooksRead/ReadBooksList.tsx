@@ -108,14 +108,14 @@ export function ReadBooksList({
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
             <label htmlFor="read-books-search" className="sr-only">
-              Sök efter titel, författare eller beskrivning
+              Sök titel eller författare
             </label>
             <input
               id="read-books-search"
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Sök efter titel, författare eller beskrivning..."
+              placeholder="Sök titel eller författare..."
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
               style={{ '--tw-ring-color': 'var(--focus-ring)' } as React.CSSProperties}
             />
