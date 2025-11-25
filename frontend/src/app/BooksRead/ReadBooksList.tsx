@@ -1,10 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
 import { BookPlaceholder } from '@/components/BookPlaceholder';
+import { useFuzzySearch } from '@/hooks/useFuzzySearch';
 
 interface ReadBook {
   _id: string;
@@ -71,33 +71,25 @@ function BookDescriptions({ googleDescription, description, title }: BookDescrip
 
 export function ReadBooksList({
   books,
-  currentSearch,
   showSearch = true
 }: {
   books: ReadBook[];
-  currentSearch: string;
   showSearch?: boolean;
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [searchInput, setSearchInput] = useState(currentSearch);
+  // Use fuzzy search hook for client-side search with typo tolerance
+  const { results: filteredBooks, query, setQuery, isSearching } = useFuzzySearch({
+    data: books,
+    keys: ['title', 'author', 'description'],
+    threshold: 0.3, // Balanced typo tolerance
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
-    if (searchInput) {
-      params.set('search', searchInput);
-    } else {
-      params.delete('search');
-    }
-    router.push(`?${params.toString()}`, { scroll: false });
+    // Search is handled automatically by the fuzzy search hook
   };
 
   const handleClearSearch = () => {
-    setSearchInput('');
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete('search');
-    router.push(`?${params.toString()}`, { scroll: false });
+    setQuery('');
   };
 
   return (
@@ -108,27 +100,25 @@ export function ReadBooksList({
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1">
             <label htmlFor="read-books-search" className="sr-only">
-              Sök titel eller författare
+              Sök titel, författare eller beskrivning (max 100 tecken)
             </label>
             <input
               id="read-books-search"
               type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Sök titel eller författare..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Sök titel, författare eller beskrivning..."
+              maxLength={100}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-[var(--focus-border)] focus:outline-none"
               style={{ '--tw-ring-color': 'var(--focus-ring)' } as React.CSSProperties}
+              aria-describedby="search-info"
             />
+            <p id="search-info" className="sr-only">
+              Fuzzy search aktiverad - sökningen tolererar stavfel
+            </p>
           </div>
           <div className="flex gap-2">
-            <button
-              type="submit"
-              className="px-4 py-2 bg-[var(--button-primary-bg)] text-[var(--button-primary-text)] rounded-lg hover:bg-[var(--button-primary-hover)] focus:outline-2 focus:outline-offset-2 transition-colors"
-              style={{ outlineColor: 'var(--focus-ring)' }}
-            >
-              Sök
-            </button>
-            {currentSearch && (
+            {query && (
               <button
                 type="button"
                 onClick={handleClearSearch}
@@ -144,10 +134,10 @@ export function ReadBooksList({
       )}
 
       {/* No results message */}
-      {books.length === 0 && currentSearch && (
+      {filteredBooks.length === 0 && isSearching && (
         <div className="bg-white rounded-lg shadow p-6 text-center">
           <p className="text-gray-600">
-            Inga lästa böcker hittades för <span className="font-semibold">&quot;{currentSearch}&quot;</span>
+            Inga lästa böcker hittades för <span className="font-semibold">&quot;{query}&quot;</span>
           </p>
           <button
             onClick={handleClearSearch}
@@ -160,14 +150,21 @@ export function ReadBooksList({
       )}
 
       {/* Empty state when no books and no search */}
-      {books.length === 0 && !currentSearch && (
+      {books.length === 0 && !isSearching && (
         <p className="text-lg leading-7" style={{ color: 'var(--secondary-text)' }}>
           Bokklubben har inte markerat några böcker som lästa ännu.
         </p>
       )}
 
+      {/* Search info badge */}
+      {isSearching && filteredBooks.length > 0 && (
+        <div className="text-sm text-gray-600">
+          Visar {filteredBooks.length} av {books.length} böcker
+        </div>
+      )}
+
       {/* Book cards */}
-      {books.map((book) => (
+      {filteredBooks.map((book) => (
         <article key={book._id} className="bg-white rounded-lg shadow p-6">
           {/* Desktop: side-by-side, Mobile: stacked */}
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
