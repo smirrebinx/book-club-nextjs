@@ -17,7 +17,7 @@ https://book-club-nextjs-mocha.vercel.app
 ### Book Suggestions
 - **Google Books Integration**: Search and add books with auto-populated metadata
 - **Duplicate Detection**: Prevents suggesting books already in the system (checks ISBN, Google Books ID, + and title + author)
-- **Fuzzy Search**: Client-side typo-tolerant search for read books using fuse.js (threshold: 0.3)
+- **Fuzzy Search**: Client-side typo-tolerant search for read books using fuse.js (threshold: 0.4)
   - Searches across title, author, and description fields
   - Handles typos and partial matches (e.g., "Hary Poter" finds "Harry Potter")
   - Secure input validation (max 100 chars, trimmed, sanitized)
@@ -342,7 +342,7 @@ The application uses **Fuse.js** for client-side fuzzy search on the Books Read 
 **How It Works:**
 - Users type their search query in the input field
 - Click "Sök" (Search) button or press Enter to trigger the search
-- Fuzzy matching finds books even with typos (threshold: 0.3)
+- Fuzzy matching finds books even with typos (threshold: 0.4 for better tolerance)
 - Searches across **title**, **author**, and **description** fields simultaneously
 
 **Example Searches:**
