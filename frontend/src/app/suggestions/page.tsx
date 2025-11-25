@@ -79,14 +79,13 @@ export default async function SuggestionsPage() {
         style={{ backgroundColor: "var(--background)" }}
       >
         <div className="flex w-full flex-col items-start gap-6 text-left px-4 sm:px-0">
-          <div className="flex w-full justify-center sm:justify-start">
+          <div className="flex w-full justify-center sm:justify-start max-w-[200px] mx-auto sm:mx-0">
             <Image
               src="/animations/undraw_book-lover_m9n3.svg"
               alt="Book lover illustration"
               width={200}
               height={150}
-              className="w-full h-auto max-w-[200px]"
-              style={{ width: "auto", height: "auto" }}
+              className="w-full h-auto"
               priority
             />
           </div>

@@ -24,8 +24,9 @@ function ExpandableDescription({ description, bookTitle }: { description: string
       {shouldTruncate && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline mt-1 focus:outline-2 focus:outline-offset-2"
+          className="text-sm text-[var(--link-color)] hover:text-[var(--link-hover)] hover:underline mt-1 py-2 focus:outline-2 focus:outline-offset-2 inline-block min-h-[44px] min-w-[44px]"
           style={{ outlineColor: 'var(--focus-ring)' }}
+          aria-expanded={isExpanded}
         >
           {isExpanded ? 'Visa mindre' : `Läs mer om ${bookTitle}`}
         </button>
