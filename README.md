@@ -16,19 +16,19 @@ https://book-club-nextjs-mocha.vercel.app
 
 ### Lästa böcker
 <img width="382" height="827" alt="image" src="https://github.com/user-attachments/assets/7772e319-e4e0-4426-9405-4ce4711e36f7" />
-
+<br>
 <img width="319" height="664" alt="image" src="https://github.com/user-attachments/assets/aded0c5b-bc9b-4f24-ba24-6ba1351978f8" />
 
 ### Bokförslag
 <img width="383" height="770" alt="image" src="https://github.com/user-attachments/assets/25e3178d-49ee-47ff-ad8c-43bfd124104b" />
-
+<br>
 <img width="383" height="726" alt="image" src="https://github.com/user-attachments/assets/b9cf885b-0216-464b-a154-2b629f075a24" />
-
+<br>
 <img width="381" height="831" alt="image" src="https://github.com/user-attachments/assets/b170e033-ed32-4c6c-9178-22914ad150a9" />
 
 ### Rösta
 <img width="305" height="663" alt="image" src="https://github.com/user-attachments/assets/b128ad3b-fa41-40c3-91da-9a9a647ea2bf" />
-
+<br>
 <img width="380" height="828" alt="image" src="https://github.com/user-attachments/assets/1ec41cac-ba64-45d7-abe3-dc2a01bc6327" />
 
 ### Admin
@@ -43,7 +43,7 @@ Admin - Bokförslag
 
 Admin - Möten
 <img width="382" height="691" alt="image" src="https://github.com/user-attachments/assets/e65e2bf6-3360-4dcd-a024-467cb2f5d119" />
-
+<br>
 <img width="387" height="833" alt="image" src="https://github.com/user-attachments/assets/92e08aaa-fd01-4840-843a-62223877c9ea" />
 
 ## Features
