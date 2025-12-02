@@ -33,15 +33,19 @@ https://book-club-nextjs-mocha.vercel.app
 
 ### Admin
 Admin - Meny
+<br>
 <img width="382" height="353" alt="image" src="https://github.com/user-attachments/assets/ac189300-33e2-4f57-a26f-d329ae5d895f" />
 
 Admin - Användarhantering
+<br>
 <img width="294" height="664" alt="image" src="https://github.com/user-attachments/assets/567bd156-3328-4cd5-b29c-4c72362b19d1" />
 
 Admin - Bokförslag
+<br>
 <img width="380" height="840" alt="image" src="https://github.com/user-attachments/assets/cc261f95-47cf-4c14-9264-fd742ae5d928" />
 
 Admin - Möten
+<br>
 <img width="382" height="691" alt="image" src="https://github.com/user-attachments/assets/e65e2bf6-3360-4dcd-a024-467cb2f5d119" />
 <br>
 <img width="387" height="833" alt="image" src="https://github.com/user-attachments/assets/92e08aaa-fd01-4840-843a-62223877c9ea" />
