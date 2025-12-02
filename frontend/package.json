@@ -20,7 +20,7 @@
     "mongoose": "^8.19.2",
     "next": "^15.0.0",
     "next-auth": "^5.0.0-beta.30",
-    "nodemailer": "^7.0.10",
+    "nodemailer": "^7.0.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.1.16",
