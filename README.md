@@ -24,7 +24,7 @@ https://book-club-nextjs-mocha.vercel.app
 <br>
 <img width="383" height="726" alt="image" src="https://github.com/user-attachments/assets/b9cf885b-0216-464b-a154-2b629f075a24" />
 <br>
-<img width="381" height="831" alt="image" src="https://github.com/user-attachments/assets/b170e033-ed32-4c6c-9178-22914ad150a9" />
+<img width="585" height="1266" alt="image" src="https://github.com/user-attachments/assets/cebf2646-e26c-4874-a1f1-b5b5b2215105" />
 
 ### Rösta
 <img width="305" height="663" alt="image" src="https://github.com/user-attachments/assets/b128ad3b-fa41-40c3-91da-9a9a647ea2bf" />
