@@ -14,6 +14,11 @@ export interface MeetingData {
   location?: string;
   book?: BookInfo;
   additionalInfo?: string;
+  // New fields for 3-winner voting system (additive, backward compatible)
+  votingRound?: string; // Reference to VotingRound that assigned this book
+  placement?: 1 | 2 | 3; // Which winner (1st, 2nd, or 3rd place) - TODO-SCALABILITY: Hardcoded to 3
+  autoAssigned?: boolean; // Was this auto-assigned vs manually set by admin?
+  assignedAt?: Date; // When book was assigned to this meeting
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -27,6 +32,11 @@ export interface Meeting {
   location?: string;
   book?: BookInfo;
   additionalInfo?: string;
+  // New fields for 3-winner voting system (additive, backward compatible)
+  votingRound?: string; // Reference to VotingRound that assigned this book
+  placement?: 1 | 2 | 3; // Which winner (1st, 2nd, or 3rd place) - TODO-SCALABILITY: Hardcoded to 3
+  autoAssigned?: boolean; // Was this auto-assigned vs manually set by admin?
+  assignedAt?: string; // When book was assigned to this meeting (ISO string)
   createdAt?: string;
   updatedAt?: string;
 }

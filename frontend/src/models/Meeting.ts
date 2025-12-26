@@ -24,6 +24,25 @@ const MeetingSchema = new Schema<MeetingData>(
     location: { type: String, required: true },
     book: { type: BookInfoSchema, required: false },
     additionalInfo: { type: String, required: false },
+    // New fields for 3-winner voting system (additive, backward compatible)
+    votingRound: {
+      type: String, // Store as string reference to VotingRound _id
+      required: false
+    },
+    placement: {
+      type: Number,
+      enum: [1, 2, 3], // TODO-SCALABILITY: Hardcoded to 3 winners
+      required: false
+    },
+    autoAssigned: {
+      type: Boolean,
+      required: false,
+      default: false
+    },
+    assignedAt: {
+      type: Date,
+      required: false
+    },
   },
   {
     timestamps: true,
