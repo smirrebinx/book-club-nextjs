@@ -119,6 +119,7 @@ export function AdminMeetingsTable({ meetings, currentBook }: AdminMeetingsTable
             {editingMeeting ? 'Redigera möte' : 'Skapa nytt möte'}
           </h2>
           <MeetingForm
+            key={editingMeeting?._id || 'new'}
             meeting={editingMeeting}
             currentBook={currentBook}
             onSubmit={handleSubmit}
