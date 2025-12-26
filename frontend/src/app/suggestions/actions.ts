@@ -8,6 +8,7 @@ import { createContextLogger } from '@/lib/logger';
 import connectDB from '@/lib/mongodb';
 import { checkRateLimit } from '@/lib/rateLimit';
 import { checkDuplicateSuggestion, formatStatus } from '@/lib/suggestions-helpers';
+import { getCurrentVotingRound } from '@/lib/voting-helpers';
 import {
   createSuggestionSchema,
   updateSuggestionSchema,
@@ -259,18 +260,38 @@ export async function toggleVote(suggestionId: string) {
     logger.debug('Connecting to database...');
     await connectDB();
 
-    // Check if voting is locked (if there's an approved or currently_reading book)
-    const winnerBook = await BookSuggestion.findOne({
-      status: { $in: ['approved', 'currently_reading'] }
-    });
+    // CRITICAL: Voting is allowed ONLY when there is exactly one ACTIVE round
+    // Uses centralized helper for consistent voting state resolution across all logic
+    const { round, isActive } = await getCurrentVotingRound();
 
-    if (winnerBook) {
-      logger.debug('Voting is locked - winner book exists');
+    if (!round) {
+      // No active round - voting system not initialized (edge case during migration)
+      // Fall back to legacy check for backward compatibility
+      logger.debug('No voting round found - checking legacy status');
+      const legacyWinner = await BookSuggestion.findOne({
+        status: { $in: ['approved', 'currently_reading'] }
+      });
+
+      if (legacyWinner) {
+        logger.debug('Voting is locked - legacy winner exists');
+        return {
+          success: false,
+          error: 'Röstning är låst (legacy mode). Kontakta admin.'
+        };
+      }
+
+      // No round and no legacy winner - allow voting (backward compatibility)
+      logger.debug('No round and no legacy winner - voting allowed');
+    } else if (!isActive) {
+      // Round is finalized - voting is LOCKED
+      logger.debug('Voting is locked - round is finalized');
       return {
         success: false,
-        error: 'Röstning är låst. En vinnare har redan valts. Vänta tills administratören startar en ny omgång.'
+        error: 'Röstning är låst. Vinnare har finaliserats. En ny omgång startar när administratören återställer röstningen.'
       };
     }
+    // If isActive === true - voting is ALLOWED (continue below)
+    logger.debug('Voting is allowed - active round exists');
 
     const suggestion = await BookSuggestion.findById(validated.suggestionId);
 

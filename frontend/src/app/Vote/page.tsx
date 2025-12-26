@@ -5,8 +5,10 @@ import { AutoRefresh } from '@/components/AutoRefresh';
 import { APP_NAME } from "@/constants";
 import { auth } from '@/lib/auth';
 import connectDB from '@/lib/mongodb';
+import { getCurrentVotingRound } from '@/lib/voting-helpers';
 import BookSuggestion from '@/models/BookSuggestion';
 import User from '@/models/User';
+import VotingRound from '@/models/VotingRound';
 
 import { VotingList } from './VotingList';
 
@@ -35,6 +37,8 @@ interface LeanSuggestion {
   description?: string;
   status: SuggestionStatus;
   votes?: { toString: () => string }[];
+  placement?: 1 | 2 | 3;
+  votingRound?: { toString: () => string };
   createdAt?: Date;
   coverImage?: string;
   isbn?: string;
@@ -50,6 +54,8 @@ interface VoteSuggestion {
   votes: string[];
   voteCount: number;
   hasVoted: boolean;
+  placement?: 1 | 2 | 3;
+  votingRound?: string;
   suggestedBy: { name: string };
   createdAt: string;
   coverImage?: string;
@@ -90,6 +96,8 @@ function mapSuggestion(s: LeanSuggestion, userMap: Map<string, LeanUser>, userId
     votes: s.votes?.map((v) => v.toString()) || [],
     voteCount: s.votes?.length || 0,
     hasVoted: s.votes?.some((v) => v.toString() === userId) || false,
+    placement: s.placement,
+    votingRound: s.votingRound?.toString(),
     suggestedBy: { name: userName },
     createdAt: s.createdAt?.toISOString() || new Date().toISOString(),
     coverImage: s.coverImage,
@@ -99,18 +107,20 @@ function mapSuggestion(s: LeanSuggestion, userMap: Map<string, LeanUser>, userId
 }
 
 /**
- * Separate suggestions by status
- * Note: We prioritize currently_reading as the winner if it exists
+ * Separate suggestions by placement (winners) and pending status
  */
 function categorizeBooks(suggestionsData: VoteSuggestion[]) {
-  const currentlyReading = suggestionsData.find(s => s.status === 'currently_reading');
-  const approved = suggestionsData.find(s => s.status === 'approved');
+  // Get winners (books with placement 1, 2, or 3) sorted by placement
+  const winners = suggestionsData
+    .filter(s => s.placement)
+    .sort((a, b) => (a.placement || 0) - (b.placement || 0));
+
+  // Get pending books (no placement)
+  const pendingBooks = suggestionsData.filter(s => s.status === 'pending' && !s.placement);
 
   return {
-    // Show currently_reading as winner if it exists, otherwise show approved
-    approvedBook: currentlyReading || approved,
-    currentlyReadingBook: currentlyReading,
-    pendingBooks: suggestionsData.filter(s => s.status === 'pending'),
+    winners,
+    pendingBooks,
   };
 }
 
@@ -135,14 +145,12 @@ async function fetchSuggestionData(userId: string) {
 /**
  * Render the voting page content
  */
-function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
-  approvedBook?: VoteSuggestion;
-  currentlyReadingBook?: VoteSuggestion;
+function VotePageContent({ winners, pendingBooks, roundNumber, isVotingLocked }: {
+  winners: VoteSuggestion[];
   pendingBooks: VoteSuggestion[];
+  roundNumber?: number;
+  isVotingLocked: boolean;
 }) {
-  // Voting is locked if there's a winner (approved or currently_reading book)
-  const isVotingLocked = !!approvedBook;
-
   return (
     <div
       className="flex min-h-screen items-start justify-center"
@@ -189,19 +197,22 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
           </p>
         </div>
 
-        {/* Winner Section */}
-        {approvedBook && (
+        {/* Winners Section - Show 3 winners when voting is finalized */}
+        {winners.length > 0 && (
           <div className="w-full px-4 sm:px-0">
             <h2
-              className="text-2xl font-semibold mb-4"
+              className="text-2xl font-semibold mb-4 flex items-center gap-2"
               style={{
                 fontFamily: "var(--font-heading)",
                 color: "var(--primary-text)",
               }}
             >
-              Vinnare
+              <span>🏆</span>
+              <span>
+                Vinnare {roundNumber ? `från omgång #${roundNumber}` : ''}
+              </span>
             </h2>
-            <VotingList suggestions={[approvedBook]} isVotingLocked={true} />
+            <VotingList suggestions={winners} isVotingLocked={true} />
           </div>
         )}
 
@@ -222,7 +233,7 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
                   color: "var(--primary-text)",
                 }}
               >
-                📚 Röstning är låst tills administratören startar en ny omgång
+                📚 Röstning är låst tills nästa omgång
               </p>
               <p
                 className="text-sm mt-2"
@@ -231,7 +242,7 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
                   color: "var(--secondary-text)",
                 }}
               >
-                En vinnare har valts. Du kan inte rösta förrän administratören återställer röstningen.
+                {winners.length} {winners.length === 1 ? 'vinnare' : 'vinnare'} har finaliserats. Vänta tills administratören startar en ny röstningsomgång.
               </p>
             </div>
           </div>
@@ -252,7 +263,7 @@ function VotePageContent({ approvedBook, currentlyReadingBook, pendingBooks }: {
           </div>
         )}
 
-        {pendingBooks.length === 0 && !approvedBook && !currentlyReadingBook && (
+        {pendingBooks.length === 0 && winners.length === 0 && (
           <div className="w-full px-4 sm:px-0 py-12">
             <p
               className="text-lg"
@@ -282,14 +293,20 @@ export default async function Vote() {
       redirect('/auth/signin');
     }
 
+    // Get current voting round status
+    await connectDB();
+    const { round, isActive } = await getCurrentVotingRound();
+    const isVotingLocked = !isActive;
+
     const suggestionsData = await fetchSuggestionData(session.user.id);
-    const { approvedBook, currentlyReadingBook, pendingBooks } = categorizeBooks(suggestionsData);
+    const { winners, pendingBooks } = categorizeBooks(suggestionsData);
 
     return (
       <VotePageContent
-        approvedBook={approvedBook}
-        currentlyReadingBook={currentlyReadingBook}
+        winners={winners}
         pendingBooks={pendingBooks}
+        roundNumber={round?.roundNumber}
+        isVotingLocked={isVotingLocked}
       />
     );
   } catch (error) {

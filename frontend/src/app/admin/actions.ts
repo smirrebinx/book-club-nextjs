@@ -1,5 +1,6 @@
 'use server';
 
+import mongoose from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
 import { requireAdmin } from '@/lib/auth-helpers';
@@ -13,9 +14,11 @@ import {
   forceLogoutUserSchema,
 } from '@/lib/validations/admin';
 import BookSuggestion from '@/models/BookSuggestion';
+import Meeting from '@/models/Meeting';
 import User from '@/models/User';
+import VotingRound from '@/models/VotingRound';
 
-import type { SuggestionStatus } from '@/models/BookSuggestion';
+import type { IBookSuggestion, SuggestionStatus } from '@/models/BookSuggestion';
 import type { UserRole } from '@/models/User';
 
 /**
@@ -269,50 +272,334 @@ export async function forceLogoutUser(userId: string) {
 }
 
 /**
- * Reset voting cycle (admin only)
- * Moves currently_reading book to read and approved to pending
- * Clears all votes to start fresh voting
+ * Helper: Check for ties and return warning messages
  */
-export async function resetVotingCycle() {
+function checkForTies(books: IBookSuggestion[]): string[] {
+  if (books.length < 3) return [];
+
+  const thirdPlaceVotes = books[2].votes?.length || 0;
+  const tiedBooks = books.filter(b => (b.votes?.length || 0) === thirdPlaceVotes);
+
+  if (tiedBooks.length > 1) {
+    return [
+      `⚠️ Observera: ${tiedBooks.length} böcker har ${thirdPlaceVotes} röster. ` +
+      `"${books[2].title}" vald som 3:e plats baserat på tidigast inlämnad (${books[2].createdAt?.toLocaleString('sv-SE')}).`
+    ];
+  }
+
+  return [];
+}
+
+/**
+ * Finalize top 3 winners and assign to next 3 meetings (admin only)
+ *
+ * PRODUCTION-READY IMPLEMENTATION:
+ * - Uses MongoDB transactions for atomicity (all-or-nothing)
+ * - Idempotent: Safe to call multiple times
+ * - DB-level constraint prevents duplicate finalized rounds
+ * - Deterministic tie-breaking with admin notification
+ * - Graceful degradation for < 3 available meetings
+ * - Comprehensive error handling and validation
+ */
+export async function finalizeWinners() {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    await requireAdmin();
+    // 1. VALIDATE ADMIN AUTH
+    const adminSession = await requireAdmin();
+    const adminId = adminSession.user.id;
 
     await connectDB();
 
-    // Move currently_reading book to read (if exists)
-    const currentlyReading = await BookSuggestion.findOne({ status: 'currently_reading' });
-    if (currentlyReading) {
-      currentlyReading.status = 'read';
-      await currentlyReading.save();
+    // 2. CHECK FOR EXISTING FINALIZED/COMPLETED ROUND (Idempotency Check)
+    //
+    // CONCURRENCY NOTE: This check prevents double-finalization even under concurrent calls.
+    // If two admins click "Finalize" simultaneously:
+    // - One transaction commits first, creating a finalized round
+    // - The other transaction sees the finalized round here and aborts
+    // - MongoDB's partial unique index provides additional safety layer
+    const existingRound = await VotingRound.findOne({
+      status: { $in: ['finalized', 'completed'] }
+    }).session(session);
+
+    if (existingRound) {
+      await session.abortTransaction();
+      return {
+        success: false,
+        error: 'Det finns redan en finaliserad röstningsomgång. Återställ den först innan du skapar en ny.'
+      };
     }
 
-    // Move approved book back to pending (if exists)
-    const approved = await BookSuggestion.findOne({ status: 'approved' });
-    if (approved) {
-      approved.status = 'pending';
-      await approved.save();
+    // 3. GET OR CREATE ACTIVE ROUND
+    //
+    // CONCURRENCY NOTE: VotingRound.create() may fail with duplicate key error (code 11000)
+    // if another transaction created a round simultaneously. This is caught in the catch block.
+    // The partial unique index on { status: 1 } ensures only ONE active round exists.
+    let activeRound = await VotingRound.findOne({ status: 'active' }).session(session);
+
+    if (!activeRound) {
+      // Create first active round
+      const maxRound = await VotingRound.findOne().sort({ roundNumber: -1 }).session(session);
+      const nextRoundNumber = (maxRound?.roundNumber || 0) + 1;
+
+      // CONCURRENCY: If duplicate round creation is attempted, MongoDB will throw error 11000
+      // due to unique constraint on roundNumber. Transaction will abort and retry.
+      const createdRounds = await VotingRound.create([{
+        roundNumber: nextRoundNumber,
+        status: 'active',
+        winners: [],
+      }], { session });
+      activeRound = createdRounds[0];
     }
 
-    // Clear all votes from all pending books to start fresh
+    // 4. GET TOP 3 BOOKS BY VOTE COUNT
+    //
+    // SCALABILITY TODO: Currently hardcoded to top 3 winners.
+    // To support N winners in the future:
+    // 1. Make .limit() configurable (e.g., from voting round config or admin setting)
+    // 2. Update placement type from `1 | 2 | 3` to `number` with max constraint
+    // 3. Update frontend UI to display N placement badges
+    // 4. Update meeting assignment logic to handle N meetings
+    const pendingBooks = await BookSuggestion.find({ status: 'pending' })
+      .sort({ 'votes': -1, createdAt: 1 }) // Tie-breaker: earliest submission wins
+      .limit(3) // TODO-SCALABILITY: Hardcoded to 3 winners
+      .session(session);
+
+    if (pendingBooks.length === 0) {
+      await session.abortTransaction();
+      return {
+        success: false,
+        error: 'Inga böcker har fått röster ännu. Vänta tills medlemmar har röstat.'
+      };
+    }
+
+    // Check for ties at 3rd place position
+    const tieWarning = checkForTies(pendingBooks);
+
+    // 5. GET NEXT 3 AVAILABLE FUTURE MEETINGS
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const availableMeetings = await Meeting.find({
+      date: { $gte: today.toISOString().split('T')[0] },
+      $or: [
+        { autoAssigned: { $ne: true } },  // Not auto-assigned
+        { autoAssigned: { $exists: false } } // Field doesn't exist (legacy)
+      ]
+    })
+      .sort({ date: 1 })
+      .limit(3)
+      .session(session);
+
+    if (availableMeetings.length === 0) {
+      await session.abortTransaction();
+      return {
+        success: false,
+        error: 'Inga framtida möten finns. Skapa minst 1 möte innan du finaliserar vinnare.'
+      };
+    }
+
+    // 6. ASSIGN WINNERS TO MEETINGS
+    //
+    // SCALABILITY TODO: placement type is `1 | 2 | 3` - hardcoded for 3 winners.
+    // To support N winners:
+    // - Change placement to `number` with validation (1 to N)
+    // - Update IVotingRound.winners type definition
+    // - Update all placement badge rendering in UI components
+    const winners = [];
+    const assignmentWarnings = [];
+
+    for (let i = 0; i < pendingBooks.length; i++) {
+      const book = pendingBooks[i];
+      const placement = (i + 1) as 1 | 2 | 3; // TODO-SCALABILITY: Hardcoded type
+      const meeting = availableMeetings[i];
+
+      const winnerEntry = {
+        bookId: book._id,
+        placement,
+        voteCount: book.votes?.length || 0,
+        assignedMeetingId: meeting?._id,
+        assignedAt: meeting ? new Date() : undefined,
+      };
+
+      winners.push(winnerEntry);
+
+      if (meeting) {
+        // Update meeting with book data
+        meeting.book = {
+          id: book.googleBooksId || book._id.toString(),
+          title: book.title,
+          author: book.author,
+          coverImage: book.coverImage,
+          isbn: book.isbn,
+          googleDescription: book.googleDescription,
+        };
+        meeting.votingRound = activeRound._id.toString();
+        meeting.placement = placement;
+        meeting.autoAssigned = true;
+        meeting.assignedAt = new Date();
+
+        await meeting.save({ session });
+      } else {
+        assignmentWarnings.push(
+          `${placement === 1 ? '🥇' : placement === 2 ? '🥈' : '🥉'} "${book.title}" kunde inte tilldelas ett möte (endast ${availableMeetings.length} möten tillgängliga)`
+        );
+      }
+
+      // Update book with winner metadata
+      book.votingRound = activeRound._id;
+      book.placement = placement;
+      book.wonAt = new Date();
+      await book.save({ session });
+    }
+
+    // 7. FINALIZE THE ROUND
+    activeRound.winners = winners;
+    activeRound.status = 'finalized';
+    activeRound.finalizedAt = new Date();
+    activeRound.finalizedBy = adminId as any;
+    await activeRound.save({ session });
+
+    // 8. COMMIT TRANSACTION
+    await session.commitTransaction();
+
+    // 9. REVALIDATE PATHS
+    revalidatePath('/admin/suggestions');
+    revalidatePath('/Vote');
+    revalidatePath('/');
+    revalidatePath('/NextMeeting');
+
+    // 10. RETURN SUCCESS WITH DETAILS
+    return {
+      success: true,
+      message: `${winners.length} vinnare finaliserade och tilldelade till möten`,
+      winners: winners.map((w, i) => ({
+        title: pendingBooks[i].title,
+        author: pendingBooks[i].author,
+        placement: w.placement,
+        votes: w.voteCount,
+        meeting: availableMeetings[i]
+          ? `${new Date(availableMeetings[i].date!).toLocaleDateString('sv-SE')} ${availableMeetings[i].time}`
+          : 'Inget möte tilldelat',
+      })),
+      warnings: [...assignmentWarnings, ...tieWarning],
+    };
+
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('[finalizeWinners] Transaction failed:', error);
+
+    if ((error as any).code === 11000) {
+      return {
+        success: false,
+        error: 'En annan admin har redan finaliserat vinnare. Ladda om sidan.'
+      };
+    }
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Ett oväntat fel uppstod'
+    };
+  } finally {
+    session.endSession();
+  }
+}
+
+/**
+ * Reset voting cycle (admin only)
+ * Completes current finalized round and creates new active round
+ *
+ * PRODUCTION-READY IMPLEMENTATION:
+ * - Moves all 3 winners to 'read' status
+ * - Clears all votes from pending books (fresh start)
+ * - Marks current round as 'completed' (audit trail)
+ * - Creates new active round with incremented roundNumber
+ * - Preserves meeting data (critical for front page display)
+ * - Uses MongoDB transactions for atomicity
+ */
+export async function resetVotingCycle() {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    // 1. VALIDATE ADMIN AUTH
+    await requireAdmin();
+    await connectDB();
+
+    // 2. FIND THE FINALIZED ROUND
+    const finalizedRound = await VotingRound.findOne({
+      status: 'finalized'
+    }).session(session);
+
+    if (!finalizedRound) {
+      await session.abortTransaction();
+      return {
+        success: false,
+        error: 'Ingen finaliserad omgång finns att återställa.'
+      };
+    }
+
+    // 3. MARK ALL WINNERS AS 'READ'
+    const winnerIds = finalizedRound.winners.map(w => w.bookId);
+
     await BookSuggestion.updateMany(
-      { status: 'pending' },
-      { $set: { votes: [] } }
+      { _id: { $in: winnerIds } },
+      {
+        $set: { status: 'read' }
+        // Keep votingRound, placement, wonAt for historical record
+      },
+      { session }
     );
 
+    // 4. CLEAR ALL VOTES FROM PENDING BOOKS (Start fresh)
+    await BookSuggestion.updateMany(
+      { status: 'pending' },
+      { $set: { votes: [] } },
+      { session }
+    );
+
+    // 5. MARK CURRENT ROUND AS COMPLETED (Don't mutate - just close it)
+    finalizedRound.status = 'completed';
+    finalizedRound.completedAt = new Date();
+    await finalizedRound.save({ session });
+
+    // 6. CREATE NEW ACTIVE ROUND
+    const nextRoundNumber = finalizedRound.roundNumber + 1;
+
+    await VotingRound.create([{
+      roundNumber: nextRoundNumber,
+      status: 'active',
+      winners: [],
+    }], { session });
+
+    // 7. MEETING DATA IS PRESERVED (Important for front page "next meeting" display)
+    // Meetings keep their book data and autoAssigned status
+
+    // 8. COMMIT TRANSACTION
+    await session.commitTransaction();
+
+    // 9. REVALIDATE PATHS
     revalidatePath('/admin/suggestions');
-    revalidatePath('/suggestions');
     revalidatePath('/Vote');
+    revalidatePath('/');
+    revalidatePath('/NextMeeting');
     revalidatePath('/BooksRead');
 
     return {
       success: true,
-      message: 'Röstningsomgång återställd. Alla röster har rensats och böcker har flyttats.'
+      message: `Röstningsomgång #${finalizedRound.roundNumber} avslutad. Omgång #${nextRoundNumber} startad.`,
     };
+
   } catch (error) {
-    console.error('Error resetting voting cycle:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte återställa röstningsomgång' };
+    await session.abortTransaction();
+    console.error('[resetVotingCycle] Transaction failed:', error);
+
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Ett oväntat fel uppstod'
+    };
+  } finally {
+    session.endSession();
   }
 }

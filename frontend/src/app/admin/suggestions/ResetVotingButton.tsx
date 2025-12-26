@@ -54,9 +54,11 @@ export function ResetVotingButton({ hasActiveVotingCycle }: ResetVotingButtonPro
             <div className="text-sm text-gray-600 mb-6 space-y-2">
               <p>Detta kommer att:</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>Flytta &quot;Läser nu&quot; boken till &quot;Läst&quot;</li>
-                <li>Flytta &quot;Godkänd&quot; boken tillbaka till &quot;Inväntar röst&quot;</li>
+                <li>Flytta alla 3 vinnare till &quot;Läst&quot;</li>
+                <li>Avsluta nuvarande röstningsomgång</li>
                 <li>Rensa alla röster från alla böcker</li>
+                <li>Starta en ny röstningsomgång</li>
+                <li>Låsa upp röstningen för medlemmar</li>
               </ul>
               <p className="mt-4 font-semibold" style={{ color: 'var(--action-warning)' }}>
                 Detta kan inte ångras!

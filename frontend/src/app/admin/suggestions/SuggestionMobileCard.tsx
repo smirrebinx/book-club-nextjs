@@ -14,6 +14,8 @@ interface Suggestion {
   description: string;
   status: SuggestionStatus;
   voteCount: number;
+  placement?: 1 | 2 | 3;
+  votingRound?: string;
   suggestedBy: {
     name: string;
     email: string;
@@ -36,6 +38,17 @@ export function SuggestionMobileCard({
   onStatusChange,
   onDelete,
 }: SuggestionMobileCardProps) {
+  const getPlacementBadge = (placement: 1 | 2 | 3) => {
+    switch (placement) {
+      case 1:
+        return <span className="text-2xl mr-1" title="1:a plats">🥇</span>;
+      case 2:
+        return <span className="text-2xl mr-1" title="2:a plats">🥈</span>;
+      case 3:
+        return <span className="text-2xl mr-1" title="3:e plats">🥉</span>;
+    }
+  };
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
       {/* Book Info with Cover */}
@@ -56,7 +69,10 @@ export function SuggestionMobileCard({
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-gray-900">{suggestion.title}</div>
+            <div className="text-sm font-medium text-gray-900 flex items-center gap-1">
+              {suggestion.placement && getPlacementBadge(suggestion.placement)}
+              {suggestion.title}
+            </div>
             <div className="text-sm text-gray-500">{suggestion.author}</div>
             {suggestion.isbn && (
               <div className="text-xs text-gray-400 mt-1">ISBN: {suggestion.isbn}</div>

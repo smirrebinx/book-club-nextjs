@@ -15,6 +15,10 @@ export interface IBookSuggestion {
   isbn?: string;
   coverImage?: string;
   googleBooksId?: string;
+  // New fields for 3-winner voting system
+  votingRound?: Types.ObjectId; // Reference to VotingRound when this book won
+  placement?: 1 | 2 | 3; // Winner placement (1st, 2nd, or 3rd) - TODO-SCALABILITY: Hardcoded to 3
+  wonAt?: Date; // When this book won
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -75,6 +79,21 @@ const BookSuggestionSchema = new Schema<IBookSuggestion>(
       type: String,
       required: false,
       trim: true
+    },
+    // New fields for 3-winner voting system (additive, backward compatible)
+    votingRound: {
+      type: Schema.Types.ObjectId,
+      ref: 'VotingRound',
+      required: false
+    },
+    placement: {
+      type: Number,
+      enum: [1, 2, 3], // TODO-SCALABILITY: Hardcoded to 3 winners
+      required: false
+    },
+    wonAt: {
+      type: Date,
+      required: false
     }
   },
   {

@@ -18,6 +18,8 @@ interface Suggestion {
   description: string;
   status: SuggestionStatus;
   voteCount: number;
+  placement?: 1 | 2 | 3;
+  votingRound?: string;
   suggestedBy: {
     name: string;
     email: string;

@@ -55,6 +55,30 @@ function StatusBadge({ status }: StatusBadgeProps) {
   );
 }
 
+interface PlacementBadgeProps {
+  placement: 1 | 2 | 3;
+}
+
+function PlacementBadge({ placement }: PlacementBadgeProps) {
+  const badgeConfig = {
+    1: { emoji: '🥇', bg: 'bg-yellow-50', border: 'border-yellow-300', text: 'text-yellow-900', label: '1:a plats' },
+    2: { emoji: '🥈', bg: 'bg-gray-50', border: 'border-gray-300', text: 'text-gray-900', label: '2:a plats' },
+    3: { emoji: '🥉', bg: 'bg-orange-50', border: 'border-orange-300', text: 'text-orange-900', label: '3:e plats' },
+  };
+
+  const config = badgeConfig[placement];
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold border-2 ${config.bg} ${config.border} ${config.text}`}
+      title={config.label}
+    >
+      <span className="text-lg">{config.emoji}</span>
+      <span>{config.label}</span>
+    </span>
+  );
+}
+
 interface BookDescriptionsProps {
   googleDescription?: string;
   description: string;
@@ -91,6 +115,8 @@ interface Suggestion {
   votes: string[];
   voteCount: number;
   hasVoted: boolean;
+  placement?: 1 | 2 | 3;
+  votingRound?: string;
   suggestedBy: {
     name: string;
   };
@@ -256,6 +282,13 @@ export function VotingList({
 
                   {/* Book info */}
                   <div className="flex-1 min-w-0">
+                    {/* Placement badge for winners */}
+                    {suggestion.placement && (
+                      <div className="mb-2">
+                        <PlacementBadge placement={suggestion.placement} />
+                      </div>
+                    )}
+
                     <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">
                       {suggestion.title}
                     </h3>
