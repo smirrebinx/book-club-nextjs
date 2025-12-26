@@ -17,7 +17,7 @@ export default async function AdminSuggestionsPage() {
   await connectDB();
 
   // Get current voting round status
-  const { round, isActive } = await getCurrentVotingRound();
+  const { round } = await getCurrentVotingRound();
   const isFinalized = round?.status === 'finalized';
 
   const suggestions = await BookSuggestion.find({})
@@ -132,8 +132,8 @@ export default async function AdminSuggestionsPage() {
           author: book?.author || 'Okänd',
           placement: w.placement,
           votes: w.voteCount,
-          meeting: meeting
-            ? `${new Date(meeting.date!).toLocaleDateString('sv-SE')} kl ${meeting.time}`
+          meeting: meeting && meeting.date
+            ? `${new Date(meeting.date).toLocaleDateString('sv-SE')} kl ${meeting.time}`
             : 'Inget möte tilldelat',
         };
       })

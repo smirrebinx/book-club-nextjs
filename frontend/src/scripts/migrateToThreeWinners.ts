@@ -1,6 +1,8 @@
+/* eslint-disable import/order */
 // Load environment variables from .env.local BEFORE any imports
-import { config } from 'dotenv';
 import { resolve } from 'path';
+
+import { config } from 'dotenv';
 
 // Load .env.local from the frontend directory
 config({ path: resolve(__dirname, '../../.env.local') });
@@ -190,7 +192,7 @@ async function performMigration(dryRun = true): Promise<void> {
     throw error;
 
   } finally {
-    session.endSession();
+    void session.endSession();
     await mongoose.connection.close();
   }
 }

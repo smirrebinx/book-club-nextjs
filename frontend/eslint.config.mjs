@@ -46,6 +46,13 @@ const eslintConfig = [
       "import": importPlugin,
       "jsx-a11y": jsxA11y,
     },
+    settings: {
+      "import/resolver": {
+        node: {
+          extensions: [".js", ".jsx", ".ts", ".tsx"],
+        },
+      },
+    },
     rules: {
       // TypeScript recommended rules
       "@typescript-eslint/no-explicit-any": "warn",

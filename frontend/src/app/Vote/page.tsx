@@ -8,7 +8,6 @@ import connectDB from '@/lib/mongodb';
 import { getCurrentVotingRound } from '@/lib/voting-helpers';
 import BookSuggestion from '@/models/BookSuggestion';
 import User from '@/models/User';
-import VotingRound from '@/models/VotingRound';
 
 import { VotingList } from './VotingList';
 

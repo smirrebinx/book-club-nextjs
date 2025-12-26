@@ -1,4 +1,6 @@
-import mongoose, { Schema, model, models, Types } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
+
+import type { Types } from 'mongoose';
 
 /**
  * VotingRound Model - Single Source of Truth for Voting State

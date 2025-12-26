@@ -1,6 +1,6 @@
 'use server';
 
-import mongoose from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
 import { requireAdmin } from '@/lib/auth-helpers';
@@ -20,6 +20,13 @@ import VotingRound from '@/models/VotingRound';
 
 import type { IBookSuggestion, SuggestionStatus } from '@/models/BookSuggestion';
 import type { UserRole } from '@/models/User';
+import type { IVotingRound } from '@/models/VotingRound';
+import type { MeetingData } from '@/types/meeting';
+
+// Type aliases for Mongoose documents
+type BookDocument = mongoose.Document<unknown, object, IBookSuggestion> & IBookSuggestion;
+type MeetingDocument = mongoose.Document<unknown, object, MeetingData> & MeetingData;
+type VotingRoundDocument = mongoose.Document<unknown, object, IVotingRound> & IVotingRound;
 
 /**
  * Approve a pending user
@@ -291,6 +298,66 @@ function checkForTies(books: IBookSuggestion[]): string[] {
 }
 
 /**
+ * Helper function to assign winners to meetings and update book statuses
+ * Extracted to reduce complexity in finalizeWinners function
+ */
+async function assignWinnersToMeetings(
+  pendingBooks: BookDocument[],
+  availableMeetings: MeetingDocument[],
+  activeRound: VotingRoundDocument,
+  session: mongoose.ClientSession
+) {
+  const winners = [];
+  const assignmentWarnings = [];
+
+  for (let i = 0; i < pendingBooks.length; i++) {
+    const book = pendingBooks[i];
+    const placement = (i + 1) as 1 | 2 | 3;
+    const meeting = availableMeetings[i];
+
+    const winnerEntry = {
+      bookId: book._id,
+      placement,
+      voteCount: book.votes?.length || 0,
+      assignedMeetingId: meeting?._id,
+      assignedAt: meeting ? new Date() : undefined,
+    };
+
+    winners.push(winnerEntry);
+
+    if (meeting) {
+      // Update meeting with book data
+      meeting.book = {
+        id: book.googleBooksId || book._id.toString(),
+        title: book.title,
+        author: book.author,
+        coverImage: book.coverImage,
+        isbn: book.isbn,
+        googleDescription: book.googleDescription,
+      };
+      meeting.votingRound = activeRound._id.toString();
+      meeting.placement = placement;
+      meeting.autoAssigned = true;
+      meeting.assignedAt = new Date();
+
+      await meeting.save({ session });
+    } else {
+      assignmentWarnings.push(
+        `${placement === 1 ? '🥇' : placement === 2 ? '🥈' : '🥉'} "${book.title}" kunde inte tilldelas ett möte (endast ${availableMeetings.length} möten tillgängliga)`
+      );
+    }
+
+    // Update book with winner metadata
+    book.votingRound = activeRound._id;
+    book.placement = placement;
+    book.wonAt = new Date();
+    await book.save({ session });
+  }
+
+  return { winners, assignmentWarnings };
+}
+
+/**
  * Finalize top 3 winners and assign to next 3 meetings (admin only)
  *
  * PRODUCTION-READY IMPLEMENTATION:
@@ -407,58 +474,18 @@ export async function finalizeWinners() {
     // - Change placement to `number` with validation (1 to N)
     // - Update IVotingRound.winners type definition
     // - Update all placement badge rendering in UI components
-    const winners = [];
-    const assignmentWarnings = [];
-
-    for (let i = 0; i < pendingBooks.length; i++) {
-      const book = pendingBooks[i];
-      const placement = (i + 1) as 1 | 2 | 3; // TODO-SCALABILITY: Hardcoded type
-      const meeting = availableMeetings[i];
-
-      const winnerEntry = {
-        bookId: book._id,
-        placement,
-        voteCount: book.votes?.length || 0,
-        assignedMeetingId: meeting?._id,
-        assignedAt: meeting ? new Date() : undefined,
-      };
-
-      winners.push(winnerEntry);
-
-      if (meeting) {
-        // Update meeting with book data
-        meeting.book = {
-          id: book.googleBooksId || book._id.toString(),
-          title: book.title,
-          author: book.author,
-          coverImage: book.coverImage,
-          isbn: book.isbn,
-          googleDescription: book.googleDescription,
-        };
-        meeting.votingRound = activeRound._id.toString();
-        meeting.placement = placement;
-        meeting.autoAssigned = true;
-        meeting.assignedAt = new Date();
-
-        await meeting.save({ session });
-      } else {
-        assignmentWarnings.push(
-          `${placement === 1 ? '🥇' : placement === 2 ? '🥈' : '🥉'} "${book.title}" kunde inte tilldelas ett möte (endast ${availableMeetings.length} möten tillgängliga)`
-        );
-      }
-
-      // Update book with winner metadata
-      book.votingRound = activeRound._id;
-      book.placement = placement;
-      book.wonAt = new Date();
-      await book.save({ session });
-    }
+    const { winners, assignmentWarnings } = await assignWinnersToMeetings(
+      pendingBooks,
+      availableMeetings,
+      activeRound,
+      session
+    );
 
     // 7. FINALIZE THE ROUND
     activeRound.winners = winners;
     activeRound.status = 'finalized';
     activeRound.finalizedAt = new Date();
-    activeRound.finalizedBy = adminId as any;
+    activeRound.finalizedBy = new Types.ObjectId(adminId);
     await activeRound.save({ session });
 
     // 8. COMMIT TRANSACTION
@@ -479,8 +506,8 @@ export async function finalizeWinners() {
         author: pendingBooks[i].author,
         placement: w.placement,
         votes: w.voteCount,
-        meeting: availableMeetings[i]
-          ? `${new Date(availableMeetings[i].date!).toLocaleDateString('sv-SE')} ${availableMeetings[i].time}`
+        meeting: availableMeetings[i] && availableMeetings[i].date
+          ? `${new Date(availableMeetings[i].date).toLocaleDateString('sv-SE')} ${availableMeetings[i].time}`
           : 'Inget möte tilldelat',
       })),
       warnings: [...assignmentWarnings, ...tieWarning],
@@ -490,7 +517,8 @@ export async function finalizeWinners() {
     await session.abortTransaction();
     console.error('[finalizeWinners] Transaction failed:', error);
 
-    if ((error as any).code === 11000) {
+    // Handle MongoDB duplicate key error
+    if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
       return {
         success: false,
         error: 'En annan admin har redan finaliserat vinnare. Ladda om sidan.'
@@ -502,7 +530,7 @@ export async function finalizeWinners() {
       error: error instanceof Error ? error.message : 'Ett oväntat fel uppstod'
     };
   } finally {
-    session.endSession();
+    void session.endSession();
   }
 }
 
@@ -600,6 +628,6 @@ export async function resetVotingCycle() {
       error: error instanceof Error ? error.message : 'Ett oväntat fel uppstod'
     };
   } finally {
-    session.endSession();
+    void session.endSession();
   }
 }

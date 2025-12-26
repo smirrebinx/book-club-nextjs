@@ -8,12 +8,12 @@ import { createContextLogger } from '@/lib/logger';
 import connectDB from '@/lib/mongodb';
 import { checkRateLimit } from '@/lib/rateLimit';
 import { checkDuplicateSuggestion, formatStatus } from '@/lib/suggestions-helpers';
-import { getCurrentVotingRound } from '@/lib/voting-helpers';
 import {
   createSuggestionSchema,
   updateSuggestionSchema,
   voteSchema,
 } from '@/lib/validations/suggestions';
+import { getCurrentVotingRound } from '@/lib/voting-helpers';
 import BookSuggestion from '@/models/BookSuggestion';
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
