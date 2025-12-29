@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 
+import { ActionButton } from '@/components/ActionButton';
+
 import type { BookInfo, Meeting } from '@/types/meeting';
 
 interface MeetingFormProps {
@@ -150,21 +152,38 @@ interface BookFieldsProps {
     googleDescription: string;
   };
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onClearBookData: () => void;
   isPending: boolean;
   isEditing: boolean;
   hasCurrentBook: boolean;
 }
 
-function BookFields({ formData, handleChange, isPending, isEditing, hasCurrentBook }: BookFieldsProps) {
+function BookFields({ formData, handleChange, onClearBookData, isPending, isEditing, hasCurrentBook }: BookFieldsProps) {
+  const hasBookData = formData.bookTitle || formData.bookAuthor || formData.bookId || formData.bookIsbn || formData.bookCoverImage || formData.googleDescription;
+
   return (
     <div className="border-t border-[var(--primary-border)] pt-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-medium text-[var(--primary-text)]">Bokinformation</h3>
-        {!isEditing && hasCurrentBook && (
-          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
-            Auto-ifylld från &quot;Läser nu&quot;
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {!isEditing && hasCurrentBook && (
+            <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+              Auto-ifylld från &quot;Läser nu&quot;
+            </span>
+          )}
+          {hasBookData && (
+            <ActionButton
+              type="button"
+              onClick={onClearBookData}
+              disabled={isPending}
+              variant="warning"
+              size="sm"
+              aria-label="Rensa all bokinformation"
+            >
+              Rensa bokinformation
+            </ActionButton>
+          )}
+        </div>
       </div>
 
       <div className="space-y-4">
@@ -328,6 +347,18 @@ export function MeetingForm({ meeting, currentBook, onSubmit, isPending, onCance
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleClearBookData = () => {
+    setFormData(prev => ({
+      ...prev,
+      bookId: '',
+      bookTitle: '',
+      bookAuthor: '',
+      bookCoverImage: '',
+      bookIsbn: '',
+      googleDescription: '',
+    }));
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     void onSubmit(new FormData(e.currentTarget));
@@ -348,6 +379,7 @@ export function MeetingForm({ meeting, currentBook, onSubmit, isPending, onCance
       <BookFields
         formData={formData}
         handleChange={handleChange}
+        onClearBookData={handleClearBookData}
         isPending={isPending}
         isEditing={isEditing}
         hasCurrentBook={!!currentBook}

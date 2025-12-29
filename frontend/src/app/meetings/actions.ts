@@ -58,18 +58,29 @@ function parseBookData(formData: FormData, currentBook?: { id?: string; title?: 
   const bookId = getFormField(formData, 'bookId');
   const bookTitle = getFormField(formData, 'bookTitle');
   const bookAuthor = getFormField(formData, 'bookAuthor');
+  const bookCoverImage = getFormField(formData, 'bookCoverImage');
+  const bookIsbn = getFormField(formData, 'bookIsbn');
+  const googleDescription = getFormField(formData, 'googleDescription');
 
-  if (!bookId && !bookTitle && !bookAuthor) {
-    return undefined;
+  // If all fields are empty, return an object with undefined values to clear book data
+  if (!bookId && !bookTitle && !bookAuthor && !bookCoverImage && !bookIsbn && !googleDescription) {
+    return {
+      id: undefined,
+      title: undefined,
+      author: undefined,
+      coverImage: undefined,
+      isbn: undefined,
+      googleDescription: undefined,
+    };
   }
 
   return {
     id: getFieldWithFallback(bookId, currentBook?.id),
     title: getFieldWithFallback(bookTitle, currentBook?.title),
     author: getFieldWithFallback(bookAuthor, currentBook?.author),
-    coverImage: getFieldWithFallback(getFormField(formData, 'bookCoverImage'), currentBook?.coverImage),
-    isbn: getFieldWithFallback(getFormField(formData, 'bookIsbn'), currentBook?.isbn),
-    googleDescription: getFieldWithFallback(getFormField(formData, 'googleDescription'), currentBook?.googleDescription),
+    coverImage: getFieldWithFallback(bookCoverImage, currentBook?.coverImage),
+    isbn: getFieldWithFallback(bookIsbn, currentBook?.isbn),
+    googleDescription: getFieldWithFallback(googleDescription, currentBook?.googleDescription),
   };
 }
 
@@ -91,8 +102,9 @@ function parseFormDataToMeetingUpdate(formData: FormData, currentMeeting: Meetin
   if (location) data.location = location;
   if (additionalInfo !== undefined) data.additionalInfo = additionalInfo;
 
+  // Always include book data in updates, even if clearing it
   const book = parseBookData(formData, currentMeeting.book);
-  if (book) data.book = book;
+  data.book = book;
 
   return data;
 }
