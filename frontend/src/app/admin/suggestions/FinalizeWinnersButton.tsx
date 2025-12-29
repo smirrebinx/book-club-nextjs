@@ -171,7 +171,7 @@ export function FinalizeWinnersButton({
     <>
       <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6 space-y-4">
         <h2 className="text-lg font-bold text-gray-900">
-          Redo att finalisera vinnare
+          Redo att slutföra bokomröstning
         </h2>
 
         <div className="space-y-3">
@@ -213,10 +213,9 @@ export function FinalizeWinnersButton({
           ref={triggerRef}
           onClick={() => setShowConfirmDialog(true)}
           disabled={isPending}
-          className="w-full px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-colors font-semibold"
-          style={{ outlineColor: 'var(--focus-ring)' }}
+          className="btn-primary w-full px-4 py-3 font-semibold"
         >
-          Finalisera vinnare och tilldela till möten
+          Slutför bokomröstning och tilldela till möten
         </button>
       </div>
 

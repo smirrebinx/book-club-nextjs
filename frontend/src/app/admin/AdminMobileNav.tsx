@@ -45,7 +45,7 @@ export default function AdminMobileNav() {
               className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
               style={{ outlineColor: "var(--focus-ring)" }}
             >
-              Användare
+              Hantera användare
             </Link>
             <Link
               href="/admin/suggestions"
@@ -53,7 +53,7 @@ export default function AdminMobileNav() {
               className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
               style={{ outlineColor: "var(--focus-ring)" }}
             >
-              Bokförslag
+              Hantera bokförslag
             </Link>
             <Link
               href="/admin/meetings"
@@ -61,7 +61,7 @@ export default function AdminMobileNav() {
               className="block px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors focus:outline-2 focus:outline-offset-2"
               style={{ outlineColor: "var(--focus-ring)" }}
             >
-              Möten
+              Hantera möten
             </Link>
             <Link
               href="/"
