@@ -81,7 +81,7 @@ export function FinalizeWinnersButton({
     startTransition(async () => {
       const result = await finalizeWinners();
       if (result.success) {
-        showToast(result.message || 'Vinnare finaliserade', 'success');
+        showToast(result.message || 'Bokomröstning slutförd', 'success');
 
         // Show warnings if any
         if (result.warnings && result.warnings.length > 0) {
@@ -121,14 +121,14 @@ export function FinalizeWinnersButton({
         </div>
 
         <p className="text-sm text-gray-600">
-          Finaliserad: {new Date(finalizedRound.finalizedAt).toLocaleString('sv-SE')}
+          Slutförd: {new Date(finalizedRound.finalizedAt).toLocaleString('sv-SE')}
         </p>
 
         <div className="space-y-3">
           <h3 className="font-semibold text-gray-900">Vinnare:</h3>
-          {finalizedRound.winners.map((winner, idx) => (
+          {finalizedRound.winners.map((winner) => (
             <div
-              key={idx}
+              key={winner.placement}
               className="bg-white rounded-md p-4 border border-gray-200"
             >
               <div className="flex items-start gap-2">
@@ -161,7 +161,7 @@ export function FinalizeWinnersButton({
         <p className="text-sm text-gray-700">
           {topCandidates.length === 0
             ? 'Inga böcker har fått röster ännu. Vänta tills medlemmar har röstat.'
-            : 'Inga framtida möten finns. Skapa minst 1 möte innan du finaliserar vinnare.'}
+            : 'Inga framtida möten finns. Skapa minst 1 möte innan du slutför bokomröstning.'}
         </p>
       </div>
     );
@@ -233,7 +233,7 @@ export function FinalizeWinnersButton({
             className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto"
           >
             <h2 id="finalize-dialog-title" className="text-xl font-bold text-gray-900 mb-4">
-              Bekräfta finalisering av vinnare
+              Bekräfta att bokomröstning slutförs
             </h2>
 
             <div className="text-sm text-gray-600 mb-6 space-y-4">
@@ -275,7 +275,7 @@ export function FinalizeWinnersButton({
               )}
 
               <p className="mt-4 font-semibold text-red-600">
-                Detta kan inte ångras! (Du kan dock återställa röstningen efter finalisering)
+                Detta kan inte ångras! (Du kan dock återställa röstningen efter slutföring av omröstning)
               </p>
             </div>
 
@@ -294,7 +294,7 @@ export function FinalizeWinnersButton({
                 className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-colors"
                 style={{ outlineColor: 'var(--focus-ring)' }}
               >
-                {isPending ? 'Finaliserar...' : 'Finalisera vinnare'}
+                {isPending ? 'Slutför...' : 'Slutför bokomröstning'}
               </button>
             </div>
           </div>

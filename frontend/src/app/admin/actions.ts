@@ -394,7 +394,7 @@ export async function finalizeWinners() {
       await session.abortTransaction();
       return {
         success: false,
-        error: 'Det finns redan en finaliserad röstningsomgång. Återställ den först innan du skapar en ny.'
+        error: 'Det finns redan en slutförd röstningsomgång. Återställ den först innan du skapar en ny.'
       };
     }
 
@@ -463,7 +463,7 @@ export async function finalizeWinners() {
       await session.abortTransaction();
       return {
         success: false,
-        error: 'Inga framtida möten finns. Skapa minst 1 möte innan du finaliserar vinnare.'
+        error: 'Inga framtida möten finns. Skapa minst 1 möte innan du slutför bokomröstning.'
       };
     }
 
@@ -500,7 +500,7 @@ export async function finalizeWinners() {
     // 10. RETURN SUCCESS WITH DETAILS
     return {
       success: true,
-      message: `${winners.length} vinnare finaliserade och tilldelade till möten`,
+      message: `${winners.length} bokomröstning slutförd och tilldelade till möten`,
       winners: winners.map((w, i) => ({
         title: pendingBooks[i].title,
         author: pendingBooks[i].author,
@@ -521,7 +521,7 @@ export async function finalizeWinners() {
     if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
       return {
         success: false,
-        error: 'En annan admin har redan finaliserat vinnare. Ladda om sidan.'
+        error: 'En annan admin har redan slutfört bokomröstningen. Ladda om sidan.'
       };
     }
 
@@ -564,7 +564,7 @@ export async function resetVotingCycle() {
       await session.abortTransaction();
       return {
         success: false,
-        error: 'Ingen finaliserad omgång finns att återställa.'
+        error: 'Ingen slutförd omgång finns att återställa.'
       };
     }
 

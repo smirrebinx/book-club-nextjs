@@ -241,7 +241,7 @@ function VotePageContent({ winners, pendingBooks, roundNumber, isVotingLocked }:
                   color: "var(--secondary-text)",
                 }}
               >
-                {winners.length} {winners.length === 1 ? 'vinnare' : 'vinnare'} har finaliserats. Vänta tills administratören startar en ny röstningsomgång.
+                {winners.length} {winners.length === 1 ? 'vinnare' : 'vinnare'} har slutförts. Vänta tills administratören startar en ny röstningsomgång.
               </p>
             </div>
           </div>

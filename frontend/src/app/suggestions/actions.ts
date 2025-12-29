@@ -287,7 +287,7 @@ export async function toggleVote(suggestionId: string) {
       logger.debug('Voting is locked - round is finalized');
       return {
         success: false,
-        error: 'Röstning är låst. Vinnare har finaliserats. En ny omgång startar när administratören återställer röstningen.'
+        error: 'Röstning är låst. Bokomröstning har slutförts. En ny omgång startar när administratören återställer röstningen.'
       };
     }
     // If isActive === true - voting is ALLOWED (continue below)
