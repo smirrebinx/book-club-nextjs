@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { ActionButton } from './ActionButton';
 import { Button } from './Button';
@@ -24,6 +24,15 @@ export function ConfirmModal({
   confirmText = 'Bekräfta',
   cancelText = 'Avbryt',
 }: ConfirmModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Focus management: Move focus to modal when opened
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      modalRef.current.focus();
+    }
+  }, [isOpen]);
+
   // Close modal on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -65,7 +74,11 @@ export function ConfirmModal({
       />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200"
+      >
         <h2
           id="modal-title"
           className="text-xl font-bold text-gray-900 mb-4"

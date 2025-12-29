@@ -39,14 +39,14 @@ export function SuggestionMobileCard({
   onDelete,
 }: SuggestionMobileCardProps) {
   const getPlacementBadge = (placement: 1 | 2 | 3) => {
-    switch (placement) {
-      case 1:
-        return <span className="text-2xl mr-1" title="1:a plats">🥇</span>;
-      case 2:
-        return <span className="text-2xl mr-1" title="2:a plats">🥈</span>;
-      case 3:
-        return <span className="text-2xl mr-1" title="3:e plats">🥉</span>;
-    }
+    const labels = {
+      1: 'Första plats',
+      2: 'Andra plats',
+      3: 'Tredje plats'
+    };
+    const emojis = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
+    return <span className="text-2xl mr-1" aria-label={labels[placement]}>{emojis[placement]}</span>;
   };
 
   return (

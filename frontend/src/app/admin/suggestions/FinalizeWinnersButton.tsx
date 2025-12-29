@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 
 import { finalizeWinners } from '@/app/admin/actions';
 import { useToast } from '@/components/Toast';
@@ -49,6 +49,33 @@ export function FinalizeWinnersButton({
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Focus management: Move focus to dialog when opened
+  useEffect(() => {
+    if (showConfirmDialog && dialogRef.current) {
+      dialogRef.current.focus();
+    }
+  }, [showConfirmDialog]);
+
+  // Escape key handler: Close dialog on Escape
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showConfirmDialog) {
+        handleClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [showConfirmDialog]);
+
+  const handleClose = () => {
+    setShowConfirmDialog(false);
+    // Return focus to trigger button
+    triggerRef.current?.focus();
+  };
 
   const handleFinalize = () => {
     startTransition(async () => {
@@ -63,7 +90,7 @@ export function FinalizeWinnersButton({
           });
         }
 
-        setShowConfirmDialog(false);
+        handleClose();
         router.refresh();
       } else {
         showToast(result.error || 'Ett fel uppstod', 'error');
@@ -72,14 +99,14 @@ export function FinalizeWinnersButton({
   };
 
   const getPlacementBadge = (placement: 1 | 2 | 3) => {
-    switch (placement) {
-      case 1:
-        return <span className="text-xl mr-1">🥇</span>;
-      case 2:
-        return <span className="text-xl mr-1">🥈</span>;
-      case 3:
-        return <span className="text-xl mr-1">🥉</span>;
-    }
+    const labels = {
+      1: 'Första plats',
+      2: 'Andra plats',
+      3: 'Tredje plats'
+    };
+    const emojis = { 1: '🥇', 2: '🥈', 3: '🥉' };
+
+    return <span className="text-xl mr-1" aria-label={labels[placement]}>{emojis[placement]}</span>;
   };
 
   // Show locked state if voting is already finalized
@@ -87,10 +114,10 @@ export function FinalizeWinnersButton({
     return (
       <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">🔒</span>
-          <h3 className="text-lg font-bold text-gray-900">
+          <span className="text-2xl" aria-hidden="true">🔒</span>
+          <h2 className="text-lg font-bold text-gray-900">
             Röstning är låst - Omgång #{finalizedRound.roundNumber}
-          </h3>
+          </h2>
         </div>
 
         <p className="text-sm text-gray-600">
@@ -98,7 +125,7 @@ export function FinalizeWinnersButton({
         </p>
 
         <div className="space-y-3">
-          <h4 className="font-semibold text-gray-900">Vinnare:</h4>
+          <h3 className="font-semibold text-gray-900">Vinnare:</h3>
           {finalizedRound.winners.map((winner, idx) => (
             <div
               key={idx}
@@ -143,14 +170,14 @@ export function FinalizeWinnersButton({
   return (
     <>
       <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6 space-y-4">
-        <h3 className="text-lg font-bold text-gray-900">
+        <h2 className="text-lg font-bold text-gray-900">
           Redo att finalisera vinnare
-        </h3>
+        </h2>
 
         <div className="space-y-3">
-          <h4 className="font-semibold text-gray-900">
+          <h3 className="font-semibold text-gray-900">
             Topp {topCandidates.length} kandidater:
-          </h4>
+          </h3>
           {topCandidates.slice(0, 3).map((book, idx) => (
             <div
               key={book._id}
@@ -171,9 +198,9 @@ export function FinalizeWinnersButton({
         </div>
 
         <div className="space-y-2">
-          <h4 className="font-semibold text-gray-900">
+          <h3 className="font-semibold text-gray-900">
             Tillgängliga möten ({availableMeetings.length}):
-          </h4>
+          </h3>
           {availableMeetings.slice(0, 3).map((meeting, idx) => (
             <div key={meeting._id} className="text-sm text-gray-600">
               {getPlacementBadge((idx + 1) as 1 | 2 | 3)}
@@ -183,6 +210,7 @@ export function FinalizeWinnersButton({
         </div>
 
         <button
+          ref={triggerRef}
           onClick={() => setShowConfirmDialog(true)}
           disabled={isPending}
           className="w-full px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-colors font-semibold"
@@ -194,9 +222,18 @@ export function FinalizeWinnersButton({
 
       {/* Confirmation Dialog */}
       {showConfirmDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="finalize-dialog-title"
+        >
+          <div
+            ref={dialogRef}
+            tabIndex={-1}
+            className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto"
+          >
+            <h2 id="finalize-dialog-title" className="text-xl font-bold text-gray-900 mb-4">
               Bekräfta finalisering av vinnare
             </h2>
 
@@ -210,9 +247,9 @@ export function FinalizeWinnersButton({
               </ul>
 
               <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mt-4">
-                <h4 className="font-semibold text-gray-900 mb-2">
+                <h3 className="font-semibold text-gray-900 mb-2">
                   Förhandsvisning av tilldelning:
-                </h4>
+                </h3>
                 {topCandidates.slice(0, 3).map((book, idx) => {
                   const meeting = availableMeetings[idx];
                   return (
@@ -233,7 +270,7 @@ export function FinalizeWinnersButton({
 
               {availableMeetings.length < 3 && (
                 <p className="mt-4 text-orange-600 font-semibold">
-                  ⚠️ Observera: Endast {availableMeetings.length} {availableMeetings.length === 1 ? 'möte' : 'möten'} tillgängligt.
+                  <span aria-hidden="true">⚠️</span> Observera: Endast {availableMeetings.length} {availableMeetings.length === 1 ? 'möte' : 'möten'} tillgängligt.
                   {3 - availableMeetings.length} {3 - availableMeetings.length === 1 ? 'bok' : 'böcker'} kommer inte att tilldelas ett möte.
                 </p>
               )}
@@ -245,7 +282,7 @@ export function FinalizeWinnersButton({
 
             <div className="flex gap-3">
               <button
-                onClick={() => setShowConfirmDialog(false)}
+                onClick={handleClose}
                 disabled={isPending}
                 className="flex-1 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 transition-colors"
                 style={{ outlineColor: 'var(--focus-ring)' }}

@@ -1,9 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
+import { useTransition, useState } from 'react';
 
 import { updateSuggestionStatus, deleteSuggestionAsAdmin } from '@/app/admin/actions';
+import { ConfirmModal } from '@/components/ConfirmModal';
 import { useToast } from '@/components/Toast';
 
 import { SuggestionMobileCard } from './SuggestionMobileCard';
@@ -31,6 +32,11 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
   const router = useRouter();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
+  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; id: string | null; title: string }>({
+    isOpen: false,
+    id: null,
+    title: ''
+  });
 
   const handleStatusChange = async (id: string, status: SuggestionStatus) => {
     startTransition(async () => {
@@ -44,13 +50,19 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
     });
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Är du säker på att du vill ta bort detta förslag?')) return;
+  const handleDelete = (id: string, title: string) => {
+    setDeleteConfirm({ isOpen: true, id, title });
+  };
+
+  const confirmDelete = async () => {
+    const id = deleteConfirm.id;
+    if (!id) return;
 
     startTransition(async () => {
       const result = await deleteSuggestionAsAdmin(id);
       if (result.success) {
         showToast('Förslag borttaget', 'success');
+        setDeleteConfirm({ isOpen: false, id: null, title: '' });
         router.refresh();
       } else {
         showToast(result.error || 'Ett fel uppstod', 'error');
@@ -63,6 +75,7 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
       {/* Desktop Table - hidden on mobile */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full">
+          <caption className="sr-only">Bokförslag med status och röstresultat</caption>
           <thead className="bg-gray-50">
             <tr>
               <th className="px-2 md:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Bok</th>
@@ -82,7 +95,7 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
                   void handleStatusChange(id, status);
                 }}
                 onDelete={(id) => {
-                  void handleDelete(id);
+                  handleDelete(id, s.title);
                 }}
               />
             ))}
@@ -101,11 +114,21 @@ export function AdminSuggestionsTable({ suggestions }: { suggestions: Suggestion
               void handleStatusChange(id, status);
             }}
             onDelete={(id) => {
-              void handleDelete(id);
+              handleDelete(id, s.title);
             }}
           />
         ))}
       </div>
+
+      <ConfirmModal
+        isOpen={deleteConfirm.isOpen}
+        onClose={() => setDeleteConfirm({ isOpen: false, id: null, title: '' })}
+        onConfirm={() => { void confirmDelete(); }}
+        title="Ta bort bokförslag"
+        message={`Är du säker på att du vill ta bort "${deleteConfirm.title}"? Detta kan inte ångras.`}
+        confirmText="Ta bort"
+        cancelText="Avbryt"
+      />
     </div>
   );
 }

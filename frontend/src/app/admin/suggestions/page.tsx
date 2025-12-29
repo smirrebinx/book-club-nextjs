@@ -150,7 +150,7 @@ export default async function AdminSuggestionsPage() {
   const hasActiveVotingCycle = isFinalized;
 
   return (
-    <div>
+    <main>
       <AutoRefresh interval={10} />
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -170,6 +170,6 @@ export default async function AdminSuggestionsPage() {
       </div>
 
       <AdminSuggestionsTable suggestions={sortedSuggestions} />
-    </div>
+    </main>
   );
 }
