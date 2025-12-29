@@ -2,7 +2,7 @@
 
 import { useState, createContext, useContext } from 'react';
 
-type ToastType = 'success' | 'error' | 'info';
+type ToastType = 'success' | 'error' | 'info' | 'warning';
 
 interface Toast {
   id: number;
@@ -56,6 +56,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               ${toast.type === 'success' ? 'bg-green-600 text-white' : ''}
               ${toast.type === 'error' ? 'bg-red-600 text-white' : ''}
               ${toast.type === 'info' ? 'bg-blue-600 text-white' : ''}
+              ${toast.type === 'warning' ? 'bg-yellow-600 text-white' : ''}
             `}
           >
             <div className="flex items-start justify-between gap-3">

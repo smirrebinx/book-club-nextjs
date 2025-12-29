@@ -316,10 +316,10 @@ async function assignWinnersToMeetings(
     const meeting = availableMeetings[i];
 
     const winnerEntry = {
-      bookId: book._id,
+      bookId: book._id as Types.ObjectId,
       placement,
       voteCount: book.votes?.length || 0,
-      assignedMeetingId: meeting?._id,
+      assignedMeetingId: meeting?._id as Types.ObjectId | undefined,
       assignedAt: meeting ? new Date() : undefined,
     };
 
@@ -328,14 +328,14 @@ async function assignWinnersToMeetings(
     if (meeting) {
       // Update meeting with book data
       meeting.book = {
-        id: book.googleBooksId || book._id.toString(),
+        id: book.googleBooksId || (book._id as Types.ObjectId).toString(),
         title: book.title,
         author: book.author,
         coverImage: book.coverImage,
         isbn: book.isbn,
         googleDescription: book.googleDescription,
       };
-      meeting.votingRound = activeRound._id.toString();
+      meeting.votingRound = (activeRound._id as Types.ObjectId).toString();
       meeting.placement = placement;
       meeting.autoAssigned = true;
       meeting.assignedAt = new Date();
@@ -348,7 +348,7 @@ async function assignWinnersToMeetings(
     }
 
     // Update book with winner metadata
-    book.votingRound = activeRound._id;
+    book.votingRound = activeRound._id as Types.ObjectId;
     book.placement = placement;
     book.wonAt = new Date();
     await book.save({ session });
@@ -569,7 +569,7 @@ export async function resetVotingCycle() {
     }
 
     // 3. MARK ALL WINNERS AS 'READ'
-    const winnerIds = finalizedRound.winners.map(w => w.bookId);
+    const winnerIds = finalizedRound.winners.map((w: { bookId: Types.ObjectId }) => w.bookId);
 
     await BookSuggestion.updateMany(
       { _id: { $in: winnerIds } },
