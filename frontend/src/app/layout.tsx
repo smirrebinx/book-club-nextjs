@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Merriweather, Playfair_Display } from "next/font/goo
 import Navbar from "@/components/Navbar";
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import { ToastProvider } from "@/components/Toast";
+import { auth } from "@/lib/auth";
 
 import type { Metadata } from "next";
 
@@ -35,18 +36,20 @@ export const metadata: Metadata = {
   description: "Barnfria bokklubben. Här kan du se vilka böcker vi har läst, lägga till egna boktips och rösta på nästa bok att läsa. Information om kommande bokträffar.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="sv">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${merriweather.variable} ${playfairDisplay.variable} antialiased`}
         suppressHydrationWarning
       >
-        <SessionProviderWrapper>
+        <SessionProviderWrapper session={session}>
           <ToastProvider>
             <Navbar />
             {children}
