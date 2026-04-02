@@ -6,9 +6,8 @@ import { useEffect, useRef, useState } from "react";
 
 import DesktopNav from "@/components/navbar/DesktopNav";
 import Logo from "@/components/navbar/Logo";
-import MobileMenuButton from "@/components/navbar/MobileMenuButton";
+import MobileControls from "@/components/navbar/MobileControls";
 import MobileNav from "@/components/navbar/MobileNav";
-import MobileUserAvatar from "@/components/navbar/MobileUserAvatar";
 import { usePendingCount } from "@/hooks/usePendingCount";
 
 interface NavLink {
@@ -56,6 +55,7 @@ export default function Navbar() {
 
   // Close mobile menu on route change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Closing menu on navigation is a legitimate response to router state change
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
@@ -119,16 +119,12 @@ export default function Navbar() {
             <>
               <DesktopNav navLinks={navLinks} pathname={pathname} session={session} />
 
-              {/* Mobile: User Avatar and Menu Button */}
-              <div className="flex items-center gap-3 lg:hidden">
-                <MobileUserAvatar session={session} />
-
-                <MobileMenuButton
-                  isMobileMenuOpen={isMobileMenuOpen}
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  menuButtonRef={menuButtonRef}
-                />
-              </div>
+              <MobileControls
+                session={session}
+                isMobileMenuOpen={isMobileMenuOpen}
+                onToggleMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                menuButtonRef={menuButtonRef} 
+              />
             </>
           )}
         </div>
