@@ -5,6 +5,8 @@
 .DS_Store
 *.pem
 .env*
+.claude.md.backup 
+README.md.backup
 
 # frontend
 /frontend/node_modules
