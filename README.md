@@ -101,7 +101,6 @@ Admin - Möten
 - **Search**: Fuse.js 7.1 for client-side fuzzy search
 - **Styling**: Tailwind CSS v4.1 with CSS Variables
 - **UI Components**: React 19 with custom components
-- **Email**: Nodemailer for magic link authentication (optional)
 - **Animation**: Lottie animations via @lottiefiles/dotlottie-react
 - **Fonts**: Playfair Display, Merriweather, custom NewYorker
 
