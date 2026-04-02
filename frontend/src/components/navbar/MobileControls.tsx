@@ -9,7 +9,7 @@ interface MobileControlsProps {
   session: Session;
   isMobileMenuOpen: boolean;
   onToggleMenu: () => void;
-  menuButtonRef: RefObject<HTMLButtonElement>;
+  menuButtonRef: RefObject<HTMLButtonElement | null>;
 }
 
 export default function MobileControls({
