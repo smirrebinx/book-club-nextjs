@@ -53,6 +53,10 @@ function formatMeetingData(m: LeanMeeting) {
 }
 
 export default async function AdminMeetingsPage() {
+  let meetingsData;
+  let currentBook: BookInfo | undefined;
+  let error: Error | null = null;
+
   try {
     await connectDB();
 
@@ -60,7 +64,7 @@ export default async function AdminMeetingsPage() {
     const meetings = await Meeting.find({}).sort({ date: 1 }).lean().exec();
 
     // Format for client component - use JSON serialization to ensure clean data
-    const meetingsData = JSON.parse(JSON.stringify(meetings.map(formatMeetingData)));
+    meetingsData = JSON.parse(JSON.stringify(meetings.map(formatMeetingData)));
 
     // Fetch the book currently being read
     const currentlyReadingBook = await BookSuggestion.findOne({
@@ -71,7 +75,7 @@ export default async function AdminMeetingsPage() {
       .exec();
 
     // Create a plain serializable object for the current book
-    const currentBook: BookInfo | undefined = currentlyReadingBook
+    currentBook = currentlyReadingBook
       ? JSON.parse(JSON.stringify({
           id: String(currentlyReadingBook._id),
           title: String(currentlyReadingBook.title),
@@ -81,21 +85,12 @@ export default async function AdminMeetingsPage() {
           googleDescription: currentlyReadingBook.googleDescription || undefined,
         }))
       : undefined;
+  } catch (err) {
+    console.error('Error loading meetings page:', err);
+    error = err as Error;
+  }
 
-    return (
-      <div>
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Möteshantering</h1>
-          <p className="text-sm md:text-base text-gray-600 mt-2">
-            Skapa, redigera och ta bort möten
-          </p>
-        </div>
-
-        <AdminMeetingsTable meetings={meetingsData} currentBook={currentBook} />
-      </div>
-    );
-  } catch (error) {
-    console.error('Error loading meetings page:', error);
+  if (error) {
     return (
       <div>
         <div className="mb-6">
@@ -107,4 +102,17 @@ export default async function AdminMeetingsPage() {
       </div>
     );
   }
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Möteshantering</h1>
+        <p className="text-sm md:text-base text-gray-600 mt-2">
+          Skapa, redigera och ta bort möten
+        </p>
+      </div>
+
+      <AdminMeetingsTable meetings={meetingsData} currentBook={currentBook} />
+    </div>
+  );
 }

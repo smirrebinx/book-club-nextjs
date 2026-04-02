@@ -30,14 +30,17 @@ export default function LottieAnimation({
   ariaLabel,
   isDecorative = false,
 }: LottieAnimationProps) {
-  const [shouldAutoplay, setShouldAutoplay] = useState(autoplay);
+  const [shouldAutoplay, setShouldAutoplay] = useState(() => {
+    if (typeof window === "undefined") return autoplay;
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    return !mediaQuery.matches && autoplay;
+  });
 
   // Handle prefers-reduced-motion for accessibility (WCAG 2.2.2)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setShouldAutoplay(!mediaQuery.matches && autoplay);
 
     const handleChange = (e: MediaQueryListEvent) => {
       setShouldAutoplay(!e.matches && autoplay);
