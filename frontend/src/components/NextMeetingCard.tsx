@@ -105,6 +105,7 @@ export default function NextMeetingCard({ meetingData }: NextMeetingCardProps) {
                       fill
                       sizes="64px"
                       className="object-cover rounded shadow-sm"
+                      priority
                     />
                   ) : (
                     <BookPlaceholder />

@@ -95,6 +95,7 @@ export default function DesktopNav({ navLinks, pathname, session }: DesktopNavPr
                 width={32}
                 height={32}
                 className="h-8 w-8 rounded-full transition-transform duration-200 group-hover:scale-110"
+                priority
               />
             ) : (
               <div

@@ -39,6 +39,7 @@ export default function MobileUserAvatar({ session }: MobileUserAvatarProps) {
           width={44}
           height={44}
           className="h-full w-full rounded-full"
+          priority
         />
       ) : (
         <svg
