@@ -123,7 +123,7 @@ export default function Navbar() {
                 session={session}
                 isMobileMenuOpen={isMobileMenuOpen}
                 onToggleMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                menuButtonRef={menuButtonRef}
+                menuButtonRef={menuButtonRef} 
               />
             </>
           )}
