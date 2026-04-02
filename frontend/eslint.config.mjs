@@ -1,23 +1,11 @@
-import { FlatCompat } from "@eslint/eslintrc";
-import js from "@eslint/js";
-import path from "path";
-import { fileURLToPath } from "url";
-import tseslint from "@typescript-eslint/eslint-plugin";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 import tsparser from "@typescript-eslint/parser";
-import importPlugin from "eslint-plugin-import";
-import jsxA11y from "eslint-plugin-jsx-a11y";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-});
 
 const eslintConfig = [
-  // Use FlatCompat to convert Next.js configs to flat format
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Next.js configs
+  ...nextCoreWebVitals,
+  ...nextTypescript,
 
   // Global ignores
   {
@@ -40,11 +28,6 @@ const eslintConfig = [
         ecmaVersion: "latest",
         sourceType: "module",
       },
-    },
-    plugins: {
-      "@typescript-eslint": tseslint,
-      "import": importPlugin,
-      "jsx-a11y": jsxA11y,
     },
     rules: {
       // TypeScript recommended rules
