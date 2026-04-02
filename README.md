@@ -1,6 +1,6 @@
 # Barnfria bokklubben
 
-A full-stack book club application built with Next.js 15, featuring user authentication, role-based access control, book suggestions with voting, and an admin dashboard.
+A full-stack book club application built with Next.js 16.1.7 or later, featuring user authentication, role-based access control, book suggestions with voting, and an admin dashboard.
 
 ## Live
 https://book-club-nextjs-mocha.vercel.app
@@ -91,7 +91,7 @@ Admin - Möten
 - **WCAG Compliant**: Accessibility features throughout
 
 ## Technology Stack
-- **Framework**: Next.js 15.5.6 (App Router)
+- **Framework**: Next.js 16.1.7 or later (App Router)
 - **Language**: TypeScript 5
 - **Runtime**: Node.js 22
 - **Database**: MongoDB Atlas with Mongoose 8.19 ODM + native MongoDB driver 6.20
@@ -100,7 +100,7 @@ Admin - Möten
 - **Security**: Server-side input sanitization (HTML/XSS prevention)
 - **Search**: Fuse.js 7.1 for client-side fuzzy search
 - **Styling**: Tailwind CSS v4.1 with CSS Variables
-- **UI Components**: React 19 with custom components
+- **UI Components**: React 19.2.1 or later with custom components
 - **Animation**: Lottie animations via @lottiefiles/dotlottie-react
 - **Fonts**: Playfair Display, Merriweather, custom NewYorker
 
@@ -108,7 +108,7 @@ Admin - Möten
 
 ```
 book-club-nextjs/
-├── netlify.toml                # Netlify deployment configuration
+├── vercel.json                 # Vercel deployment configuration
 └── frontend/                   # Main Next.js application
     ├── src/
     │   ├── app/                # Next.js App Router
@@ -225,7 +225,6 @@ book-club-nextjs/
     │   ├── data/               # Static data files
     │   ├── scripts/            # Utility scripts
     │   │   └── seedMeetings.ts # Database seeding script
-    │   ├── middleware.ts       # Next.js middleware (auth, redirects)
     │   └── constants.ts        # Application constants
     ├── public/                 # Static assets
     │   └── animations/         # Lottie animation files
@@ -237,7 +236,7 @@ book-club-nextjs/
     ├── next.config.ts          # Next.js configuration
     ├── tailwind.config.js      # Tailwind CSS configuration
     ├── tsconfig.json           # TypeScript configuration
-    ├── eslint.config.mjs       # ESLint configuration
+    ├── eslint.config.mjs       # ESLint flat config (Next.js 16+)
     ├── ACCESSIBILITY.md        # Accessibility documentation
     └── package.json
 ```
@@ -260,7 +259,7 @@ cd book-club-nextjs/frontend
 ### 2. Install Dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 3. Configure Environment Variables
@@ -279,13 +278,6 @@ NEXTAUTH_URL=http://localhost:3000
 # Google OAuth (for Sign in with Google)
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-# Email Provider (optional - for magic link authentication)
-EMAIL_SERVER_HOST=smtp.gmail.com
-EMAIL_SERVER_PORT=587
-EMAIL_SERVER_USER=your-email@gmail.com
-EMAIL_SERVER_PASSWORD=your-app-password
-EMAIL_FROM=noreply@yourdomain.com
 
 # Google Books API (for book search functionality)
 GOOGLE_BOOKS_API_KEY=your-google-books-api-key
@@ -366,7 +358,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 npm run dev      # Start development server (localhost:3000)
 npm run build    # Build for production
 npm start        # Start production server
-npm run lint     # Run ESLint
+npm run lint     # Run ESLint (Next.js 16 uses eslint directly, not next lint)
 npm run seed     # Seed database with sample meetings (uses tsx)
 ```
 
@@ -473,14 +465,13 @@ All UI text is in Swedish:
 - **Environment Validation**: Required environment variables checked on startup
 
 ### Serverless Optimization
-The application is optimized for serverless deployment (Netlify/Vercel):
+The application is optimized for serverless deployment on Vercel:
 - **Connection Pooling**: Optimized MongoDB connection settings (maxPoolSize: 10, minPoolSize: 1)
 - **Connection Caching**: Global variable caching prevents connection exhaustion
 - **Cold Start Handling**: Extended timeouts (10s) for serverless cold starts
 - **Buffer Commands Disabled**: Critical for serverless (`bufferCommands: false`)
 - **Model Registration**: Proper Mongoose model imports ensure schema availability in serverless functions
 - **Write Operation Safety**: Connection 'open' event verification before writes
-- **External Dependencies**: Mongoose, MongoDB, and BSON marked as external in Netlify config
 - **Detailed Logging**: Comprehensive logging for debugging in serverless environments
 - **Error Boundaries**: Custom error pages (404 and general errors) with user-friendly messages
 
@@ -501,62 +492,9 @@ The application is optimized for serverless deployment (Netlify/Vercel):
 
 ## Deployment
 
-The application includes a `netlify.toml` configuration file optimized for serverless deployment.
+This project is deployed on Vercel. See live demo: https://book-club-nextjs-mocha.vercel.app
 
-### Deploy to Netlify
-
-1. **Push your code to GitHub**
-
-2. **Connect to Netlify**
-   - Go to [Netlify](https://netlify.com) and sign in
-   - Click "Add new site" → "Import an existing project"
-   - Connect your GitHub repository
-
-3. **Configure Build Settings**
-   - Base directory: `frontend`
-   - Build command: `npm run build`
-   - Publish directory: `frontend/.next`
-   - Node version: 22 (configured in `netlify.toml`)
-
-4. **Set Environment Variables** (in Netlify dashboard under Site settings → Environment variables)
-   ```bash
-   # Database
-   MONGODB_URI=your-mongodb-atlas-connection-string
-
-   # NextAuth
-   AUTH_SECRET=your-random-secret-key
-   AUTH_URL=https://your-app.netlify.app
-   NEXTAUTH_URL=https://your-app.netlify.app
-
-   # Google OAuth
-   GOOGLE_CLIENT_ID=your-google-client-id
-   GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-   # Google Books API
-   GOOGLE_BOOKS_API_KEY=your-google-books-api-key
-
-   # Email (optional)
-   EMAIL_SERVER_HOST=smtp.gmail.com
-   EMAIL_SERVER_PORT=587
-   EMAIL_SERVER_USER=your-email@gmail.com
-   EMAIL_SERVER_PASSWORD=your-app-password
-   EMAIL_FROM=noreply@yourdomain.com
-
-   # Admin
-   ADMIN_EMAIL=your-email@gmail.com
-
-   # Environment
-   NODE_ENV=production
-   ```
-
-5. **Deploy**
-
-**Important Notes:**
-- The `netlify.toml` marks `mongoose`, `mongodb`, and `bson` as external dependencies for proper serverless function bundling
-- Update `NEXTAUTH_URL` and `AUTH_URL` to your production Netlify URL
-- Enhanced MongoDB connection logic handles serverless cold starts automatically
-
-### Deploy to Vercel
+### Deploy to Vercel (Recommended)
 
 1. **Push your code to GitHub**
 
@@ -569,8 +507,60 @@ The application includes a `netlify.toml` configuration file optimized for serve
    - Root Directory: `frontend`
    - Framework Preset: Next.js (auto-detected)
    - Node.js Version: 22
+   - Build Command: `npm ci && npm run build`
+   - Output Directory: `.next`
 
-4. **Add the same environment variables as Netlify** (update URLs to your Vercel domain)
+4. **Set Environment Variables** (in Vercel dashboard under Project Settings → Environment Variables)
+   ```bash
+   # Database
+   MONGODB_URI=your-mongodb-atlas-connection-string
+
+   # NextAuth
+   AUTH_SECRET=your-random-secret-key
+   AUTH_URL=https://your-app.vercel.app
+   NEXTAUTH_URL=https://your-app.vercel.app
+
+   # Google OAuth
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+   # Google Books API
+   GOOGLE_BOOKS_API_KEY=your-google-books-api-key
+
+   # Admin
+   ADMIN_EMAIL=your-email@gmail.com
+
+   # Environment
+   NODE_ENV=production
+   ```
+
+5. **Deploy**
+   - Vercel will automatically build and deploy your application
+   - Every push to main branch triggers a production deployment
+   - Pull requests get preview deployments automatically
+
+### Alternative: Deploy to Netlify
+
+While this project is configured for Vercel, you can also deploy to Netlify:
+
+1. **Create netlify.toml** in project root:
+   ```toml
+   [build]
+     base = "frontend"
+     command = "npm ci && npm run build"
+     publish = ".next"
+
+   [[plugins]]
+     package = "@netlify/plugin-nextjs"
+
+   [build.environment]
+     NODE_VERSION = "22"
+   ```
+
+2. **Follow Netlify's standard Next.js deployment process**
+   - Connect your GitHub repository
+   - Configure the same environment variables as listed above for Vercel
+   - Update `AUTH_URL` and `NEXTAUTH_URL` to your Netlify domain
 
 ### Post-Deployment Configuration
 
@@ -578,23 +568,22 @@ The application includes a `netlify.toml` configuration file optimized for serve
 After deployment, update your Google OAuth settings:
 1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
 2. Edit your OAuth 2.0 Client ID
-3. Add authorized redirect URIs for both platforms:
-   - `https://your-app.netlify.app/api/auth/callback/google`
-   - `https://your-app.vercel.app/api/auth/callback/google`
+3. Add authorized redirect URI:
+   - For Vercel: `https://your-app.vercel.app/api/auth/callback/google`
+   - For Netlify: `https://your-app.netlify.app/api/auth/callback/google`
 
 #### MongoDB Atlas
 Whitelist deployment platform IP addresses:
 1. Go to MongoDB Atlas → Network Access
-2. Add `0.0.0.0/0` (allow all connections) for simplicity
-3. Or add specific IP ranges for better security:
-   - Netlify: Check [Netlify's IP ranges documentation](https://docs.netlify.com/)
-   - Vercel: Vercel uses dynamic IPs, so `0.0.0.0/0` is typically required
+2. Add `0.0.0.0/0` (allow all connections) for development
+3. For production, restrict to specific IPs if your platform supports it
+   - Vercel uses dynamic IPs, so `0.0.0.0/0` is typically required
 
 #### Monitoring
-Check your deployment logs for `[MongoDB]` and `[API]` prefixed messages to verify:
-- Database connections are establishing correctly
-- Write operations are working
-- Authentication flow is functioning
+Check your deployment logs for:
+- `[MongoDB]` prefixed messages to verify database connections
+- `[API]` prefixed messages to verify endpoint functionality
+- Authentication flow working correctly
 
 ## License
 
