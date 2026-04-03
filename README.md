@@ -3,7 +3,7 @@
 A full-stack book club application built with Next.js 16.1.7 or later, featuring user authentication, role-based access control, book suggestions with voting, and an admin dashboard.
 
 ## Live
-https://book-club-nextjs-mocha.vercel.app
+This project is deployed on Vercel.
 
 ### Home
 <img width="377" height="837" alt="image" src="https://github.com/user-attachments/assets/ab980bee-a598-4f4f-9964-90254dfe15ab" />
@@ -492,7 +492,7 @@ The application is optimized for serverless deployment on Vercel:
 
 ## Deployment
 
-This project is deployed on Vercel. See live demo: https://book-club-nextjs-mocha.vercel.app
+This project is deployed on Vercel. 
 
 ### Deploy to Vercel (Recommended)
 
