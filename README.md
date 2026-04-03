@@ -1,6 +1,6 @@
 # Barnfria bokklubben
 
-A full-stack book club application built with Next.js 16.1.7 or later, featuring user authentication, role-based access control, book suggestions with voting, and an admin dashboard.
+A full-stack book club application built with Next.js, featuring user authentication, role-based access control, book suggestions with voting, and an admin dashboard.
 
 ## Live
 This project is deployed on Vercel.
