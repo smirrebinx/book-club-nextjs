@@ -14,8 +14,16 @@ import type { MeetingData } from '@/types/meeting';
  * Replaces DOMPurify which doesn't work in Vercel serverless environments
  */
 function sanitizeText(text: string): string {
-  return text
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
+  let sanitized = text;
+  let previous: string;
+
+  // Apply repeatedly so dangerous patterns cannot re-form after a single pass.
+  do {
+    previous = sanitized;
+    sanitized = sanitized.replace(/<[^>]*>/g, ''); // Remove HTML tags
+  } while (sanitized !== previous);
+
+  return sanitized
     .replace(/[<>]/g, '') // Remove < and > characters
     .trim();
 }
