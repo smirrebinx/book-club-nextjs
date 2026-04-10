@@ -20,12 +20,11 @@ import type { SuggestionStatus } from '@/models/BookSuggestion';
 const logger = createContextLogger('Suggestions');
 
 /**
- * Simple sanitization function to remove HTML tags and dangerous characters
+ * Simple sanitization function to remove dangerous HTML delimiter characters.
  * Replaces DOMPurify which doesn't work in Vercel serverless environments
  */
 function sanitizeText(text: string): string {
   return text
-    .replace(/<[^>]*>/g, '') // Remove HTML tags
     .replace(/[<>]/g, '') // Remove < and > characters
     .trim();
 }
