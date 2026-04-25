@@ -6,6 +6,7 @@
 *.pem
 .env*
 .claude.md.backup 
+.claude.md
 README.md.backup
 
 # frontend
