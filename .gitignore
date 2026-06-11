@@ -8,6 +8,8 @@
 .claude.md.backup 
 .claude.md
 README.md.backup
+SECURITY_CHECKLIST.md
+SECURITY_REVIEW.md
 
 # frontend
 /frontend/node_modules
