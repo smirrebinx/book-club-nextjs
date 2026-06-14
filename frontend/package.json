@@ -39,7 +39,7 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "postcss": "^8.5.10",
-    "tsx": "^4.20.6",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }
