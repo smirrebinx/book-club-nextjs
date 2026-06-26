@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { requireApproved, requireAdmin } from '@/lib/auth-helpers';
+import { toSafeErrorMessage, UserFacingError } from '@/lib/errors';
 import { createContextLogger } from '@/lib/logger';
 import connectDB from '@/lib/mongodb';
 import { createRateLimitMiddleware } from '@/lib/rateLimit';
@@ -28,19 +29,9 @@ export async function GET() {
       data: meetings,
     });
   } catch (error) {
-    logger.error('Error fetching meetings:', error);
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 403 }
-      );
-    }
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch meetings',
-      },
-      { status: 500 }
+      { success: false, error: toSafeErrorMessage(error, 'Failed to fetch meetings') },
+      { status: error instanceof UserFacingError ? 403 : 500 }
     );
   }
 }
@@ -95,8 +86,6 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error: unknown) {
-    logger.error('POST /api/meetings - Error creating meeting:', error);
-
     // Handle duplicate key error
     if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
       return NextResponse.json(
@@ -108,16 +97,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return sanitized error message
-    const errorMessage = error instanceof Error ? error.message : 'Failed to create meeting';
-    logger.error('POST /api/meetings - Error details:', errorMessage);
-
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Kunde inte skapa möte',
-      },
-      { status: 500 }
+      { success: false, error: toSafeErrorMessage(error, 'Kunde inte skapa möte') },
+      { status: error instanceof UserFacingError ? 403 : 500 }
     );
   }
 }
