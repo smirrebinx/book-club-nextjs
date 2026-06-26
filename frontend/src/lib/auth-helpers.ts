@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { UserFacingError } from "@/lib/errors";
 
 /**
  * Get the current session or throw an error
@@ -8,7 +9,7 @@ export async function requireAuth() {
   const session = await auth();
 
   if (!session?.user) {
-    throw new Error('Inte autentiserad');
+    throw new UserFacingError('Inte autentiserad');
   }
 
   return session;
@@ -22,7 +23,7 @@ export async function requireAdmin() {
   const session = await requireAuth();
 
   if (session.user.role !== 'admin') {
-    throw new Error('Åtkomst nekad. Endast administratörer tillåtna.');
+    throw new UserFacingError('Åtkomst nekad. Endast administratörer tillåtna.');
   }
 
   return session;
@@ -36,7 +37,7 @@ export async function requireApproved() {
   const session = await requireAuth();
 
   if (!session.user.isApproved) {
-    throw new Error('Ditt konto väntar på godkännande');
+    throw new UserFacingError('Ditt konto väntar på godkännande');
   }
 
   return session;
