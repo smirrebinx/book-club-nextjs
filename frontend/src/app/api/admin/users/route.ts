@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { requireAdmin } from '@/lib/auth-helpers';
+import { toSafeErrorMessage, UserFacingError } from '@/lib/errors';
 import connectDB from '@/lib/mongodb';
 import { createRateLimitMiddleware } from '@/lib/rateLimit';
 import User from '@/models/User';
@@ -93,12 +94,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    // Note: Using console.error here as logger is not imported
-    // Consider importing logger for consistency
-    console.error('Error fetching users:', error);
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
-    return NextResponse.json({ error: 'Kunde inte hämta användare' }, { status: 500 });
+    return NextResponse.json(
+      { error: toSafeErrorMessage(error, 'Kunde inte hämta användare') },
+      { status: error instanceof UserFacingError ? 403 : 500 }
+    );
   }
 }
