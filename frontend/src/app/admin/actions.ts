@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { requireAdmin } from '@/lib/auth-helpers';
+import { toSafeErrorMessage } from '@/lib/errors';
 import connectDB from '@/lib/mongodb';
 import {
   approveUserSchema,
@@ -46,11 +47,7 @@ export async function approveUser(userId: string) {
     revalidatePath('/admin/users');
     return { success: true, message: 'Användare godkänd' };
   } catch (error) {
-    console.error('Error approving user:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte godkänna användare' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte godkänna användare') };
   }
 }
 
@@ -84,11 +81,7 @@ export async function rejectUser(userId: string) {
     revalidatePath('/admin/users');
     return { success: true, message: 'Användare avvisad' };
   } catch (error) {
-    console.error('Error rejecting user:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte avvisa användare' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte avvisa användare') };
   }
 }
 
@@ -121,11 +114,7 @@ export async function changeUserRole(userId: string, role: UserRole) {
     revalidatePath('/admin/users');
     return { success: true, message: 'Användarroll uppdaterad' };
   } catch (error) {
-    console.error('Error changing user role:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte ändra användarroll' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte ändra användarroll') };
   }
 }
 
@@ -156,11 +145,7 @@ export async function updateSuggestionStatus(
     revalidatePath('/suggestions');
     return { success: true, message: 'Status uppdaterad' };
   } catch (error) {
-    console.error('Error updating suggestion status:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte uppdatera status' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte uppdatera status') };
   }
 }
 
@@ -187,11 +172,7 @@ export async function deleteSuggestionAsAdmin(suggestionId: string) {
     revalidatePath('/suggestions');
     return { success: true, message: 'Förslag borttaget' };
   } catch (error) {
-    console.error('Error deleting suggestion:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte ta bort förslag' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte ta bort förslag') };
   }
 }
 
@@ -222,11 +203,7 @@ export async function deleteUser(userId: string) {
     revalidatePath('/admin/users');
     return { success: true, message: 'Användare borttagen' };
   } catch (error) {
-    console.error('Error deleting user:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte ta bort användare' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte ta bort användare') };
   }
 }
 
@@ -260,11 +237,7 @@ export async function forceLogoutUser(userId: string) {
     revalidatePath('/admin/users');
     return { success: true, message: 'Användare utloggad' };
   } catch (error) {
-    console.error('Error forcing logout:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte logga ut användare' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte logga ut användare') };
   }
 }
 
@@ -309,10 +282,6 @@ export async function resetVotingCycle() {
       message: 'Röstningsomgång återställd. Alla röster har rensats och böcker har flyttats.'
     };
   } catch (error) {
-    console.error('Error resetting voting cycle:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte återställa röstningsomgång' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte återställa röstningsomgång') };
   }
 }

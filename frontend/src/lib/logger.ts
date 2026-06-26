@@ -14,6 +14,12 @@ function sanitizeForProduction(args: unknown[]): unknown[] {
   }
 
   return args.map(arg => {
+    // Reduce Error objects to their message — never leak a stack trace,
+    // and let the string redaction below still apply to the message text.
+    if (arg instanceof Error) {
+      arg = arg.message;
+    }
+
     if (typeof arg === 'string') {
       // Remove email patterns
       let sanitized = arg.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL_REDACTED]');
@@ -49,13 +55,8 @@ export const logger = {
   },
 
   error: (...args: unknown[]) => {
-    if (isProduction) {
-      // In production, only log the first argument (error message) without details
-      const sanitized = sanitizeForProduction([args[0]]);
-      console.error(...sanitized);
-    } else {
-      console.error(...args);
-    }
+    const sanitized = sanitizeForProduction(args);
+    console.error(...sanitized);
   },
 
   debug: (...args: unknown[]) => {

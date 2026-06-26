@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { requireApproved } from '@/lib/auth-helpers';
+import { toSafeErrorMessage, UserFacingError } from '@/lib/errors';
 import connectDB from '@/lib/mongodb';
 import { createRateLimitMiddleware } from '@/lib/rateLimit';
 import BookSuggestion from '@/models/BookSuggestion';
@@ -152,15 +153,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    // Note: Using console.error here as logger is not imported
-    // Consider importing logger for consistency
-    console.error('Error fetching suggestions:', error);
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 403 });
-    }
     return NextResponse.json(
-      { error: 'Kunde inte hämta förslag' },
-      { status: 500 }
+      { error: toSafeErrorMessage(error, 'Kunde inte hämta förslag') },
+      { status: error instanceof UserFacingError ? 403 : 500 }
     );
   }
 }

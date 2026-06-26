@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { AutoRefresh } from '@/components/AutoRefresh';
 import { APP_NAME } from "@/constants";
 import { auth } from '@/lib/auth';
+import { createContextLogger } from '@/lib/logger';
 import connectDB from '@/lib/mongodb';
 import BookSuggestion from '@/models/BookSuggestion';
 import User from '@/models/User';
@@ -11,6 +12,8 @@ import User from '@/models/User';
 import { VotingList } from './VotingList';
 
 import type { SuggestionStatus } from '@/models/BookSuggestion';
+
+const logger = createContextLogger('Vote');
 
 export const metadata = {
   title: `Rösta - ${APP_NAME}`,
@@ -293,28 +296,27 @@ export default async function Vote() {
       />
     );
   } catch (error) {
-    console.error('[Vote] ERROR:', error);
-    console.error('[Vote] Error stack:', error instanceof Error ? error.stack : 'No stack');
-    console.error('[Vote] Error details:', JSON.stringify(error, null, 2));
+    logger.error('ERROR:', error);
+    logger.error('Error stack:', error instanceof Error ? error.stack : 'No stack');
+    logger.error('Error details:', JSON.stringify(error, null, 2));
 
-    // Show detailed error to help debug in production (remove after fixing)
     return (
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <h1 className="text-2xl font-bold text-red-800 mb-4">Ett fel uppstod</h1>
             <div className="text-sm text-red-700 space-y-2">
-              <p><strong>Felmeddelande:</strong></p>
-              <pre className="bg-white p-4 rounded border border-red-300 overflow-auto">
-                {error instanceof Error ? error.message : 'Okänt fel'}
-              </pre>
-              {error instanceof Error && error.stack && (
-                <>
-                  <p className="mt-4"><strong>Stack trace:</strong></p>
-                  <pre className="bg-white p-4 rounded border border-red-300 overflow-auto text-xs">
-                    {error.stack}
+              <p>Något gick fel när röstningssidan skulle laddas. Vänligen försök igen om en stund.</p>
+              {process.env.NODE_ENV === 'development' && error instanceof Error && error.message && (
+                <details className="mt-4">
+                  <summary className="cursor-pointer font-semibold">Teknisk information</summary>
+                  <pre
+                    className="mt-2 bg-white p-4 rounded border border-red-300 overflow-auto text-xs"
+                    style={{ wordBreak: 'break-word' }}
+                  >
+                    {error.message}
                   </pre>
-                </>
+                </details>
               )}
               <p className="mt-4 text-red-600">
                 Om du ser detta meddelande, vänligen skicka en skärmdump till administratören.

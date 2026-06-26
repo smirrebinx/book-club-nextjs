@@ -163,8 +163,7 @@ book-club-nextjs/
     │   │   │   ├── meetings/
     │   │   │   │   ├── route.ts                 # GET all, POST new
     │   │   │   │   ├── [id]/route.ts            # GET, PUT, DELETE by ID
-    │   │   │   │   ├── next/route.ts            # GET next meeting
-    │   │   │   │   └── test-db/route.ts         # Database connectivity test
+    │   │   │   │   └── next/route.ts            # GET next meeting
     │   │   │   └── books/route.ts               # Google Books API proxy
     │   │   ├── page.tsx        # Home page
     │   │   ├── error.tsx       # Global error boundary

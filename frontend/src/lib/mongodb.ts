@@ -53,7 +53,7 @@ async function connectDB(): Promise<typeof mongoose> {
       connectTimeoutMS: 10000, // Add explicit connection timeout
     };
 
-    console.log('[MongoDB] Creating new connection to:', MONGODB_URI?.substring(0, 30) + '...');
+    console.log('[MongoDB] Creating new connection');
     cached.promise = mongoose.connect(MONGODB_URI as string, opts)
       .then(async (mongooseInstance) => {
         console.log('[MongoDB] Connection established successfully');

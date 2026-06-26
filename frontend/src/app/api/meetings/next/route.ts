@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 
 import { requireApproved } from '@/lib/auth-helpers';
+import { toSafeErrorMessage, UserFacingError } from '@/lib/errors';
 import connectDB from '@/lib/mongodb';
 import Meeting from '@/models/Meeting';
 
@@ -30,19 +31,9 @@ export async function GET() {
       data: meeting,
     });
   } catch (error) {
-    console.error('Error fetching next meeting:', error);
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 403 }
-      );
-    }
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch next meeting',
-      },
-      { status: 500 }
+      { success: false, error: toSafeErrorMessage(error, 'Failed to fetch next meeting') },
+      { status: error instanceof UserFacingError ? 403 : 500 }
     );
   }
 }

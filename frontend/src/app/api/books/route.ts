@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 
+import { requireApproved } from '@/lib/auth-helpers';
+import { createContextLogger } from '@/lib/logger';
+
 import type { NextRequest} from 'next/server';
 
+const logger = createContextLogger('API/Books');
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 
 // Google Books API response types
@@ -70,7 +74,7 @@ function validateRequest(query: string | null) {
   }
 
   if (!GOOGLE_BOOKS_API_KEY) {
-    console.error('GOOGLE_BOOKS_API_KEY is not set');
+    logger.error('GOOGLE_BOOKS_API_KEY is not set');
     return NextResponse.json(
       { error: 'API key not configured' },
       { status: 500 }
@@ -102,7 +106,7 @@ async function fetchGoogleBooks(url: string): Promise<GoogleBooksResponse> {
   const response = await fetch(url);
 
   if (!response.ok) {
-    console.error('Google Books API error:', response.status, response.statusText);
+    logger.error('Google Books API error:', response.status, response.statusText);
     throw new Error(`Google Books API error: ${response.statusText}`);
   }
 
@@ -111,12 +115,12 @@ async function fetchGoogleBooks(url: string): Promise<GoogleBooksResponse> {
 
 // Try fallback search without language restriction
 async function tryFallbackSearch(query: string, apiKey: string): Promise<GoogleBooksResponse | null> {
-  console.log('No Swedish results, trying international search...');
+  logger.debug('No Swedish results, trying international search...');
   const fallbackUrl = buildApiUrl(query, apiKey, false);
-  
+
   try {
     const fallbackData = await fetchGoogleBooks(fallbackUrl);
-    console.log('International search returned:', fallbackData.totalItems || 0, 'results');
+    logger.debug('International search returned:', fallbackData.totalItems || 0, 'results');
     return fallbackData;
   } catch {
     return null;
@@ -130,6 +134,8 @@ function hasResults(data: GoogleBooksResponse): boolean {
 
 export async function GET(request: NextRequest) {
   try {
+    await requireApproved();
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
 
@@ -146,10 +152,10 @@ export async function GET(request: NextRequest) {
 
     // Search with Swedish language preference first
     const apiUrl = buildApiUrl(query, GOOGLE_BOOKS_API_KEY, true);
-    console.log('Searching Google Books API with query:', query);
+    logger.debug('Searching Google Books API with query:', query);
 
     let data = await fetchGoogleBooks(apiUrl);
-    console.log('Google Books API returned:', data.totalItems || 0, 'results');
+    logger.debug('Google Books API returned:', data.totalItems || 0, 'results');
 
     // If no Swedish results, try without language restriction
     if (!hasResults(data)) {
@@ -162,7 +168,7 @@ export async function GET(request: NextRequest) {
     const books = formatBooks(data.items);
     return NextResponse.json({ books, total: data.totalItems || 0 });
   } catch (error) {
-    console.error('Error fetching books:', error);
+    logger.error('Error fetching books:', error);
     return NextResponse.json(
       { error: 'Failed to fetch books' },
       { status: 500 }

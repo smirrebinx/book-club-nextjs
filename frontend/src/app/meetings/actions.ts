@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 
 import { requireAdmin } from '@/lib/auth-helpers';
+import { toSafeErrorMessage } from '@/lib/errors';
 import connectDB from '@/lib/mongodb';
 import { createMeetingSchema, updateMeetingSchema, meetingIdSchema } from '@/lib/validations/meetings';
 import Meeting from '@/models/Meeting';
@@ -234,11 +235,7 @@ export async function createMeeting(formData: FormData) {
     revalidatePath('/');
     return { success: true, message: 'Möte skapat' };
   } catch (error) {
-    console.error('Error creating meeting:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte skapa möte' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte skapa möte') };
   }
 }
 
@@ -272,11 +269,7 @@ export async function updateMeeting(meetingId: string, formData: FormData) {
     revalidatePath('/');
     return { success: true, message: 'Möte uppdaterat' };
   } catch (error) {
-    console.error('Error updating meeting:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte uppdatera möte' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte uppdatera möte') };
   }
 }
 
@@ -304,10 +297,6 @@ export async function deleteMeeting(meetingId: string) {
     revalidatePath('/');
     return { success: true, message: 'Möte borttaget' };
   } catch (error) {
-    console.error('Error deleting meeting:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte ta bort möte' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte ta bort möte') };
   }
 }

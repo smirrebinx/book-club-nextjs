@@ -93,6 +93,22 @@ const eslintConfig = [
       "max-nested-callbacks": ["warn", 3],
     },
   },
+
+  // API routes and Server Actions: enforce logging through lib/logger.ts
+  // and client-safe error messages through lib/errors.ts. Scoped narrowly
+  // (not src/lib/**) because a few lib utilities still log error.message
+  // directly for their own internal logging, not to a client response.
+  {
+    files: ["src/app/api/**/route.ts", "src/app/**/actions.ts"],
+    rules: {
+      "no-console": "error",
+      "no-restricted-syntax": ["error", {
+        selector: "CatchClause MemberExpression[property.name=/^(message|stack|name)$/]",
+        message:
+          "Don't read error.message/.stack/.name directly. Call toSafeErrorMessage(error, fallback) from '@/lib/errors' instead — it returns a client-safe message and logs the real error for you.",
+      }],
+    },
+  },
 ];
 
 export default eslintConfig;
