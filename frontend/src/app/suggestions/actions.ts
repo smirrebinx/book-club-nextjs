@@ -4,6 +4,7 @@ import { Types } from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
 import { requireAuth, requireApproved } from '@/lib/auth-helpers';
+import { toSafeErrorMessage } from '@/lib/errors';
 import { createContextLogger } from '@/lib/logger';
 import connectDB from '@/lib/mongodb';
 import { checkRateLimit } from '@/lib/rateLimit';
@@ -34,9 +35,9 @@ function sanitizeText(text: string): string {
  */
 export async function createSuggestion(formData: FormData) {
   try {
-    console.log('[createSuggestion] Starting...');
+    logger.debug('createSuggestion: starting');
     const session = await requireApproved();
-    console.log('[createSuggestion] Session approved, user:', session.user.id);
+    logger.debug('createSuggestion: session approved, user:', session.user.id);
 
     // Parse form data - convert null to undefined for optional fields
     const data = {
@@ -48,11 +49,9 @@ export async function createSuggestion(formData: FormData) {
       googleBooksId: formData.get('googleBooksId') as string | null,
       googleDescription: formData.get('googleDescription') as string | null,
     };
-    console.log('[createSuggestion] Parsed form data');
 
     // Validate with Zod
     const validated = createSuggestionSchema.parse(data);
-    console.log('[createSuggestion] Validated with Zod');
 
     // Sanitize inputs server-side
     const sanitized = {
@@ -64,14 +63,10 @@ export async function createSuggestion(formData: FormData) {
       googleBooksId: validated.googleBooksId,
       googleDescription: validated.googleDescription,
     };
-    console.log('[createSuggestion] Sanitized inputs');
 
-    console.log('[createSuggestion] Connecting to database...');
     await connectDB();
-    console.log('[createSuggestion] Database connected');
 
     // Check for duplicate suggestions
-    console.log('[createSuggestion] Checking for duplicates...');
     const duplicateCheck = await checkDuplicateSuggestion(
       sanitized.title,
       sanitized.author,
@@ -81,7 +76,7 @@ export async function createSuggestion(formData: FormData) {
 
     if (duplicateCheck.isDuplicate && duplicateCheck.existingSuggestion) {
       const existing = duplicateCheck.existingSuggestion;
-      console.log('[createSuggestion] Duplicate found:', existing.title, 'Status:', existing.status);
+      logger.debug('createSuggestion: duplicate found:', existing.title, 'status:', existing.status);
 
       // Format error message based on status
       let errorMessage: string;
@@ -102,7 +97,6 @@ export async function createSuggestion(formData: FormData) {
         error: errorMessage
       };
     }
-    console.log('[createSuggestion] No duplicates found');
 
     // Filter out undefined values to avoid Mongoose issues in serverless
     const dataToCreate = Object.fromEntries(
@@ -113,21 +107,14 @@ export async function createSuggestion(formData: FormData) {
         status: 'pending',
       }).filter(([_, value]) => value !== undefined)
     );
-    console.log('[createSuggestion] Creating suggestion...');
 
     await BookSuggestion.create(dataToCreate);
-    console.log('[createSuggestion] Suggestion created successfully');
+    logger.debug('createSuggestion: suggestion created successfully');
 
     revalidatePath('/suggestions');
     return { success: true, message: 'Förslag skapat' };
   } catch (error) {
-    console.error('[createSuggestion] ERROR:', error);
-    console.error('[createSuggestion] Error stack:', error instanceof Error ? error.stack : 'No stack');
-    console.error('[createSuggestion] Error details:', JSON.stringify(error, null, 2));
-    if (error instanceof Error) {
-      return { success: false, error: `${error.name}: ${error.message}` };
-    }
-    return { success: false, error: 'Kunde inte skapa förslag' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte skapa förslag') };
   }
 }
 
@@ -186,11 +173,7 @@ export async function updateSuggestion(suggestionId: string, formData: FormData)
     revalidatePath('/suggestions');
     return { success: true, message: 'Förslag uppdaterat' };
   } catch (error) {
-    console.error('Error updating suggestion:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte uppdatera förslag' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte uppdatera förslag') };
   }
 }
 
@@ -221,11 +204,7 @@ export async function deleteSuggestion(suggestionId: string) {
     revalidatePath('/suggestions');
     return { success: true, message: 'Förslag borttaget' };
   } catch (error) {
-    console.error('Error deleting suggestion:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte ta bort förslag' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte ta bort förslag') };
   }
 }
 
@@ -282,25 +261,22 @@ export async function toggleVote(suggestionId: string) {
     const userVoteIndex = suggestion.votes.findIndex(
       (vote) => vote.toString() === session.user.id
     );
-    console.log('[toggleVote] User vote index:', userVoteIndex);
 
     if (userVoteIndex > -1) {
       // Remove vote - create new array to ensure Mongoose detects the change
-      console.log('[toggleVote] Removing vote');
+      logger.debug('toggleVote: removing vote');
       suggestion.votes = suggestion.votes.filter(
         (vote) => vote.toString() !== session.user.id
       );
     } else {
       // Add vote - create new array to ensure Mongoose detects the change
-      console.log('[toggleVote] Adding vote');
+      logger.debug('toggleVote: adding vote');
       suggestion.votes = [...suggestion.votes, new Types.ObjectId(session.user.id)];
     }
 
     // Mark the votes field as modified to ensure Mongoose saves it
     suggestion.markModified('votes');
-    console.log('[toggleVote] Saving suggestion with', suggestion.votes.length, 'votes...');
     await suggestion.save();
-    console.log('[toggleVote] Suggestion saved successfully');
 
     revalidatePath('/suggestions');
     return {
@@ -310,13 +286,7 @@ export async function toggleVote(suggestionId: string) {
       hasVoted: userVoteIndex === -1,
     };
   } catch (error) {
-    console.error('[toggleVote] ERROR:', error);
-    console.error('[toggleVote] Error stack:', error instanceof Error ? error.stack : 'No stack');
-    console.error('[toggleVote] Error details:', JSON.stringify(error, null, 2));
-    if (error instanceof Error) {
-      return { success: false, error: `${error.name}: ${error.message}` };
-    }
-    return { success: false, error: 'Kunde inte rösta' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte rösta') };
   }
 }
 
@@ -351,10 +321,6 @@ export async function updateSuggestionStatus(suggestionId: string, newStatus: st
     revalidatePath('/suggestions');
     return { success: true, message: 'Status uppdaterad' };
   } catch (error) {
-    console.error('Error updating status:', error);
-    if (error instanceof Error) {
-      return { success: false, error: error.message };
-    }
-    return { success: false, error: 'Kunde inte uppdatera status' };
+    return { success: false, error: toSafeErrorMessage(error, 'Kunde inte uppdatera status') };
   }
 }
