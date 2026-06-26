@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+import { requireApproved } from '@/lib/auth-helpers';
+
 import type { NextRequest} from 'next/server';
 
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
@@ -130,6 +132,8 @@ function hasResults(data: GoogleBooksResponse): boolean {
 
 export async function GET(request: NextRequest) {
   try {
+    await requireApproved();
+
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
 
