@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 
 import { requireApproved, requireAdmin } from '@/lib/auth-helpers';
+import { toSafeErrorMessage, UserFacingError } from '@/lib/errors';
+import { createContextLogger } from '@/lib/logger';
 import connectDB from '@/lib/mongodb';
 import Meeting from '@/models/Meeting';
 
 import type { MeetingData } from '@/types/meeting';
 import type { NextRequest } from 'next/server';
+
+const logger = createContextLogger('API/Meetings/[id]');
 
 interface RouteParams {
   params: Promise<{
@@ -38,19 +42,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       data: meeting,
     });
   } catch (error) {
-    console.error('Error fetching meeting:', error);
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 403 }
-      );
-    }
     return NextResponse.json(
-      {
-        success: false,
-        error: 'Failed to fetch meeting',
-      },
-      { status: 500 }
+      { success: false, error: toSafeErrorMessage(error, 'Failed to fetch meeting') },
+      { status: error instanceof UserFacingError ? 403 : 500 }
     );
   }
 }
@@ -60,9 +54,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     await requireAdmin();
 
-    console.log('[API] PUT /api/meetings/[id] - Connecting to database...');
+    logger.debug('PUT - Connecting to database...');
     await connectDB();
-    console.log('[API] PUT /api/meetings/[id] - Database connected');
+    logger.debug('PUT - Database connected');
 
     const { id } = await params;
     const body: Partial<MeetingData> = await request.json();
@@ -78,7 +72,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    console.log('[API] PUT /api/meetings/[id] - Updating meeting:', id);
+    logger.debug('PUT - Updating meeting:', id);
     const meeting = await Meeting.findOneAndUpdate(
       { id },
       body,
@@ -95,22 +89,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    console.log('[API] PUT /api/meetings/[id] - Meeting updated successfully');
+    logger.debug('PUT - Meeting updated successfully');
     return NextResponse.json({
       success: true,
       data: meeting,
     });
   } catch (error) {
-    console.error('[API] PUT /api/meetings/[id] - Error updating meeting:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to update meeting';
-    console.error('[API] PUT /api/meetings/[id] - Error details:', errorMessage);
-
     return NextResponse.json(
-      {
-        success: false,
-        error: errorMessage,
-      },
-      { status: 500 }
+      { success: false, error: toSafeErrorMessage(error, 'Failed to update meeting') },
+      { status: error instanceof UserFacingError ? 403 : 500 }
     );
   }
 }
@@ -120,13 +107,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     await requireAdmin();
 
-    console.log('[API] DELETE /api/meetings/[id] - Connecting to database...');
+    logger.debug('DELETE - Connecting to database...');
     await connectDB();
-    console.log('[API] DELETE /api/meetings/[id] - Database connected');
+    logger.debug('DELETE - Database connected');
 
     const { id } = await params;
 
-    console.log('[API] DELETE /api/meetings/[id] - Deleting meeting:', id);
+    logger.debug('DELETE - Deleting meeting:', id);
     const meeting = await Meeting.findOneAndDelete({ id });
 
     if (!meeting) {
@@ -139,28 +126,15 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    console.log('[API] DELETE /api/meetings/[id] - Meeting deleted successfully');
+    logger.debug('DELETE - Meeting deleted successfully');
     return NextResponse.json({
       success: true,
       data: meeting,
     });
   } catch (error) {
-    console.error('[API] DELETE /api/meetings/[id] - Error deleting meeting:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to delete meeting';
-    console.error('[API] DELETE /api/meetings/[id] - Error details:', errorMessage);
-
-    if (error instanceof Error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 403 }
-      );
-    }
     return NextResponse.json(
-      {
-        success: false,
-        error: errorMessage,
-      },
-      { status: 500 }
+      { success: false, error: toSafeErrorMessage(error, 'Failed to delete meeting') },
+      { status: error instanceof UserFacingError ? 403 : 500 }
     );
   }
 }
