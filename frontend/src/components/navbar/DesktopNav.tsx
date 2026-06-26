@@ -77,8 +77,7 @@ export default function DesktopNav({ navLinks, pathname, session }: DesktopNavPr
         {session?.user ? (
           <button
             onClick={() => void signOut({ callbackUrl: "/auth/signin" })}
-            className="group flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200 hover:shadow-md focus:outline-2
-  focus:outline-offset-2"
+            className="group flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all duration-200 hover:shadow-md focus:outline-2 focus:outline-offset-2"
             style={{
               fontFamily: "var(--font-body)",
               color: "var(--secondary-text)",
