@@ -3,7 +3,7 @@
 import { Types } from 'mongoose';
 import { revalidatePath } from 'next/cache';
 
-import { requireAuth, requireApproved } from '@/lib/auth-helpers';
+import { requireAdmin, requireAuth, requireApproved } from '@/lib/auth-helpers';
 import { toSafeErrorMessage } from '@/lib/errors';
 import { createContextLogger } from '@/lib/logger';
 import connectDB from '@/lib/mongodb';
@@ -295,12 +295,7 @@ export async function toggleVote(suggestionId: string) {
  */
 export async function updateSuggestionStatus(suggestionId: string, newStatus: string) {
   try {
-    const session = await requireAuth();
-
-    // Only admins can change status
-    if (session.user.role !== 'admin') {
-      return { success: false, error: 'Du har inte behörighet att ändra status' };
-    }
+    await requireAdmin();
 
     await connectDB();
     const suggestion = await BookSuggestion.findById(suggestionId);
