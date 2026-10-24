@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Ensure serverless functions work properly on Netlify
+  // Allow larger Server Action payloads (default is 1mb)
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',
