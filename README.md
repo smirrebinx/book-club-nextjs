@@ -108,136 +108,136 @@ Admin - Möten
 
 ```
 book-club-nextjs/
-├── vercel.json                 # Vercel deployment configuration
-└── frontend/                   # Main Next.js application
-    ├── src/
-    │   ├── app/                # Next.js App Router
-    │   │   ├── admin/          # Admin dashboard
-    │   │   │   ├── users/      # User management page
-    │   │   │   │   ├── page.tsx
-    │   │   │   │   ├── UserManagementTable.tsx
-    │   │   │   │   ├── UserTableRow.tsx
-    │   │   │   │   └── UserMobileCard.tsx
-    │   │   │   ├── suggestions/# Suggestion management page
-    │   │   │   │   ├── page.tsx
-    │   │   │   │   ├── AdminSuggestionsTable.tsx
-    │   │   │   │   ├── SuggestionTableRow.tsx
-    │   │   │   │   ├── SuggestionMobileCard.tsx
-    │   │   │   │   └── ResetVotingButton.tsx
-    │   │   │   ├── meetings/   # Meeting management page
-    │   │   │   │   ├── page.tsx
-    │   │   │   │   ├── AdminMeetingsTable.tsx
-    │   │   │   │   ├── MeetingForm.tsx
-    │   │   │   │   ├── MeetingTableRow.tsx
-    │   │   │   │   └── MeetingMobileCard.tsx
-    │   │   │   ├── layout.tsx  # Admin layout with navigation
-    │   │   │   ├── AdminMobileNav.tsx
-    │   │   │   └── actions.ts  # Admin Server Actions
-    │   │   ├── suggestions/    # User-facing suggestions page
-    │   │   │   ├── page.tsx
-    │   │   │   ├── SuggestionsList.tsx
-    │   │   │   ├── AddSuggestionForm.tsx
-    │   │   │   └── actions.ts  # Suggestion Server Actions
-    │   │   ├── meetings/       # Meeting data actions
-    │   │   │   └── actions.ts
-    │   │   ├── Vote/           # Voting page
-    │   │   │   ├── page.tsx
-    │   │   │   └── VotingList.tsx
-    │   │   ├── NextMeeting/    # Next meeting page
-    │   │   │   ├── page.tsx
-    │   │   │   └── StaticCalendar.tsx
-    │   │   ├── BooksRead/      # Books read page
-    │   │   │   ├── page.tsx
-    │   │   │   └── ReadBooksList.tsx
-    │   │   ├── auth/           # Auth pages
-    │   │   │   ├── signin/page.tsx
-    │   │   │   └── pending/    # Pending approval page
-    │   │   │       ├── page.tsx
-    │   │   │       └── PendingContent.tsx
-    │   │   ├── api/            # API routes (REST endpoints)
-    │   │   │   ├── auth/[...nextauth]/route.ts  # NextAuth handler
-    │   │   │   ├── admin/
-    │   │   │   │   ├── users/route.ts           # User list with filters
-    │   │   │   │   └── pending-count/route.ts   # Pending user count
-    │   │   │   ├── suggestions/route.ts         # GET suggestions
-    │   │   │   ├── meetings/
-    │   │   │   │   ├── route.ts                 # GET all, POST new
-    │   │   │   │   ├── [id]/route.ts            # GET, PUT, DELETE by ID
-    │   │   │   │   └── next/route.ts            # GET next meeting
-    │   │   │   └── books/route.ts               # Google Books API proxy
-    │   │   ├── page.tsx        # Home page
-    │   │   ├── error.tsx       # Global error boundary
-    │   │   ├── not-found.tsx   # 404 page
-    │   │   └── layout.tsx      # Root layout
-    │   ├── components/         # React components
-    │   │   ├── navbar/         # Navigation components
-    │   │   │   ├── Navbar.tsx
-    │   │   │   ├── DesktopNav.tsx
-    │   │   │   ├── MobileNav.tsx
-    │   │   │   ├── Logo.tsx
-    │   │   │   ├── MobileMenuButton.tsx
-    │   │   │   └── MobileUserAvatar.tsx
-    │   │   ├── AdminOnly.tsx   # Admin-only wrapper
-    │   │   ├── ApprovedOnly.tsx# Approved user wrapper
-    │   │   ├── Toast.tsx       # Notification system
-    │   │   ├── ConfirmModal.tsx# Confirmation dialog
-    │   │   ├── BookSearchInput.tsx  # Google Books search
-    │   │   ├── BookPlaceholder.tsx  # Book cover fallback
-    │   │   ├── MeetingCard.tsx # Meeting display card
-    │   │   ├── NextMeetingCard.tsx # Next meeting card
-    │   │   ├── StatCard.tsx    # Statistics card
-    │   │   ├── StatusBadge.tsx # Status indicator
-    │   │   ├── Button.tsx      # Button component
-    │   │   ├── ActionButton.tsx# Action button with loading
-    │   │   ├── LoadingSkeleton.tsx  # Loading state
-    │   │   ├── LottieAnimation.tsx  # Lottie player
-    │   │   ├── AutoRefresh.tsx # Auto-refresh component
-    │   │   ├── GdprInfoModal.tsx    # GDPR info modal
-    │   │   └── SessionProviderWrapper.tsx
-    │   ├── lib/                # Utilities & core logic
-    │   │   ├── auth.ts         # NextAuth configuration
-    │   │   ├── auth.config.ts  # NextAuth config (edge-compatible)
-    │   │   ├── auth-helpers.ts # Auth helper functions
-    │   │   ├── mongodb.ts      # Mongoose connection (serverless optimized)
-    │   │   ├── mongodb-client.ts # MongoDB native client (serverless optimized)
-    │   │   ├── logger.ts       # Server-side logging utility
-    │   │   ├── rateLimit.ts    # Rate limiting middleware
-    │   │   └── validations/    # Zod schemas
-    │   │       ├── admin.ts
-    │   │       ├── suggestions.ts
-    │   │       └── meetings.ts
-    │   ├── models/             # Mongoose models
-    │   │   ├── User.ts         # User with roles & approval
-    │   │   ├── BookSuggestion.ts # Suggestions with voting
-    │   │   └── Meeting.ts      # Meeting model
-    │   ├── types/              # TypeScript type definitions
-    │   │   ├── auth.ts
-    │   │   ├── admin.ts
-    │   │   ├── meeting.ts
-    │   │   ├── suggestion.ts
-    │   │   └── next-auth.d.ts  # NextAuth type extensions
-    │   ├── hooks/              # Custom React hooks
-    │   │   ├── usePendingCount.ts # Hook for pending user count
-    │   │   ├── useFuzzySearch.ts  # Fuzzy search hook with validation
-    │   │   └── __tests__/
-    │   │       └── useFuzzySearch.test.ts # Fuzzy search tests
-    │   ├── data/               # Static data files
-    │   ├── scripts/            # Utility scripts
-    │   │   └── seedMeetings.ts # Database seeding script
-    │   └── constants.ts        # Application constants
-    ├── public/                 # Static assets
-    │   └── animations/         # Lottie animation files
-    │       ├── animationBooks.lottie
-    │       ├── booksStack.lottie
-    │       └── Error.lottie    # Error page animation
-    ├── .env.local              # Environment variables (not in git)
-    ├── .env.example            # Environment variables template
-    ├── next.config.ts          # Next.js configuration
-    ├── tailwind.config.js      # Tailwind CSS configuration
-    ├── tsconfig.json           # TypeScript configuration
-    ├── eslint.config.mjs       # ESLint flat config (Next.js 16+)
-    ├── ACCESSIBILITY.md        # Accessibility documentation
-    └── package.json
+├── src/
+│   ├── app/                # Next.js App Router
+│   │   ├── admin/          # Admin dashboard
+│   │   │   ├── users/      # User management page
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── UserManagementTable.tsx
+│   │   │   │   ├── UserTableRow.tsx
+│   │   │   │   └── UserMobileCard.tsx
+│   │   │   ├── suggestions/# Suggestion management page
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── AdminSuggestionsTable.tsx
+│   │   │   │   ├── SuggestionTableRow.tsx
+│   │   │   │   ├── SuggestionMobileCard.tsx
+│   │   │   │   └── ResetVotingButton.tsx
+│   │   │   ├── meetings/   # Meeting management page
+│   │   │   │   ├── page.tsx
+│   │   │   │   ├── AdminMeetingsTable.tsx
+│   │   │   │   ├── MeetingForm.tsx
+│   │   │   │   ├── MeetingTableRow.tsx
+│   │   │   │   └── MeetingMobileCard.tsx
+│   │   │   ├── layout.tsx  # Admin layout with navigation
+│   │   │   ├── AdminMobileNav.tsx
+│   │   │   └── actions.ts  # Admin Server Actions
+│   │   ├── suggestions/    # User-facing suggestions page
+│   │   │   ├── page.tsx
+│   │   │   ├── SuggestionsList.tsx
+│   │   │   ├── AddSuggestionForm.tsx
+│   │   │   └── actions.ts  # Suggestion Server Actions
+│   │   ├── meetings/       # Meeting data actions
+│   │   │   └── actions.ts
+│   │   ├── Vote/           # Voting page
+│   │   │   ├── page.tsx
+│   │   │   └── VotingList.tsx
+│   │   ├── NextMeeting/    # Next meeting page
+│   │   │   ├── page.tsx
+│   │   │   └── StaticCalendar.tsx
+│   │   ├── BooksRead/      # Books read page
+│   │   │   ├── page.tsx
+│   │   │   └── ReadBooksList.tsx
+│   │   ├── auth/           # Auth pages
+│   │   │   ├── signin/page.tsx
+│   │   │   └── pending/    # Pending approval page
+│   │   │       ├── page.tsx
+│   │   │       └── PendingContent.tsx
+│   │   ├── api/            # API routes (REST endpoints)
+│   │   │   ├── auth/[...nextauth]/route.ts  # NextAuth handler
+│   │   │   ├── admin/
+│   │   │   │   ├── users/route.ts           # User list with filters
+│   │   │   │   └── pending-count/route.ts   # Pending user count
+│   │   │   ├── suggestions/route.ts         # GET suggestions
+│   │   │   ├── meetings/
+│   │   │   │   ├── route.ts                 # GET all, POST new
+│   │   │   │   ├── [id]/route.ts            # GET, PUT, DELETE by ID
+│   │   │   │   └── next/route.ts            # GET next meeting
+│   │   │   └── books/route.ts               # Google Books API proxy
+│   │   ├── page.tsx        # Home page
+│   │   ├── error.tsx       # Global error boundary
+│   │   ├── not-found.tsx   # 404 page
+│   │   └── layout.tsx      # Root layout
+│   ├── components/         # React components
+│   │   ├── navbar/         # Navigation components
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── DesktopNav.tsx
+│   │   │   ├── MobileNav.tsx
+│   │   │   ├── Logo.tsx
+│   │   │   ├── MobileMenuButton.tsx
+│   │   │   └── MobileUserAvatar.tsx
+│   │   ├── AdminOnly.tsx   # Admin-only wrapper
+│   │   ├── ApprovedOnly.tsx# Approved user wrapper
+│   │   ├── Toast.tsx       # Notification system
+│   │   ├── ConfirmModal.tsx# Confirmation dialog
+│   │   ├── BookSearchInput.tsx  # Google Books search
+│   │   ├── BookPlaceholder.tsx  # Book cover fallback
+│   │   ├── MeetingCard.tsx # Meeting display card
+│   │   ├── NextMeetingCard.tsx # Next meeting card
+│   │   ├── StatCard.tsx    # Statistics card
+│   │   ├── StatusBadge.tsx # Status indicator
+│   │   ├── Button.tsx      # Button component
+│   │   ├── ActionButton.tsx# Action button with loading
+│   │   ├── LoadingSkeleton.tsx  # Loading state
+│   │   ├── LottieAnimation.tsx  # Lottie player
+│   │   ├── AutoRefresh.tsx # Auto-refresh component
+│   │   ├── GdprInfoModal.tsx    # GDPR info modal
+│   │   └── SessionProviderWrapper.tsx
+│   ├── lib/                # Utilities & core logic
+│   │   ├── auth.ts         # NextAuth configuration
+│   │   ├── auth.config.ts  # NextAuth config (edge-compatible)
+│   │   ├── auth-helpers.ts # Auth helper functions
+│   │   ├── mongodb.ts      # Mongoose connection (serverless optimized)
+│   │   ├── mongodb-client.ts # MongoDB native client (serverless optimized)
+│   │   ├── logger.ts       # Server-side logging utility
+│   │   ├── rateLimit.ts    # Rate limiting middleware
+│   │   └── validations/    # Zod schemas
+│   │       ├── admin.ts
+│   │       ├── suggestions.ts
+│   │       └── meetings.ts
+│   ├── models/             # Mongoose models
+│   │   ├── User.ts         # User with roles & approval
+│   │   ├── BookSuggestion.ts # Suggestions with voting
+│   │   └── Meeting.ts      # Meeting model
+│   ├── types/              # TypeScript type definitions
+│   │   ├── auth.ts
+│   │   ├── admin.ts
+│   │   ├── meeting.ts
+│   │   ├── suggestion.ts
+│   │   └── next-auth.d.ts  # NextAuth type extensions
+│   ├── hooks/              # Custom React hooks
+│   │   ├── usePendingCount.ts # Hook for pending user count
+│   │   ├── useFuzzySearch.ts  # Fuzzy search hook with validation
+│   │   └── __tests__/
+│   │       └── useFuzzySearch.test.ts # Fuzzy search tests
+│   ├── data/               # Static data files
+│   ├── scripts/            # Utility scripts
+│   │   └── seedMeetings.ts # Database seeding script
+│   └── constants.ts        # Application constants
+├── public/                 # Static assets
+│   └── animations/         # Lottie animation files
+│       ├── animationBooks.lottie
+│       ├── booksStack.lottie
+│       └── Error.lottie    # Error page animation
+├── .env.local              # Environment variables (not in git)
+├── .env.example            # Environment variables template
+├── next.config.ts          # Next.js configuration
+├── tailwind.config.js      # Tailwind CSS configuration
+├── tsconfig.json           # TypeScript configuration
+├── eslint.config.mjs       # ESLint flat config (Next.js 16+)
+├── docs/
+│   └── ACCESSIBILITY.md    # Accessibility documentation
+├── package.json
+└── vercel.json             # Vercel deployment configuration
 ```
 
 ## Getting Started
@@ -252,7 +252,7 @@ book-club-nextjs/
 
 ```bash
 git clone <your-repo-url>
-cd book-club-nextjs/frontend
+cd book-club-nextjs
 ```
 
 ### 2. Install Dependencies
@@ -263,7 +263,7 @@ npm ci
 
 ### 3. Configure Environment Variables
 
-Create `frontend/.env.local` (see `frontend/.env.example` for reference):
+Create `.env.local` (see `.env.example` for reference):
 
 ```bash
 # MongoDB Atlas Connection
@@ -393,7 +393,7 @@ The application uses **Fuse.js** for client-side fuzzy search on the Books Read 
 - No regex injection vulnerabilities
 
 **Implementation:**
-- Custom React hook: `useFuzzySearch` (`frontend/src/hooks/useFuzzySearch.ts`)
+- Custom React hook: `useFuzzySearch` (`src/hooks/useFuzzySearch.ts`)
 - Memoized for performance (doesn't re-run on every render)
 - TypeScript typed for type safety
 - Configurable threshold and search keys
@@ -503,7 +503,7 @@ This project is deployed on Vercel.
    - Import your GitHub repository
 
 3. **Configure Settings**
-   - Root Directory: `frontend`
+   - Root Directory: leave empty (repository root)
    - Framework Preset: Next.js (auto-detected)
    - Node.js Version: 22
    - Build Command: `npm ci && npm run build`
