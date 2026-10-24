@@ -31,6 +31,3 @@ SECURITY_REVIEW.md
 /frontend/yarn-debug.log*
 /frontend/yarn-error.log*
 /frontend/.pnpm-debug.log*
-
-# Local Netlify folder
-.netlify

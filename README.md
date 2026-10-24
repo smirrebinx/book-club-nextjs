@@ -538,29 +538,6 @@ This project is deployed on Vercel.
    - Every push to main branch triggers a production deployment
    - Pull requests get preview deployments automatically
 
-### Alternative: Deploy to Netlify
-
-While this project is configured for Vercel, you can also deploy to Netlify:
-
-1. **Create netlify.toml** in project root:
-   ```toml
-   [build]
-     base = "frontend"
-     command = "npm ci && npm run build"
-     publish = ".next"
-
-   [[plugins]]
-     package = "@netlify/plugin-nextjs"
-
-   [build.environment]
-     NODE_VERSION = "22"
-   ```
-
-2. **Follow Netlify's standard Next.js deployment process**
-   - Connect your GitHub repository
-   - Configure the same environment variables as listed above for Vercel
-   - Update `AUTH_URL` and `NEXTAUTH_URL` to your Netlify domain
-
 ### Post-Deployment Configuration
 
 #### Google OAuth
@@ -569,7 +546,6 @@ After deployment, update your Google OAuth settings:
 2. Edit your OAuth 2.0 Client ID
 3. Add authorized redirect URI:
    - For Vercel: `https://your-app.vercel.app/api/auth/callback/google`
-   - For Netlify: `https://your-app.netlify.app/api/auth/callback/google`
 
 #### MongoDB Atlas
 Whitelist deployment platform IP addresses:
