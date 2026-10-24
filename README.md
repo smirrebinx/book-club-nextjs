@@ -93,7 +93,7 @@ Admin - Möten
 ## Technology Stack
 - **Framework**: Next.js 16.1.7 or later (App Router)
 - **Language**: TypeScript 5
-- **Runtime**: Node.js 22
+- **Runtime**: Node.js 24
 - **Database**: MongoDB Atlas with Mongoose 8.19 ODM + native MongoDB driver 6.20
 - **Authentication**: NextAuth v5 (beta.30) with MongoDBAdapter and JWT strategy
 - **Validation**: Zod 4.1 (API) + Mongoose (Database)
@@ -244,7 +244,7 @@ book-club-nextjs/
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 24 and npm
 - MongoDB Atlas account (free tier works)
 - Google OAuth credentials (from Google Cloud Console)
 
@@ -505,7 +505,7 @@ This project is deployed on Vercel.
 3. **Configure Settings**
    - Root Directory: leave empty (repository root)
    - Framework Preset: Next.js (auto-detected)
-   - Node.js Version: 22
+   - Node.js Version: 24
    - Build Command: `npm ci && npm run build`
    - Output Directory: `.next`
 
